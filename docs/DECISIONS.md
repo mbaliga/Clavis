@@ -1,0 +1,323 @@
+# Decisions
+
+Architectural and product decisions for Clavis, numbered so other documents can cite them
+(`D-4`), in the same spirit as the constellation's `DECISIONS.md` files. Each entry records the
+decision, the evidence or constraint that forced it, what it costs, and what would reopen it.
+Superseded decisions stay in the file with a note rather than being deleted.
+
+Status legend: **settled** — implemented or committed to; **provisional** — decided on current
+evidence, expected to be confirmed by a build or a measurement named in the entry.
+
+---
+
+## D-1 · Clavis is a Kotlin Multiplatform app; the web build stays as the executable spec
+
+**Decision.** The product is a Kotlin Multiplatform + Compose Multiplatform application with an
+Android target and a JVM desktop target (Linux, macOS, Windows) built from one codebase. The
+single-file web build (`reference-prototype/`) is kept as the *reference implementation*: the
+corpus pipeline still produces it, and behavioural parity is checked against it. It is not
+shipped as a product.
+
+**Why.** The user's targets are Android first, then Linux, macOS and Windows (`04-personas.md`
+P1). KMP is the only single-codebase route that is also consistent with the rest of the
+constellation (Kotlin/Compose everywhere). The web build's own README calls itself "the
+authoritative spec … that native ports must reproduce", so keeping it as the oracle costs
+nothing and buys a regression baseline.
+
+**Cost.** Two rendering stacks exist during the transition (Compose and the web template).
+Anything changed in the domain logic must be changed in both until the template is frozen.
+Decision: the template is frozen at v0.10 behaviour; new features land natively only.
+
+**Status.** Settled.
+
+## D-2 · Toolchain: Kotlin 2.1.20 · Compose Multiplatform 1.8.x · AGP 8.9.1 · Gradle 8.14.3 · JDK 17
+
+**Decision.** Pin AGP 8.9.1 and the Gradle wrapper 8.14.3 (the constellation's lockstep, required
+for any composite build with `Shared-Libraries-asoc` or `Hyle-Design-System`); Kotlin 2.1.20 (the
+same as `Fyl-Manager`; the newest line that Compose Multiplatform 1.8 supports without moving
+AGP); JDK 17 as the documented toolchain, compiled on JDK 21 where that is what the machine has.
+Exact versions and the sources they were verified against live in `docs/build-platform.md`.
+
+**Why.** `Shared-Libraries-asoc/README.md` documents that Gradle hard-fails a composite build that
+mixes AGP versions, so AGP is not a free choice. Kotlin 2.1.20 rather than 2.1.0 because Compose
+Multiplatform 1.8 requires ≥ 2.1.20 and 1.8 is the first line with stable multiplatform
+resources, navigation and adaptive layouts, all of which this app uses.
+
+**Cost.** Kotlin 2.1.20 + AGP 8.9.1 is outside KGP's officially tested AGP range and prints a
+compatibility warning; `Fyl-Manager` builds with exactly this pair, which is the evidence it is
+safe. Newer Kotlin/CMP lines are deferred until the constellation moves AGP.
+
+**Status.** Provisional — confirmed by the first green build recorded in `build-platform.md`.
+
+## D-3 · Repository layout: `:shared` (domain, no UI) · `:composeApp` (UI + entry points) · `pipeline/` (Python)
+
+**Decision.** `:shared` is a KMP library holding everything that is not rendering: corpus model
+and loader, FSRS-5, the selection engine, the baseline test, the Paths engine, state persistence,
+the language registry and content-pack manifests. `:composeApp` holds Compose UI, navigation,
+theme, and the Android/desktop entry points, plus `expect/actual` platform services (TTS, audio,
+file import, app directories). `pipeline/` is the Python corpus pipeline (parameterised successor
+of `reference-prototype/`), run off-device; its outputs are committed as app assets.
+
+**Why.** Everything the original web build did well was already separated from rendering in
+its JavaScript (`06-app-architecture.md` §7); porting that separation into a module boundary
+makes the domain testable with plain JVM unit tests, the pattern `Fyl-Manager` uses ("the pure
+layers carry the tests"). Committing generated assets (a few MB) keeps CI builds reproducible
+without CI needing MeCab, jieba and 2 GB of comics.
+
+**Status.** Settled.
+
+## D-4 · Corpus source is the current Pepper&Carrot repository on framagit, not the 2017 GitHub snapshot
+
+**Decision.** The pipeline reads `https://framagit.org/peppercarrot/webcomics` (sparse: `ep*/lang/`),
+which as of 2026‑09‑01 carries **39 episodes** and **74 languages** — versus 23 episodes and 40
+languages in the `Deevad/peppercarrot_epNN_translation` snapshots the original pipeline used.
+
+**Evidence.** Cloned and inspected on 2026‑09‑01. The framagit SVGs for ep01–23 are structurally
+identical to the snapshot (same element histogram for ep01 P01); episodes ≥ 13 are
+`<text>/<tspan>` based; episodes 18, 24, 27 and 29 **mix** `flowRoot` and `text` on one page, so
+the extractor must classify per element, not per episode as the original did. Licence: the
+repository README states CC BY 4.0 for all content; each language folder's `info.json` credits
+its translators, which is what the in-app attribution uses.
+
+**What it changes.** Per-episode language coverage falls off in newer episodes (ep01: 69 languages,
+ep39: 14), so the app's "how much of the corpus is available in language X" readout must be
+computed per language from the manifest rather than assumed uniform. Hindi (`hi`), Tamil,
+Malayalam, Turkish and Hebrew become available as candidate languages (see D-6).
+
+**Cost.** Regenerated corpus numbers will differ from every figure quoted in `01`–`09`; those
+documents describe the v0.10 build and are left as the historical record with this note.
+
+**Status.** Settled.
+
+## D-5 · Etymology graph: wiktextract (kaikki.org) is the primary source; EtymDB is secondary
+
+**Decision.** Origins, cognate/borrowing edges, IPA and audio references are derived from the
+kaikki.org per-language Wiktionary extracts (CC BY-SA 4.0), with EtymDB 2.1 (CC BY-SA 4.0) kept as
+a second source whose links are unioned in and provenance-tagged. Every displayed origin or edge
+traces to a specific source row (`07-etymology.md` §8 — "never invent an etymology" — still
+holds).
+
+**Evidence (measured 2026‑09‑01 against the real v0.10 lexicon).** Share of corpus lemmas with an
+etymology — EtymDB (shipped) → Wiktionary (measured):
+
+| Language | EtymDB | Wiktionary | Headword found |
+|---|---:|---:|---:|
+| Korean | 2.8% | **70.1%** | 76.7% |
+| Arabic | 4.5% | **40.3%** | 67.1% |
+| Japanese | 2.9% | **27.6%** | 51.6% |
+| Chinese | 0.6% | **24.5%** | 93.0% |
+| Spanish | 36.8% | **51.9%** | 57.7% |
+| French | 35.0% | **48.8%** | 57.5% |
+| Italian | 31.5% | **47.3%** | 53.3% |
+| German | 27.4% | **49.9%** | 58.9% |
+| Dutch | 33.1% | **49.1%** | 53.5% |
+| English | 51.4% | **75.8%** | 81.3% |
+
+This is the migration `07-etymology.md` §7 ranks as the highest-value open item, now with
+numbers. The residual misses are dominated by translator credit names that leaked into the
+lexicon, interjections, digits, and un-lemmatised inflections (Korean conjugated stems, Arabic
+clitic forms) — each of which is a pipeline fix (D-7, lexicon hygiene), not a source limitation.
+
+**How edges are built.** (a) Wiktionary etymology templates (`inh`, `bor`, `der`, `cog`, and the
+CJK/Sinographic templates such as Korean `ko-etym-sino`/`bor|ko|zh`, Japanese kango markers) give
+typed parent links; (b) Latin/Middle Chinese/etc. `descendants` lists (17,610 Latin entries carry
+one) give explicit ancestor → descendant edges across the Romance and Sinographic families;
+(c) two corpus lemmas sharing an attested ancestor within the depth cap are cognates, with the
+original hub guard (> 40 corpus descendants ⇒ skip) retained. Chinese is matched through both the
+headword and Wiktionary's `forms` (simplified/traditional), which is what raised headword recall
+to 93% and answers the "keying bug" suspicion in `07-etymology.md` §5.
+
+**Cost.** The kaikki extracts are large (11.8 GB raw for 13 languages); the pipeline streams and
+compacts them (~340 MB compacted) and never commits them. CC BY-SA attribution obligations
+extend to Wiktionary contributors and are carried in the pack manifest and the colophon.
+
+**Status.** Settled (source); provisional (edge-construction details, to be confirmed by the
+regenerated graph's coverage report).
+
+## D-6 · Languages are data, not code: a registry, nine enabled by default, more available
+
+**Decision.** `pipeline/languages.json` is the single registry of languages (ISO code,
+Pepper&Carrot folder code, name, family, script, direction, tokenizer, `wordfreq` code, reading
+system, TTS locale, default lane mode, colour). The pipeline processes every language marked
+`enabled`; the app ships the resulting packs and lets the user turn languages on or off and set
+each one to productive or receptive. The nine original languages are on by default. Additional
+languages present in the corpus ship where a tokenizer and frequency data exist — first
+candidates: Portuguese, Latin, Russian, Polish, Ukrainian, Turkish, Hindi.
+
+**Rules the app enforces.** One productive language per family (`03-evidence.md` §3, H2): enabling
+a second productive sibling is allowed only after an explicit, cited warning, and the default is
+receptive. Turning a language off hides it and pauses its cards; it never deletes state.
+Per-language corpus coverage (scenes available, lemma count, etymology coverage) is shown on the
+language screen, because coverage is uneven (D-4) and the app must not imply otherwise.
+
+**Why Hindi is a candidate and not yet a default.** P1's native language and the P2 heritage
+persona both point at it; the corpus has it from ep01, `wordfreq` has frequency data, Piper has
+no permissively licensed voice (D-8), and Devanagari needs a bundled font on desktop (D-9). It
+ships as an opt-in receptive language once the pipeline's Hindi tokenisation is validated.
+
+**Status.** Settled (mechanism); provisional (exact extra-language list, pending tokenizer checks).
+
+## D-7 · Content packs: versioned, licence-tagged, attribution-carrying
+
+**Decision.** All learning content is delivered as content packs with a manifest (`id`, `kind`,
+`version`, `languages`, `licence`, `attribution[]`, `source`, `generatedAt`, `sizes`). Pack kinds
+in v1: `comics` (Pepper&Carrot scenes + page art), `lexicon`, `etymology` (D-5), `sentences`
+(Tatoeba text, CC BY 2.0 FR), `pronunciations` (IPA from Wiktionary; audio *references* to
+Wikimedia Commons files with per-file licence), and `user-media` (text the user imports:
+`.txt`, `.srt`, `.lrc`). Bundled packs are loaded from app resources; optional packs and audio
+are downloaded only on explicit user action and cached locally.
+
+**Licence rule.** Only CC0 / CC BY / CC BY-SA content is bundled or offered for download; anything
+NC or ND is excluded at pipeline time, including Tatoeba audio not explicitly CC BY/BY-SA/CC0
+(measured 2026‑09‑01: permissive sentence audio exists mainly for German 5.3k, Russian 6.9k,
+English 6.7k, French 2.1k, Italian 1.6k; Spanish 11, Japanese 27, Dutch/Chinese/Arabic/Korean 0).
+Wiktionary/Commons word audio is rich for German (~57% of corpus lemmas), French (~53%), Dutch
+(~52%), English (~67%), Chinese (~30%), Arabic (~12%) and near-absent for Spanish, Italian,
+Japanese, Korean — the app shows real audio where it exists and falls back to TTS (D-8),
+labelled as such.
+
+**Lexicon hygiene.** Lemmas are kept only if attested in `wordfreq` or Wiktionary for that
+language, which removes the translator names and credit tokens that survived into v0.10.
+
+**Status.** Settled (format and rule); provisional (which optional packs ship in v1.0).
+
+## D-8 · Text-to-speech: downloaded Piper voice → system TTS → no button
+
+**Decision.** The Speak action uses, in order: a Piper voice (MIT runtime, executed as a separate
+process, downloaded on demand and only from the permissively licensed list), the platform's own
+TTS (Android `TextToSpeech`; macOS `say`; Windows SAPI), and otherwise the button is not shown.
+The app never claims pronunciation scoring (`04-personas.md`, "who this is not for").
+
+**Evidence (2026‑09‑01 audit of `rhasspy/piper-voices` model cards).** Permissive (CC0 / CC BY /
+CC BY-SA / public domain) voices exist for German, English, Spanish, French, Italian, Dutch,
+Polish, Portuguese, Russian, Ukrainian and Chinese; **none** for Arabic, Japanese, Korean, Hindi
+or Turkish (their datasets are NC or restricted). A Spanish medium voice synthesised 2.6 s of
+audio in 0.38 s on this 4-core machine. Piper's runtime bundles `espeak-ng` (GPL) for
+phonemisation, which is why it is invoked as an external tool rather than linked into the app.
+
+**Cost.** Voices are ~63 MB each; they are never bundled, only downloaded by choice. The
+languages where the premise is hardest to test (CJK, Arabic) depend on system voices.
+
+**Status.** Settled.
+
+## D-9 · Typography: Hind · Rozha One · IBM Plex Mono, with Noto fallbacks bundled on desktop
+
+**Decision.** UI text uses **Hind** (Latin + Devanagari), display uses **Rozha One**, readings
+and IPA use **IBM Plex Mono** — the three faces the v0.10 web build requested from Google
+Fonts (all SIL OFL 1.1). For scripts those do not cover, the desktop builds bundle Noto Sans
+Arabic, Hebrew, JP, KR and SC (OFL; ~50 MB); the Android build relies on the system's Noto
+fonts for CJK/Arabic to keep the APK small, bundling only Hind/Rozha/Plex.
+
+**Why.** The desktop JVM has no guarantee of CJK or Arabic system fonts on Linux and Windows,
+and a language app that renders tofu for four of its nine languages is broken. Android ships
+these scripts in every locale. Hind is also the natural choice for the Hindi candidate (D-6).
+
+**Status.** Settled; font subsetting for size is a later optimisation.
+
+## D-10 · Navigation is adaptive: bottom dock on compact widths, navigation rail on expanded
+
+**Decision.** The five primary destinations (Learn, Cosmos, Paths, Letters, You) live in a bottom
+dock on phones and a left navigation rail on tablets and desktop windows. Settings, Colophon and
+Story remain secondary destinations reached from context (D-14 fixes the IA weaknesses recorded
+in `05-information-architecture.md` §9). Learn ↔ Cosmos ↔ Paths keep a shared transition (the
+"same substance re-pooling" idea, `05-information-architecture.md` §1) implemented with
+Compose's own transition APIs first; a ferrofluid-style material treatment is a later pass.
+
+**The alternative considered.** `dev.aarso:cell-shell`'s edge-room pattern, used by `Fyl-Manager`
+and `Foto Xplorr`. It is an Android-only Compose library and cannot be used from KMP common code,
+and the three co-equal arrangements of one dataset map poorly onto "one home + parked rooms".
+Recorded here so it is not re-litigated by accident; reopen if cell-shell gains a KMP target.
+
+**Status.** Settled.
+
+## D-11 · Constellation reuse: crash-recovery yes (Android), Hyle tokens partially, cell-shell and evidence-schema no
+
+**Decision.** `dev.aarso:crash-recovery` is consumed on Android via git submodule + `includeBuild`
+with explicit `dependencySubstitution` (the Hyle tombstone gotcha in `Fyl-Manager`'s
+`settings.gradle.kts`) once the core app compiles; `dev.aarso:feedback` is adopted for the
+opt-in, share-sheet-only feedback flow. From Hyle, Clavis takes the motion discipline ("law"
+before material; weight not bounce) and the token *structure*, but keeps its own quiet
+low-contrast palette from `06-app-architecture.md` §8 — Hyle's near-black provenance-lit field
+is a different product's material. `evidence-schema` is not adopted in v1: its record shape is
+close to what the hypothesis instrumentation needs, but the cost of a cross-repo schema
+dependency is not justified until the `You` view's metrics stabilise.
+
+**Status.** Provisional (crash-recovery wiring lands after the first green multiplatform build).
+
+## D-12 · State is one JSON document per profile, written atomically, with an import path from the web build
+
+**Decision.** All learner state (`lanes`, `cards`, `tests`, `bandit`, `inter`, `routes`, `seen`,
+`log`, `pathLog`, `settings`, …) is a single `kotlinx.serialization` document persisted to the
+app's data directory with atomic replace and a schema version + migration step, mirroring the
+web build's `clavis.v1` shape closely enough that a JSON export from the web build imports
+directly. No account, no server, no sync (`01-premise.md` §3).
+
+**Why not a database now.** Card counts are bounded by touched lemmas (thousands, not millions);
+a document load at start-up is milliseconds and keeps the migration story trivial. Reopen when
+review logs grow past what a single document loads comfortably, or when FSRS parameter
+optimisation (`06-app-architecture.md` §13) needs queryable review history.
+
+**Status.** Settled.
+
+## D-13 · No telemetry, no network by default; every download is an explicit user action
+
+**Decision.** The app makes no network requests unless the user starts a download (voice,
+optional pack, Commons audio) or an import. There is no analytics, no crash upload
+(crash-recovery is local-only by design), and the store listing's data-safety section says so.
+
+**Status.** Settled.
+
+## D-14 · IA fixes carried from the weaknesses list
+
+**Decision.** (1) Letters becomes a Paths branch kind ("learn the script first") offered whenever a
+CJK/Arabic lane is enabled without script familiarity, and stays in the dock. (2) Story is
+reachable from Learn ("just read") as well as from Paths. (3) The pedagogically significant
+switches (`monoSession`, `readings`) are surfaced on the language screen, not only in Settings.
+(4) The colophon keeps a "back to the claim" affordance. (5) `You` gains the hypothesis
+instrumentation: cognate vs non-cognate acquisition cost (H1), origin-surfaced vs not stability
+(H4′), branch-prediction accuracy (H8), maintenance interval (H9), each with the N=1 caveat
+wording from `02-hypothesis.md`.
+
+**Status.** Settled (scope); implementation order is in `10-build-plan.md`.
+
+## D-15 · Streaks: none, still
+
+**Decision.** No streaks, XP, leagues or loss-aversion mechanics in v1. `research/06` recommends
+*forgiving* streaks with the largest behavioural dataset in the corpus; the build keeps the
+stronger no-streak position deliberately and records that this is a design choice, not an
+evidential one (`03-evidence.md` §10). Reopen after the first real usage data exists.
+
+**Status.** Settled.
+
+## D-16 · Release shape
+
+**Decision.** Semantic versions; one GitHub Release per tag carrying: Android APK (universal) and
+AAB (signed when the CI secrets exist, otherwise unsigned and clearly named), Linux `.deb` and a
+cross-platform uber-jar, macOS `.dmg` (unsigned unless signing secrets exist; the Gatekeeper
+caveat is documented), Windows `.msi`. Desktop installers are built on their own OS runners
+(jpackage cannot cross-build). Application code is Apache-2.0 (constellation convention); the
+data packs are CC BY-SA 4.0 with an `ATTRIBUTION.md` naming Pepper&Carrot's author and
+translators, Wiktionary, EtymDB, Tatoeba and Commons contributors. Procedure in
+`docs/RELEASE.md`.
+
+**Status.** Settled.
+
+## D-17 · Testing shape
+
+**Decision.** Pure-layer JVM unit tests for FSRS, the selection engine, the Paths engine, rect and
+cloze helpers, and pack loading; headless desktop Compose UI tests for the boot/onboarding →
+session flow and the cloze-leak regression (both render paths); CI runs them on every push.
+Device acceptance (TalkBack, RTL, font scaling, foldables) is a documented gate before a stable
+release, as in `Fyl-Manager/docs/DEVICE_ACCEPTANCE.md`.
+
+**Status.** Settled.
+
+## D-18 · Honesty rules are product requirements
+
+**Decision.** The copy rules from the evidence set are enforced in review, not left to taste:
+never "subconscious"/"absorb"; coverage is "scenes readable at the 95% threshold", never "% of a
+language learned"; every on-screen claim carries a citation; the store listing and onboarding
+state that the method is being tested on one person and is not a validated pedagogy
+(`01-premise.md` §6).
+
+**Status.** Settled.
