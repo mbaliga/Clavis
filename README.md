@@ -62,7 +62,7 @@ unsigned R8 release APK, Linux jar); they are validation outputs, not releases.
 ## Build
 
 Requirements: JDK 17 (any JDK ≥ 17 runs Gradle; the foojay resolver provisions 17 for compilation),
-Android SDK platform 35 with build-tools 35.0.0, the Gradle wrapper (8.14.3), Python 3.11 for the
+Android SDK platform 36 with build-tools 36.0.0, the Gradle wrapper (8.14.3), Python 3.11 for the
 pipeline. Everything about the pins is in [docs/build-platform.md](docs/build-platform.md).
 
 ```bash

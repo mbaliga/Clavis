@@ -46,7 +46,7 @@ jobs:
       # Keep the platform / build-tools numbers in step with gradle/libs.versions.toml (android-compileSdk).
       - uses: android-actions/setup-android@v4
         with:
-          packages: 'platforms;android-35 build-tools;35.0.0 platform-tools'
+          packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
           log-accepted-android-sdk-licenses: false
 
       - uses: gradle/actions/setup-gradle@v6
@@ -68,7 +68,7 @@ jobs:
 
       - name: Release APK sanity (16 KB page alignment, badging)
         run: |
-          bt="$ANDROID_HOME/build-tools/35.0.0"
+          bt="$ANDROID_HOME/build-tools/36.0.0"
           apk=$(ls composeApp/build/outputs/apk/release/*.apk)
           "$bt/zipalign" -c -P 16 -v 4 "$apk" | tail -1
           "$bt/aapt2" dump badging "$apk" | head -2

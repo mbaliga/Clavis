@@ -14,7 +14,7 @@ Verified on 2026-09-01 on Linux x86-64 (4 CPU / 15 GB), Android SDK at `/opt/and
 | Android Gradle Plugin | **8.9.1** | Constellation lockstep; a composite build with `Shared-Libraries-asoc` / `Hyle-Design-System` hard-fails on mixed AGP versions. |
 | Kotlin (KGP, `kotlin-test`, serialization plugin, `org.jetbrains.kotlin.plugin.compose`) | **2.1.20** | Same line as `Fyl-Manager`; D-2. KGP 2.1.20's *tested* ranges are Gradle 7.6.3–8.12.1 and AGP 7.3.1–8.7.2 ([kotlinlang.org/docs/gradle-configure-project.html](https://kotlinlang.org/docs/gradle-configure-project.html)); the same page says newer Gradle/AGP may be used with at most deprecation warnings. Observed: **zero** warnings with `--warning-mode all` (see §7). |
 | Compose Multiplatform | **1.8.2** | Maps to Jetpack Compose 1.8.2; requires Kotlin ≥ 2.1.0 and is K2-only ([compose-compatibility-and-versioning](https://kotlinlang.org/docs/multiplatform/compose-compatibility-and-versioning.html)). Release notes ship lifecycle 2.9.1 and navigation 2.9.0-beta03 with it. |
-| Android SDK | compileSdk **35**, targetSdk **35**, minSdk **26**, build-tools 35.0.0 | What is installed here and what the brief asked for; D-2 in the build plan lists 36 for `Fyl-Manager` but Clavis has no dependency that needs it yet. |
+| Android SDK | compileSdk **36**, targetSdk **36**, minSdk **26**, build-tools 36.0.0 | Google Play requires targetSdk 36 for new apps and updates since 2026-08-31 (platform-spec F-1); bumped from 35 on 2026-09-02. |
 | JDK toolchain | **17** (`kotlin { jvmToolchain(17) }` in both modules) | Constellation's documented toolchain. See §2. |
 | kotlinx-serialization | 1.8.1 | Built against Kotlin 2.1.x; 1.9.0 is built with 2.2.0 and is the pair for a Kotlin 2.2 move. |
 | kotlinx-coroutines | 1.10.2 | Current for Kotlin 2.1.x. `-swing` is on the desktop main classpath for `Dispatchers.Main`. |
@@ -133,7 +133,7 @@ Always `export ANDROID_HOME=/opt/android-sdk` (or have `local.properties` with `
 | macOS .dmg / Windows .msi | `packageDmg` / `packageMsi` on that OS | not run here |
 
 Check the badging of any APK with
-`/opt/android-sdk/build-tools/35.0.0/aapt2 dump badging <apk> | head`.
+`/opt/android-sdk/build-tools/36.0.0/aapt2 dump badging <apk> | head`.
 
 Linux packaging prerequisites: jpackage's DEB bundler shells out to **`fakeroot`** as well as
 `dpkg-deb`. Without it the task fails with
@@ -227,7 +227,7 @@ If 429s still appear, add to `gradle.properties` for the download phase only:
 
 `.github/workflows/ci.yml` (push to `main`, pull requests): `ubuntu-24.04`, `actions/checkout@v7`,
 `actions/setup-java@v6` (temurin 17), `android-actions/setup-android@v4`
-(`platforms;android-35 build-tools;35.0.0 platform-tools`), `gradle/actions/setup-gradle@v6`, then
+(`platforms;android-36 build-tools;36.0.0 platform-tools`), `gradle/actions/setup-gradle@v6`, then
 
 ```
 ./gradlew :shared:allTests :composeApp:desktopTest :composeApp:lintDebug :composeApp:assembleDebug \
