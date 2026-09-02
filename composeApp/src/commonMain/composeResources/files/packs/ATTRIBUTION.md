@@ -71,4 +71,4 @@ Pack `clavis-pronunciations` (PRONUNCIATIONS, version 2026.09.02), languages ar,
 
 ## Generator
 
-Built 2026-09-02T05:06:01Z by the Clavis pipeline (`pipeline/`, Apache-2.0) from corpus `corpus-framagit`.
+Built 2026-09-02T12:04:47Z by the Clavis pipeline (`pipeline/`, Apache-2.0) from corpus `corpus-framagit`.

@@ -25,7 +25,7 @@
   ],
   "licence": "CC-BY-4.0",
   "source": "https://framagit.org/peppercarrot/webcomics",
-  "generatedAt": "2026-09-02T05:06:01Z",
+  "generatedAt": "2026-09-02T12:04:47Z",
   "attribution": [
    {
     "name": "David Revoy",
@@ -1766,7 +1766,7 @@
   ],
   "licence": "CC-BY-SA-4.0",
   "source": "wordfreq 3.1.1 (CC BY-SA 4.0) + Pepper&Carrot corpus counts",
-  "generatedAt": "2026-09-02T05:06:01Z",
+  "generatedAt": "2026-09-02T12:04:47Z",
   "attribution": [
    {
     "name": "Robyn Speer",
@@ -2257,7 +2257,7 @@
   ],
   "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
   "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
-  "generatedAt": "2026-09-02T05:02:05Z",
+  "generatedAt": "2026-09-02T07:00:20Z",
   "attribution": [
    {
     "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
@@ -2274,22 +2274,22 @@
   ],
   "files": {
    "pronunciations/es.json.gz": 18678,
-   "pronunciations/fr.json.gz": 38349,
-   "pronunciations/it.json.gz": 20464,
-   "pronunciations/de.json.gz": 39481,
-   "pronunciations/nl.json.gz": 33566,
+   "pronunciations/fr.json.gz": 50737,
+   "pronunciations/it.json.gz": 21952,
+   "pronunciations/de.json.gz": 51021,
+   "pronunciations/nl.json.gz": 44057,
    "pronunciations/ja.json.gz": 20148,
-   "pronunciations/ko.json.gz": 11423,
-   "pronunciations/zh.json.gz": 26151,
+   "pronunciations/ko.json.gz": 11487,
+   "pronunciations/zh.json.gz": 35915,
    "pronunciations/ar.json.gz": 8121,
-   "pronunciations/en.json.gz": 42226,
-   "pronunciations/pt.json.gz": 18318,
+   "pronunciations/en.json.gz": 53310,
+   "pronunciations/pt.json.gz": 34695,
    "pronunciations/la.json.gz": 7155,
-   "pronunciations/ru.json.gz": 22917,
+   "pronunciations/ru.json.gz": 57857,
    "pronunciations/pl.json.gz": 22713,
-   "pronunciations/uk.json.gz": 17163,
-   "pronunciations/tr.json.gz": 4206,
-   "pronunciations/hi.json.gz": 740
+   "pronunciations/uk.json.gz": 43146,
+   "pronunciations/tr.json.gz": 8881,
+   "pronunciations/hi.json.gz": 1395
   },
   "stats": {
    "es": {
@@ -2301,26 +2301,26 @@
    "fr": {
     "lemmas": 1767,
     "ipa": 1564,
-    "audio": 879,
-    "audioExcluded": 644
+    "audio": 1523,
+    "audioExcluded": 0
    },
    "it": {
     "lemmas": 1598,
     "ipa": 1411,
-    "audio": 81,
-    "audioExcluded": 63
+    "audio": 144,
+    "audioExcluded": 0
    },
    "de": {
     "lemmas": 1770,
     "ipa": 1418,
-    "audio": 929,
-    "audioExcluded": 619
+    "audio": 1548,
+    "audioExcluded": 0
    },
    "nl": {
     "lemmas": 1700,
     "ipa": 1302,
-    "audio": 871,
-    "audioExcluded": 612
+    "audio": 1483,
+    "audioExcluded": 0
    },
    "ja": {
     "lemmas": 2062,
@@ -2331,14 +2331,14 @@
    "ko": {
     "lemmas": 1115,
     "ipa": 899,
-    "audio": 4,
-    "audioExcluded": 1
+    "audio": 5,
+    "audioExcluded": 0
    },
    "zh": {
     "lemmas": 2439,
     "ipa": 447,
-    "audio": 728,
-    "audioExcluded": 372
+    "audio": 1100,
+    "audioExcluded": 0
    },
    "ar": {
     "lemmas": 583,
@@ -2349,14 +2349,14 @@
    "en": {
     "lemmas": 1603,
     "ipa": 1529,
-    "audio": 964,
-    "audioExcluded": 557
+    "audio": 1521,
+    "audioExcluded": 0
    },
    "pt": {
     "lemmas": 1557,
     "ipa": 1378,
-    "audio": 0,
-    "audioExcluded": 690
+    "audio": 689,
+    "audioExcluded": 1
    },
    "la": {
     "lemmas": 642,
@@ -2367,8 +2367,8 @@
    "ru": {
     "lemmas": 1757,
     "ipa": 1505,
-    "audio": 0,
-    "audioExcluded": 1330
+    "audio": 1330,
+    "audioExcluded": 0
    },
    "pl": {
     "lemmas": 1863,
@@ -2379,20 +2379,20 @@
    "uk": {
     "lemmas": 1431,
     "ipa": 1142,
-    "audio": 0,
-    "audioExcluded": 1032
+    "audio": 1032,
+    "audioExcluded": 0
    },
    "tr": {
     "lemmas": 437,
     "ipa": 316,
-    "audio": 0,
-    "audioExcluded": 206
+    "audio": 205,
+    "audioExcluded": 1
    },
    "hi": {
     "lemmas": 45,
     "ipa": 39,
-    "audio": 0,
-    "audioExcluded": 14
+    "audio": 14,
+    "audioExcluded": 0
    }
   }
  }

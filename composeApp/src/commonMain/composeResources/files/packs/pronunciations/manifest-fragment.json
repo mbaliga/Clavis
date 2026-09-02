@@ -24,7 +24,7 @@
  ],
  "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
  "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
- "generatedAt": "2026-09-02T05:02:05Z",
+ "generatedAt": "2026-09-02T07:00:20Z",
  "attribution": [
   {
    "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
@@ -41,22 +41,22 @@
  ],
  "files": {
   "es.json.gz": 18678,
-  "fr.json.gz": 38349,
-  "it.json.gz": 20464,
-  "de.json.gz": 39481,
-  "nl.json.gz": 33566,
+  "fr.json.gz": 50737,
+  "it.json.gz": 21952,
+  "de.json.gz": 51021,
+  "nl.json.gz": 44057,
   "ja.json.gz": 20148,
-  "ko.json.gz": 11423,
-  "zh.json.gz": 26151,
+  "ko.json.gz": 11487,
+  "zh.json.gz": 35915,
   "ar.json.gz": 8121,
-  "en.json.gz": 42226,
-  "pt.json.gz": 18318,
+  "en.json.gz": 53310,
+  "pt.json.gz": 34695,
   "la.json.gz": 7155,
-  "ru.json.gz": 22917,
+  "ru.json.gz": 57857,
   "pl.json.gz": 22713,
-  "uk.json.gz": 17163,
-  "tr.json.gz": 4206,
-  "hi.json.gz": 740
+  "uk.json.gz": 43146,
+  "tr.json.gz": 8881,
+  "hi.json.gz": 1395
  },
  "stats": {
   "es": {
@@ -68,26 +68,26 @@
   "fr": {
    "lemmas": 1767,
    "ipa": 1564,
-   "audio": 879,
-   "audioExcluded": 644
+   "audio": 1523,
+   "audioExcluded": 0
   },
   "it": {
    "lemmas": 1598,
    "ipa": 1411,
-   "audio": 81,
-   "audioExcluded": 63
+   "audio": 144,
+   "audioExcluded": 0
   },
   "de": {
    "lemmas": 1770,
    "ipa": 1418,
-   "audio": 929,
-   "audioExcluded": 619
+   "audio": 1548,
+   "audioExcluded": 0
   },
   "nl": {
    "lemmas": 1700,
    "ipa": 1302,
-   "audio": 871,
-   "audioExcluded": 612
+   "audio": 1483,
+   "audioExcluded": 0
   },
   "ja": {
    "lemmas": 2062,
@@ -98,14 +98,14 @@
   "ko": {
    "lemmas": 1115,
    "ipa": 899,
-   "audio": 4,
-   "audioExcluded": 1
+   "audio": 5,
+   "audioExcluded": 0
   },
   "zh": {
    "lemmas": 2439,
    "ipa": 447,
-   "audio": 728,
-   "audioExcluded": 372
+   "audio": 1100,
+   "audioExcluded": 0
   },
   "ar": {
    "lemmas": 583,
@@ -116,14 +116,14 @@
   "en": {
    "lemmas": 1603,
    "ipa": 1529,
-   "audio": 964,
-   "audioExcluded": 557
+   "audio": 1521,
+   "audioExcluded": 0
   },
   "pt": {
    "lemmas": 1557,
    "ipa": 1378,
-   "audio": 0,
-   "audioExcluded": 690
+   "audio": 689,
+   "audioExcluded": 1
   },
   "la": {
    "lemmas": 642,
@@ -134,8 +134,8 @@
   "ru": {
    "lemmas": 1757,
    "ipa": 1505,
-   "audio": 0,
-   "audioExcluded": 1330
+   "audio": 1330,
+   "audioExcluded": 0
   },
   "pl": {
    "lemmas": 1863,
@@ -146,20 +146,20 @@
   "uk": {
    "lemmas": 1431,
    "ipa": 1142,
-   "audio": 0,
-   "audioExcluded": 1032
+   "audio": 1032,
+   "audioExcluded": 0
   },
   "tr": {
    "lemmas": 437,
    "ipa": 316,
-   "audio": 0,
-   "audioExcluded": 206
+   "audio": 205,
+   "audioExcluded": 1
   },
   "hi": {
    "lemmas": 45,
    "ipa": 39,
-   "audio": 0,
-   "audioExcluded": 14
+   "audio": 14,
+   "audioExcluded": 0
   }
  }
 }
