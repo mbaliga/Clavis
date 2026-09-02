@@ -12,10 +12,13 @@ import java.awt.FileDialog
 import java.awt.Frame
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
+import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Clip
+import javax.sound.sampled.SourceDataLine
 
 private val os: String = System.getProperty("os.name").lowercase()
 private val isMac get() = os.contains("mac")
@@ -170,25 +173,86 @@ class SystemSpeaker(private val localeFor: (Lang) -> String?) : Speaker {
     }
 }
 
-/** javax.sound: WAV (and other `AudioSystem`-supported PCM containers). TODO(ui-features): MP3/OGG need a decoder (e.g. JLayer/JOrbis) before Commons/Tatoeba clips play here. */
+/**
+ * javax.sound with explicit decoders: WAV (and any `AudioSystem` PCM container) natively, MP3 via
+ * JLayer/mp3spi and OGG Vorbis via JOrbis/vorbisspi — both pure Java, LGPL 2.1 (THIRD_PARTY_NOTICES
+ * "Desktop audio"). The container is sniffed from the bytes (ID3 / MPEG sync, `OggS`, `RIFF`) with
+ * the MIME as a fallback; decoded PCM streams through a `SourceDataLine` so a clip of unknown
+ * frame length (every decoded stream) plays without buffering it whole into a `Clip`.
+ */
 class DesktopAudioPlayer : AudioPlayer {
-    @Volatile private var clip: Clip? = null
+    @Volatile private var line: SourceDataLine? = null
+    @Volatile private var generation = 0
 
-    override suspend fun play(bytes: ByteArray, mime: String) {
-        stop()
-        withContext(Dispatchers.IO) {
-            runCatching {
-                val ais = AudioSystem.getAudioInputStream(ByteArrayInputStream(bytes))
-                val c = AudioSystem.getClip()
-                c.open(ais)
-                c.addLineListener { ev -> if (ev.type == javax.sound.sampled.LineEvent.Type.STOP) c.close() }
-                clip = c
-                c.start()
+    companion object {
+        val FORMATS: Set<String> = setOf("wav", "mp3", "ogg")
+
+        internal fun sniff(bytes: ByteArray, mime: String): String {
+            if (bytes.size >= 4) {
+                if (bytes[0] == 'O'.code.toByte() && bytes[1] == 'g'.code.toByte() && bytes[2] == 'g'.code.toByte() && bytes[3] == 'S'.code.toByte()) return "ogg"
+                if (bytes[0] == 'R'.code.toByte() && bytes[1] == 'I'.code.toByte() && bytes[2] == 'F'.code.toByte() && bytes[3] == 'F'.code.toByte()) return "wav"
+                if (bytes[0] == 'I'.code.toByte() && bytes[1] == 'D'.code.toByte() && bytes[2] == '3'.code.toByte()) return "mp3"
+                if ((bytes[0].toInt() and 0xFF) == 0xFF && (bytes[1].toInt() and 0xE0) == 0xE0) return "mp3"
+            }
+            val m = mime.lowercase()
+            return when {
+                m.contains("ogg") || m.contains("vorbis") -> "ogg"
+                m.contains("mpeg") || m.contains("mp3") -> "mp3"
+                else -> "wav"
+            }
+        }
+
+        /** Decodes [bytes] to 16-bit signed PCM; throws when no decoder applies. */
+        internal fun decode(bytes: ByteArray, mime: String): AudioInputStream {
+            val kind = sniff(bytes, mime)
+            val input = BufferedInputStream(ByteArrayInputStream(bytes))
+            val raw: AudioInputStream = when (kind) {
+                "mp3" -> javazoom.spi.mpeg.sampled.file.MpegAudioFileReader().getAudioInputStream(input)
+                "ogg" -> javazoom.spi.vorbis.sampled.file.VorbisAudioFileReader().getAudioInputStream(input)
+                else -> AudioSystem.getAudioInputStream(input)
+            }
+            val base = raw.format
+            if (base.encoding == AudioFormat.Encoding.PCM_SIGNED && base.sampleSizeInBits == 16) return raw
+            val rate = if (base.sampleRate > 0) base.sampleRate else 44_100f
+            val ch = if (base.channels > 0) base.channels else 2
+            val pcm = AudioFormat(AudioFormat.Encoding.PCM_SIGNED, rate, 16, ch, ch * 2, rate, false)
+            return when (kind) {
+                "mp3" -> javazoom.spi.mpeg.sampled.convert.MpegFormatConversionProvider().getAudioInputStream(pcm, raw)
+                "ogg" -> javazoom.spi.vorbis.sampled.convert.VorbisFormatConversionProvider().getAudioInputStream(pcm, raw)
+                else -> AudioSystem.getAudioInputStream(pcm, raw)
             }
         }
     }
 
-    override fun stop() { clip?.let { runCatching { it.stop(); it.close() } }; clip = null }
+    override suspend fun play(bytes: ByteArray, mime: String) {
+        stop()
+        val gen = ++generation
+        withContext(Dispatchers.IO) {
+            runCatching {
+                decode(bytes, mime).use { pcm ->
+                    val out = AudioSystem.getSourceDataLine(pcm.format)
+                    out.open(pcm.format)
+                    line = out
+                    out.start()
+                    val buf = ByteArray(8 * 1024)
+                    while (gen == generation) {
+                        val n = pcm.read(buf)
+                        if (n < 0) break
+                        out.write(buf, 0, n)
+                    }
+                    if (gen == generation) out.drain()
+                    out.close()
+                    if (line === out) line = null
+                }
+            }
+        }
+    }
+
+    override fun stop() {
+        generation++
+        line?.let { runCatching { it.stop(); it.flush(); it.close() } }
+        line = null
+    }
 }
 
 /** AWT `FileDialog` on the Swing thread. */
@@ -221,7 +285,10 @@ fun desktopServices(root: File? = null): PlatformServices {
         speaker = DesktopSpeaker(dirs, audio),
         audio = audio,
         importer = DesktopFileImporter(),
+        downloader = HttpDownloader(),
         share = DesktopShare(),
         reducedMotion = ::platformReducedMotion,
+        audioFormats = DesktopAudioPlayer.FORMATS,
+        canDownload = true,
     )
 }

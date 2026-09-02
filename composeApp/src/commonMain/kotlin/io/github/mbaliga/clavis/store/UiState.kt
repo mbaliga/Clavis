@@ -99,6 +99,14 @@ data class UiState(
     val toast: Toast? = null,
     val confirm: Confirm? = null,
     val theme: ThemeMode = ThemeMode.SYSTEM,
+    /** Recording URLs being fetched right now (D-13: only after a tap). */
+    val clipBusy: Set<String> = emptySet(),
+    /** Recording URLs known to be cached in this run (a hint for recomposition; the file is the truth). */
+    val clipsReady: Set<String> = emptySet(),
+    /** The imported text open in Media's reading mode, by id. */
+    val mediaOpen: String? = null,
+    /** The lane whose Tatoeba sentences are being browsed (Sentences mode), or null. */
+    val sentencesLane: String? = null,
 ) {
     val ready: Boolean get() = phase is Phase.Ready
     /** Onboarding, the baseline test and a live session hide the dock/rail (product-spec §3.3 rule 1). */

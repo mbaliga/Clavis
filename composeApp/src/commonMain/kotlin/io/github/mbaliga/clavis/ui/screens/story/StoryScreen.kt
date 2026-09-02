@@ -132,6 +132,7 @@ fun StoryScreen(store: ClavisStore, ui: UiState) {
             QuietButton("Page →", onClick = { store.setStoryPage(pi + 1) }, enabled = pi < pages.lastIndex, modifier = Modifier.weight(1f), testTag = "story-next")
         }
         Text(Copy.pageOfN(pi + 1, pages.size), style = t.small, color = p.ink2, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp).tagged("story-page-of"))
+        QuietButton("Sentences in ${store.langName(lane)}", onClick = { store.openSentences(lane) }, modifier = Modifier.padding(top = 10.dp), minHeight = 40.dp, testTag = "story-sentences")
         Spacer(Modifier.height(130.dp))
     }
 }

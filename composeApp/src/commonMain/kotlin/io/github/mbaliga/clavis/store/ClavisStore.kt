@@ -9,13 +9,17 @@ import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.Corpus
 import io.github.mbaliga.clavis.core.DayKey
 import io.github.mbaliga.clavis.core.Encounter
+import io.github.mbaliga.clavis.core.ImportedMedia
 import io.github.mbaliga.clavis.core.Lang
 import io.github.mbaliga.clavis.core.LaneMode
 import io.github.mbaliga.clavis.core.LanguageInfo
 import io.github.mbaliga.clavis.core.LanguageRegistry
 import io.github.mbaliga.clavis.core.LocalDayKey
+import io.github.mbaliga.clavis.core.LogEntry
 import io.github.mbaliga.clavis.core.PackManifest
+import io.github.mbaliga.clavis.core.Pronunciation
 import io.github.mbaliga.clavis.core.Scene
+import io.github.mbaliga.clavis.core.Sentence
 import io.github.mbaliga.clavis.core.Session
 import io.github.mbaliga.clavis.core.Settings
 import io.github.mbaliga.clavis.core.SystemClock
@@ -23,11 +27,13 @@ import io.github.mbaliga.clavis.core.data.DefaultContentPackLoader
 import io.github.mbaliga.clavis.core.engine.ClavisEngine
 import io.github.mbaliga.clavis.core.freshState
 import io.github.mbaliga.clavis.core.lineOf
+import io.github.mbaliga.clavis.core.state.FileIo
 import io.github.mbaliga.clavis.core.state.JsonStateStore
 import io.github.mbaliga.clavis.platform.PlatformServices
 import io.github.mbaliga.clavis.ui.theme.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -408,6 +414,108 @@ class ClavisStore(
     fun setCosmosWebFor(id: String?) { state.cosmos.webFor = id; commit() }
     fun setCosmosLens(lens: String) { state.cosmos.exlens = lens; commit() }
     fun setCosmosSets(on: Boolean) { state.cosmos.exsets = on; commit() }
+
+    /** `Read where it appears`: opens Story on the page of [sceneId] in lane [l]. */
+    fun openStoryAt(l: Lang, sceneId: Int) {
+        val sc = corpus.scenes.getOrNull(sceneId) ?: return
+        state.story.lane = l.code
+        state.story.ep = sc.e
+        state.story.pi = engine.storyPages(l, sc.e).indexOf(sc.m).coerceAtLeast(0)
+        state.view = "story"
+        commit()
+    }
+
+    // ------------------------------------------------------------------ media (D-7 user-media) & tingles (§5.5)
+
+    /** Stores an imported text; returns its id. Files never leave the device (D-13). */
+    fun addMedia(title: String, l: Lang, kind: String, lines: List<String>): String {
+        val id = "m${now}-${random.nextInt(1_000_000)}"
+        state.media[id] = ImportedMedia(id = id, title = title.ifBlank { "untitled" }, lang = l.code, addedAt = now, kind = kind, lines = lines)
+        commit()
+        return id
+    }
+
+    fun deleteMedia(id: String) {
+        state.media.remove(id)
+        commit { if (it.mediaOpen == id) it.copy(mediaOpen = null) else it }
+    }
+
+    fun openMedia(id: String?) = commit(save = false) { it.copy(mediaOpen = id) }
+
+    /** Sentences mode for a lane (null closes it); lands on the Media view. */
+    fun openSentences(l: Lang?) {
+        if (l != null && state.view != "media") state.view = "media"
+        commit(save = l != null) { it.copy(sentencesLane = l?.code, mediaOpen = null) }
+    }
+
+    /**
+     * A "tingle" (product-spec §5.5): the learner met a lexicon word out in the world. Logged as
+     * `{type:"tingle", l, lm}` — no grade, no reward, no scheduling, nothing counted as progress.
+     * (`LogEntry` has no `src`/`ctx` field and the engine has no pre-exposure hook: shared_issues.)
+     */
+    fun logTingle(l: Lang, lemma: String) {
+        state.log.add(LogEntry(t = now, l = l.code, type = "tingle", lm = lemma))
+        val over = state.log.size - ClavisEngine.LOG_CAP
+        if (over > 0) state.log.subList(0, over).clear()
+        commit()
+    }
+
+    // ------------------------------------------------------------------ optional packs (D-7)
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val pronCache = HashMap<String, Map<String, Pronunciation>>()
+    private val sentCache = HashMap<String, List<Sentence>>()
+
+    /** The pronunciation pack for [l] (IPA + Commons audio references), parsed once per run. */
+    suspend fun pronunciations(l: Lang): Map<String, Pronunciation> =
+        pronCache[l.code] ?: withContext(Dispatchers.Default) { loader.pronunciations(l) }.also { pronCache[l.code] = it }
+
+    /** The Tatoeba sentence pack for [l], parsed once per run. */
+    suspend fun sentences(l: Lang): List<Sentence> =
+        sentCache[l.code] ?: withContext(Dispatchers.Default) { loader.sentences(l) }.also { sentCache[l.code] = it }
+
+    // ------------------------------------------------------------------ recordings (D-13: download on tap, cached)
+
+    /** Container extension of a recording URL ("mp3", "ogg", "wav"). */
+    fun clipFormat(url: String): String {
+        val tail = url.substringAfterLast('/').substringBefore('?').substringAfterLast('.', "").lowercase()
+        return when (tail) { "mp3", "ogg", "wav", "oga" -> if (tail == "oga") "ogg" else tail; else -> "mp3" }
+    }
+
+    /** Local cache path for a recording URL (`<cache>/audio/<fnv64>.<ext>`). */
+    fun clipPath(url: String): String {
+        var h = -0x340d631b7bdddcdbL // FNV-1a 64 offset basis
+        for (ch in url) { h = h xor ch.code.toLong(); h *= 0x100000001b3L }
+        return "${services.dirs.cache}/audio/${h.toULong().toString(16)}.${clipFormat(url)}"
+    }
+
+    fun clipCached(url: String): Boolean = FileIo.exists(clipPath(url))
+
+    /** Whether a Play control may be shown for [url]: this platform decodes the format and can fetch it (or already has it). */
+    fun clipOffered(url: String): Boolean = clipFormat(url) in services.audioFormats && (services.canDownload || clipCached(url))
+
+    private fun mimeOf(url: String) = when (clipFormat(url)) { "ogg" -> "audio/ogg"; "wav" -> "audio/wav"; else -> "audio/mpeg" }
+
+    /**
+     * Plays a recording: from the cache when present, otherwise downloads it first (the tap is the
+     * consent, D-13). Runs off the UI thread; the UI sees `clipBusy` / `clipsReady` change.
+     */
+    fun playClip(url: String) {
+        if (!ready || url in current.clipBusy) return
+        val path = clipPath(url)
+        _ui.update { it.copy(clipBusy = it.clipBusy + url, rev = it.rev + 1) }
+        scope.launch {
+            val ok = FileIo.exists(path) || services.downloader.download(url, path)
+            if (ok) {
+                _ui.update { it.copy(clipBusy = it.clipBusy - url, clipsReady = it.clipsReady + url, rev = it.rev + 1) }
+                val bytes = FileIo.read(path)
+                if (bytes != null) runCatching { services.audio.play(bytes, mimeOf(url)) }
+            } else {
+                _ui.update { it.copy(clipBusy = it.clipBusy - url, rev = it.rev + 1) }
+                toast(io.github.mbaliga.clavis.ui.screens.cosmos.CosmosCopy.DOWNLOAD_FAILED)
+            }
+        }
+    }
 
     // ------------------------------------------------------------------ settings (§7.9)
 

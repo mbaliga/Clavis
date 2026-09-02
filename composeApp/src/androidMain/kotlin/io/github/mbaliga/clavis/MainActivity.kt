@@ -10,6 +10,7 @@ import io.github.mbaliga.clavis.platform.AndroidAudioPlayer
 import io.github.mbaliga.clavis.platform.AndroidFileImporter
 import io.github.mbaliga.clavis.platform.AndroidShare
 import io.github.mbaliga.clavis.platform.AndroidSpeaker
+import io.github.mbaliga.clavis.platform.HttpDownloader
 import io.github.mbaliga.clavis.platform.PlatformServices
 import io.github.mbaliga.clavis.platform.platformReducedMotion
 import io.github.mbaliga.clavis.resources.Res
@@ -30,8 +31,12 @@ class MainActivity : ComponentActivity() {
             speaker = AndroidSpeaker(applicationContext),
             audio = AndroidAudioPlayer(applicationContext),
             importer = importer,
+            downloader = HttpDownloader(),
             share = AndroidShare(this),
             reducedMotion = ::platformReducedMotion,
+            audioFormats = setOf("wav", "mp3", "ogg"), // MediaPlayer decodes all three
+            canDownload = true,
+            dustCap = 2000,
         )
         val s = ClavisStore(services, readResource = { path -> Res.readBytes(path) })
         store = s

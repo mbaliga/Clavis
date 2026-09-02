@@ -128,7 +128,10 @@ fun LearnScreen(store: ClavisStore, ui: UiState) {
             Eyebrow(Copy.JUST_READING)
             CitedText(Copy.JUST_READING_COPY, onCite = store::openColophon, color = p.ink, style = t.body)
             Spacer(Modifier.height(10.dp))
-            QuietButton(Copy.OPEN_COMIC, onClick = { store.setView("story") }, testTag = "open-comic")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                QuietButton(Copy.OPEN_COMIC, onClick = { store.setView("story") }, testTag = "open-comic")
+                QuietButton("Your texts", onClick = { store.setView("media") }, testTag = "open-media")
+            }
         }
         Spacer(Modifier.height(130.dp))
     }
