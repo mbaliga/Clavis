@@ -96,13 +96,15 @@ fun SceneBox(
     numbers: Boolean = false,
     noHalo: Boolean = false,
     rtl: Boolean = false,
+    /** Story mode: the "current" balloon is just the first one and must be tappable too. */
+    tapCurrent: Boolean = false,
 ) {
     val bitmap by rememberPageBitmap(images, scene.m)
     val info = corpus.pages[scene.m]
     val pageW = info?.width?.takeIf { it > 0 } ?: bitmap?.width ?: 640
     val pageH = info?.height?.takeIf { it > 0 } ?: bitmap?.height ?: 904
     if (full) {
-        WholePage(bitmap, pageW, pageH, scene, lang, mask, siblings, onTapBalloon, numbers, noHalo, rtl, modifier)
+        WholePage(bitmap, pageW, pageH, scene, lang, mask, siblings, onTapBalloon, numbers, noHalo, rtl, tapCurrent, modifier)
     } else {
         CroppedScene(bitmap, pageW, pageH, scene, lang, mask, mini, rtl, modifier)
     }
@@ -258,7 +260,7 @@ private fun BalloonText(
 @Composable
 private fun WholePage(
     bitmap: ImageBitmap?, pageW: Int, pageH: Int, cur: Scene, lang: Lang, mask: String?, siblings: List<Scene>,
-    onTap: ((Scene) -> Unit)?, numbers: Boolean, noHalo: Boolean, rtl: Boolean, modifier: Modifier,
+    onTap: ((Scene) -> Unit)?, numbers: Boolean, noHalo: Boolean, rtl: Boolean, tapCurrent: Boolean, modifier: Modifier,
 ) {
     val p = ClavisTheme.palette
     val pulseT = pulse(ClavisMotion.BPULSE_MS, 0f, 1f)
@@ -334,7 +336,7 @@ private fun WholePage(
                 Box(Modifier.size(1.dp).offset { IntOffset(((pl.r.x + pl.r.w / 2) * wPx).roundToInt(), ((pl.r.y + pl.r.h / 2) * hPx).roundToInt()) }.tagged("marker-${pl.s.i}"))
                 continue
             }
-            val tap = if (onTap != null && !pl.isCur) ({ onTap(pl.s) }) else null
+            val tap = if (onTap != null && (!pl.isCur || tapCurrent)) ({ onTap(pl.s) }) else null
             BalloonText(
                 pl.text, pl.fs, style, IntOffset((pl.r.x * wPx).roundToInt(), (pl.r.y * hPx).roundToInt()), IntSize(pl.boxW, pl.boxH), rtl,
                 masked = pl.isCur && mask != null, tag = "balloon-${pl.s.i}", onTap = tap,

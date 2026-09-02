@@ -212,6 +212,13 @@ class ClavisStore(
         commit()
     }
 
+    /** A preset (D-6 / OD-3): every registry language gets a mode in one commit; the pin is dropped if its lane rests. */
+    fun setLanes(modes: Map<String, LaneMode>) {
+        for (info in registry.all) state.lanes[info.iso.code] = modes[info.iso.code] ?: LaneMode.OFF
+        if (state.pin != null && state.lanes[state.pin] == LaneMode.OFF) state.pin = null
+        commit()
+    }
+
     fun finishOnboarding() { state.onboarded = true; state.view = "learn"; commit() }
     fun replayIntro() { state.ob = 0; state.onboarded = false; commit { it.copy(session = null, enc = null, test = null, colophon = null) } }
 
@@ -373,6 +380,34 @@ class ClavisStore(
         commit()
         toast(Copy.UNDONE_TOAST)
     }
+
+    // ------------------------------------------------------------------ ui-features intents
+
+    /** `As a tree` / `As a map` (persisted `S.pathView`). */
+    fun setPathView(v: String) { state.pathView = if (v == "map") "map" else "tree"; commit() }
+
+    /**
+     * Letters tab. When the learner opens a script's tab themselves the script counts as visited
+     * (D-21: `coach["letters:<iso>"] = true`), which retires the LETTERS branch in Paths.
+     */
+    fun setLetterTab(l: Lang, byUser: Boolean = true) {
+        state.letterTab = l.code
+        if (byUser) state.coach["letters:${l.code}"] = true
+        commit()
+    }
+
+    fun setKanaSet(set: String) { state.kanaSet = if (set == "kata") "kata" else "hira"; commit() }
+
+    /** Story lane / episode / page (template-spec §7.11): a lane change resets ep and page. */
+    fun setStoryLane(l: Lang) { state.story.lane = l.code; state.story.ep = null; state.story.pi = 0; commit() }
+    fun setStoryEpisode(ep: Int) { state.story.ep = ep; state.story.pi = 0; commit() }
+    fun setStoryPage(pi: Int) { state.story.pi = maxOf(0, pi); commit() }
+
+    /** Cosmos mode `depth` (Field) / `explore`, and the Explore→Field handoff word (`S.cosmos.webFor`). */
+    fun setCosmosMode(mode: String) { state.cosmos.mode = if (mode == "explore") "explore" else "depth"; commit() }
+    fun setCosmosWebFor(id: String?) { state.cosmos.webFor = id; commit() }
+    fun setCosmosLens(lens: String) { state.cosmos.exlens = lens; commit() }
+    fun setCosmosSets(on: Boolean) { state.cosmos.exsets = on; commit() }
 
     // ------------------------------------------------------------------ settings (§7.9)
 
