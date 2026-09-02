@@ -87,6 +87,11 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            // MP3 / OGG decoding for downloaded recordings (javax.sound only knows WAV). The decoders are
+            // instantiated explicitly (no ServiceLoader), so the uber-jar's duplicate META-INF/services
+            // handling cannot silently drop one of them.
+            implementation(libs.mp3spi)
+            implementation(libs.vorbisspi)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

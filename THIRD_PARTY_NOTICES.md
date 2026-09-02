@@ -25,6 +25,26 @@ Clavis's packaging configuration removes duplicate `META-INF` licence resources 
 
 The Linux `.deb`, macOS `.dmg` and Windows `.msi` bundle an Eclipse Temurin 17 runtime image produced by jlink/jpackage — OpenJDK under the GNU General Public License v2 with the Classpath Exception. Its own third-party notices are installed with the application under `runtime/legal/<module>/` (observed in the verified Linux build: `java.base` — aes, asm, c-libutl, cldr, gcc, icu, public_suffix, siphash, unicode, zlib; `java.desktop` — colorimaging, freetype, giflib, harfbuzz, jpeg, lcms, libpng, mesa3d, pipewire, xwd; plus `java.datatransfer`, `java.logging`, `java.prefs`, `java.xml`, `jdk.crypto.ec`). The uber-jar bundles no runtime and runs on the user's own JRE 17+.
 
+## Desktop audio (LGPL 2.1; desktop JVM target only)
+
+The desktop build decodes the MP3 and OGG Vorbis recordings a learner explicitly downloads
+(Wikimedia Commons word audio, Tatoeba sentence audio) with pure-Java decoders; javax.sound alone
+knows only WAV. They are consumed as ordinary jars on the desktop runtime classpath, unmodified,
+and instantiated explicitly (`MpegAudioFileReader`, `VorbisAudioFileReader` and their conversion
+providers) rather than through `ServiceLoader`; nothing from them is linked into the Android APK.
+
+| Artifact | Version | Licence | Source |
+|---|---|---|---|
+| `com.googlecode.soundlibs:mp3spi` (JavaZOOM MP3SPI) | 1.9.5.4 | LGPL 2.1 | http://www.javazoom.net/mp3spi/mp3spi.html |
+| `com.googlecode.soundlibs:jlayer` (JavaZOOM JLayer) | 1.0.1.4 | LGPL 2.1 | http://www.javazoom.net/javalayer/javalayer.html |
+| `com.googlecode.soundlibs:vorbisspi` (JavaZOOM VorbisSPI) | 1.0.3.3 | LGPL 2.1 | http://www.javazoom.net/vorbisspi/vorbisspi.html |
+| `com.googlecode.soundlibs:jorbis` (JCraft JOrbis) | 0.0.17.4 | LGPL 2.1 | http://www.jcraft.com/jorbis/ |
+| `com.googlecode.soundlibs:tritonus-share` (Tritonus) | 0.3.7.4 | LGPL 2.1 | http://www.tritonus.org/ |
+
+LGPL 2.1 §6 is satisfied by shipping them as separate, replaceable jars (the uber-jar and the
+jpackage image both keep them as distinct entries under `app/`); the licence text is inside each
+jar's `META-INF/`. A user may relink against a modified copy by replacing the jar.
+
 ## Fonts (SIL Open Font License 1.1)
 
 The typefaces below are bundled as application resources (docs/DECISIONS.md D-9: Hind, Rozha One and IBM Plex Mono everywhere; the Noto Sans families on desktop, where system coverage of Arabic, Hebrew and CJK cannot be assumed). The set actually shipped is the content of `composeApp/src/commonMain/composeResources/font/` (and the desktop-only set) at the release commit; step 5 of the review procedure compares it with this table. Each family's copyright notice, as required by OFL §2, and the full licence text (Appendix A) accompany every distribution.

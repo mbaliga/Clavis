@@ -73,9 +73,14 @@ private fun DockButton(item: NavItem, on: Boolean, onInk: Color, offInk: Color, 
     }
 }
 
+/** Rail-only secondary destinations: id · label · glyph. */
+val RAIL_MORE: List<Triple<String, String, String>> = listOf(
+    Triple("story", "Story", "¶"), Triple("languages", "Languages", "Aa"), Triple("media", "Texts", "≡"),
+)
+
 /**
- * The left navigation rail for medium/expanded widths: wordmark on top, the five items, the gear
- * at the bottom (product-spec §3.4).
+ * The left navigation rail for medium/expanded widths: wordmark on top, the five items, the
+ * secondary destinations, the gear at the bottom (product-spec §3.4).
  */
 @Composable
 fun Rail(active: String, onSelect: (String) -> Unit, onSettings: () -> Unit, modifier: Modifier = Modifier) {
@@ -111,6 +116,23 @@ fun Rail(active: String, onSelect: (String) -> Unit, onSettings: () -> Unit, mod
             }
         }
         Spacer(Modifier.weight(1f))
+        // Secondary destinations (the "dock overflow" of expanded widths): Story, Languages, Your texts.
+        for ((id, label, glyph) in RAIL_MORE) {
+            Column(
+                Modifier
+                    .padding(vertical = 2.dp)
+                    .size(width = 72.dp, height = 48.dp)
+                    .clip(ClavisShapes.dockButton)
+                    .selectable(selected = false, role = Role.Button) { onSelect(id) }
+                    .semantics { contentDescription = label }
+                    .tagged("rail-$id")
+                    .padding(top = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(glyph, style = ClavisTheme.type.small, color = p.ink3)
+                Text(label, style = ClavisTheme.type.dockLabel, color = p.ink3)
+            }
+        }
         Column(
             Modifier
                 .size(width = 72.dp, height = 56.dp)

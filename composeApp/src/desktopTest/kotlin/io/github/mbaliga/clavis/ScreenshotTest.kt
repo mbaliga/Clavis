@@ -57,6 +57,29 @@ class ScreenshotTest {
 
     @Test fun colophon() = shoot("colophon", { TestBoot.onboarded { it.state.view = "colophon" } })
 
+    // ui-features screens
+    @Test fun cosmos() = shoot("cosmos", { TestBoot.onboarded { it.state.view = "cosmos" } })
+
+    @Test fun cosmosExplore() = shoot("cosmos-explore", { TestBoot.onboarded { it.state.view = "cosmos"; it.state.cosmos.mode = "explore"; it.state.cosmos.exsets = true } })
+
+    @Test fun paths() = shoot("paths", { TestBoot.onboarded { it.state.view = "paths" } })
+
+    @Test fun pathsMap() = shoot("paths-map", { TestBoot.onboarded { it.state.view = "paths"; it.state.pathView = "map" } })
+
+    @Test fun letters() = shoot("letters", { TestBoot.onboarded { it.state.view = "letters" } })
+
+    @Test fun story() = shoot("story", { TestBoot.onboarded { it.state.view = "story"; it.state.story.lane = "es" } }) { store ->
+        waitUntil(timeoutMillis = 30_000) { store.pageImages.size > 0 }
+    }
+
+    @Test fun languages() = shoot("languages", { TestBoot.onboarded { it.state.view = "languages" } })
+
+    @Test fun media() = shoot("media", {
+        TestBoot.onboarded { it.state.view = "media" }.also { s ->
+            s.addMedia("Canción de ejemplo", io.github.mbaliga.clavis.core.Lang("es"), "lrc", listOf("La casa azul", "El perro duerme"))
+        }
+    })
+
     @Test fun encounterCropped() = shoot("encounter-cropped", { TestBoot.onboarded(seed = 1) { TestBoot.seedDueCloze(it) }.also { it.startSession() } }) { store ->
         val e = store.current.enc?.enc as Encounter.Cloze
         waitUntil(timeoutMillis = 30_000) { store.pageImages.peek(e.sc.m) != null }

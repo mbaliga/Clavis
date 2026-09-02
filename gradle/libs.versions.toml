@@ -22,6 +22,10 @@ androidx-navigation = "2.9.0-beta03"
 compose-material-icons = "1.7.3"
 multiplatform-settings = "1.3.0"
 junit = "4.13.2"
+# Desktop audio decoders (pure Java, LGPL 2.1; THIRD_PARTY_NOTICES "Desktop audio"): Commons and
+# Tatoeba recordings are MP3 (Commons serves transcoded .ogg.mp3), some Commons originals are OGG.
+mp3spi = "1.9.5.4"
+vorbisspi = "1.0.3.3"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -42,6 +46,8 @@ androidx-navigation-compose = { module = "org.jetbrains.androidx.navigation:navi
 # material3 itself comes from the `compose.material3` accessor of the Compose Multiplatform
 # plugin (version-locked to compose-multiplatform). Icons are published on their own cadence.
 compose-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "compose-material-icons" }
+mp3spi = { module = "com.googlecode.soundlibs:mp3spi", version.ref = "mp3spi" }
+vorbisspi = { module = "com.googlecode.soundlibs:vorbisspi", version.ref = "vorbisspi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

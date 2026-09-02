@@ -26,6 +26,12 @@ class PlatformServices(
     /** The platform's reduced-motion flag, read on each call so a settings change is honoured. */
     val reducedMotion: () -> Boolean = { false },
     val name: String = platformName(),
+    /** Container formats the [audio] player can decode ("wav", "mp3", "ogg"); Play is hidden for the rest. */
+    val audioFormats: Set<String> = setOf("wav"),
+    /** Whether the [downloader] can actually fetch (false = every Play stays a "no download in this build"). */
+    val canDownload: Boolean = false,
+    /** Cap on Cosmos dust motes (phones draw fewer). */
+    val dustCap: Int = 7200,
 )
 
 /** Opens the platform share sheet with a user-readable draft (D-11 feedback flow; D-13: no network). */

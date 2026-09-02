@@ -67,12 +67,12 @@ import io.github.mbaliga.clavis.ui.nav.activeNav
 import io.github.mbaliga.clavis.ui.screens.colophon.ColophonScreen
 import io.github.mbaliga.clavis.ui.screens.learn.LearnScreen
 import io.github.mbaliga.clavis.ui.screens.onboarding.OnboardingScreen
-import io.github.mbaliga.clavis.ui.screens.placeholders.CosmosPlaceholder
-import io.github.mbaliga.clavis.ui.screens.placeholders.LanguagesPlaceholder
-import io.github.mbaliga.clavis.ui.screens.placeholders.LettersPlaceholder
-import io.github.mbaliga.clavis.ui.screens.placeholders.MediaPlaceholder
-import io.github.mbaliga.clavis.ui.screens.placeholders.PathsPlaceholder
-import io.github.mbaliga.clavis.ui.screens.placeholders.StoryPlaceholder
+import io.github.mbaliga.clavis.ui.screens.cosmos.CosmosScreen
+import io.github.mbaliga.clavis.ui.screens.languages.LanguagesScreen
+import io.github.mbaliga.clavis.ui.screens.letters.LettersScreen
+import io.github.mbaliga.clavis.ui.screens.media.MediaScreen
+import io.github.mbaliga.clavis.ui.screens.paths.PathsScreen
+import io.github.mbaliga.clavis.ui.screens.story.StoryScreen
 import io.github.mbaliga.clavis.ui.screens.session.SessionScreen
 import io.github.mbaliga.clavis.ui.screens.session.confirmStop
 import io.github.mbaliga.clavis.ui.screens.settings.SettingsScreen
@@ -189,15 +189,15 @@ private fun viewTransition(from: String, to: String, reduced: Boolean): ContentT
 @Composable
 private fun ViewContent(store: ClavisStore, ui: UiState, view: String) {
     when (view) {
-        "cosmos" -> CosmosPlaceholder(store)
-        "paths" -> PathsPlaceholder(store)
-        "letters" -> LettersPlaceholder(store)
+        "cosmos" -> CosmosScreen(store, ui)
+        "paths" -> PathsScreen(store, ui)
+        "letters" -> LettersScreen(store, ui)
         "you" -> YouScreen(store, ui)
         "set" -> SettingsScreen(store, ui)
         "colophon" -> ColophonScreen(store, ui, overlay = false)
-        "story" -> StoryPlaceholder(store)
-        "languages" -> LanguagesPlaceholder(store)
-        "media" -> MediaPlaceholder(store)
+        "story" -> StoryScreen(store, ui)
+        "languages" -> LanguagesScreen(store, ui)
+        "media" -> MediaScreen(store, ui)
         else -> LearnScreen(store, ui)
     }
 }
