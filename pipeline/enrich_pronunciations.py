@@ -102,7 +102,9 @@ class Commons:
     def save(self):
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.cache_path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(self.cache, ensure_ascii=False, indent=0), encoding="utf-8")
+        # offline placeholders ("unverified") are never persisted: a later networked run must fetch them
+        real = {k: v for k, v in self.cache.items() if not (isinstance(v, dict) and v.get("unverified"))}
+        tmp.write_text(json.dumps(real, ensure_ascii=False, indent=0), encoding="utf-8")
         tmp.replace(self.cache_path)
 
     def _fetch(self, titles: list[str]) -> dict:
@@ -137,7 +139,7 @@ class Commons:
         todo = []
         for n in names:
             t = commons_title(n)
-            if t in self.cache:
+            if t in self.cache and not self.cache[t].get("unverified"):
                 self.cached_hits += 1
             else:
                 todo.append(t)

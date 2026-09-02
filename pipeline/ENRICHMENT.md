@@ -34,8 +34,8 @@ python enrich_etymology.py --lexicon build/lexicon.json \
     --kaikki-dir $SCRATCH/data/kaikki --etymdb-dir $SCRATCH/etymdb/data/split_etymdb \
     --desc-dir $SCRATCH/data/kaikki/raw --out-dir build
 
-# B. pronunciations (network: Commons API; ≈ 45–60 min for ~6,000 files at the rate Commons
-#    tolerates from this egress, seconds afterwards thanks to build/enrich/commons_cache.json;
+# B. pronunciations (network: Commons API; measured 117 requests / 5,243 files ≈ 30 min at the rate
+#    Commons tolerates from this egress, seconds afterwards thanks to build/enrich/commons_cache.json;
 #    --offline never calls the API and treats uncached files as unverified = excluded)
 python enrich_pronunciations.py --lexicon build/lexicon.json --kaikki-dir $SCRATCH/data/kaikki --out-dir build
 
@@ -174,30 +174,45 @@ number D-5 quotes (ko 70.1 %, ar 40.3 %, ja 27.6 %, zh 24.5 %, es 51.9 %, fr 48.
 de 49.9 %, nl 49.1 %, en 75.8 %; re-measured here with the improved matcher).
 
 <!-- ETYM_TRACKA -->
+| Lang | Lemmas | Wiktionary entry found | Has etymology section | With origin | % | With ≥ 1 edge | % | In graph | cog / bor / der endpoints | EtymDB-only (07 §4) | Top origin languages |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---|
+| en | 1832 | 1505 | 1418 (77.4 %) | 1251 | **68.3 %** | 807 | 44.1 % | 69.6 % | 1695 / 340 / 81 | 51.4 % | Middle English 775, Latin 98, French 49, Old French 33 |
+| es | 1828 | 1062 | 959 (52.5 %) | 841 | **46.0 %** | 662 | 36.2 % | 47.8 % | 1626 / 83 / 23 | 36.8 % | Latin 399, Old Spanish 242, Vulgar Latin 38, Late Latin 34 |
+| fr | 1863 | 1075 | 914 (49.1 %) | 782 | **42.0 %** | 657 | 35.3 % | 44.6 % | 1560 / 157 / 60 | 35.0 % | Middle French 287, Old French 228, Latin 157, English 33 |
+| it | 1845 | 988 | 883 (47.9 %) | 759 | **41.1 %** | 606 | 32.8 % | 42.3 % | 1603 / 79 / 30 | 31.5 % | Latin 532, Late Latin 74, Vulgar Latin 54, French 21 |
+| nl | 1857 | 1002 | 918 (49.4 %) | 755 | **40.7 %** | 514 | 27.7 % | 42.2 % | 1017 / 91 / 57 | 33.1 % | Middle Dutch 576, French 37, Latin 32, English 28 |
+| ja | 2088 | 1068 | 620 (29.7 %) | 303 | **14.5 %** | 228 | 10.9 % | 17.8 % | 208 / 196 / 7 | 2.9 % | Middle Chinese 111, English 80, Proto-Japonic 58, Old Japanese 29 |
+| ko | 867 | 729 | 677 (78.1 %) | 333 | **38.4 %** | 147 | 17.0 % | 40.8 % | 167 / 137 / 7 | 2.8 % | Chinese 201, Middle Korean 38, English 33, Old Korean 26 |
+| zh | 1424 | 1325 | 400 (28.1 %) | 146 | **10.3 %** | 172 | 12.1 % | 18.6 % | 23 / 242 / 6 | 0.6 % | Proto-Sino-Tibetan 73, Middle Chinese 38, English 13, Japanese 7 |
+| ar | 605 | 487 | 379 (62.6 %) | 107 | **17.7 %** | 15 | 2.5 % | 18.3 % | 15 / 12 / 3 | 4.5 % | Proto-Semitic 59, Aramaic 12, Proto-West Semitic 7, Hebrew 7 |
+| de | 1923 | 1141 | 972 (50.5 %) | 736 | **38.3 %** | 483 | 25.1 % | 40.0 % | 990 / 97 / 71 | 27.4 % | Middle High German 507, Latin 61, English 48, French 30 |
+
+Totals: **6,013 origins** (4,365 inherited, 1,648 borrowed; 5,737 from Wiktionary, 276 from EtymDB where Wiktionary had none) and **10,683 edge endpoints** (8,904 cognate, 1,434 borrowing, 345 derivation; 8,822 from Wiktionary, 1,861 EtymDB-only) over 6,415 lemmas in the graph. Sinographic ja/ko/zh triples: 37 (+174 pairs). Top origin languages overall: Latin 1,281, Middle English 779, Middle Dutch 579, Middle High German 509, Middle French 345, English 288, Old French 277, Old Spanish 242, Chinese 210, French 159, Middle Chinese 153, Late Latin 138. Runtime {'kaikki_match': 40.7, 'wiktionary_graph': 3.2, 'etymdb_graph': 17.1, 'total': 61.4}.
+
 <!-- /ETYM_TRACKA -->
 
 **Why the origin-string share is lower than "has an etymology section".** The gap is by
 construction, not a matching loss (entry found ≈ the D-5 "headword found" column):
 
-- Korean (77.5 % → 38.2 %): of the 342 matched lemmas that have an etymology section but no
-  origin, 190 are native words whose section says only "of native Korean origin" or cites a Middle
+- Korean (77.5 % → 38.4 %): of the 345 matched lemmas that have an etymology section but no
+  origin, 193 are native words whose section says only "of native Korean origin" or cites a Middle
   Korean attestation without a form (`ko-etym-native`, `ko-attest`, `ko-l`/`okm-l`), 86 are
   Sino-Korean homographs excluded by the guard (109 ambiguous lemmas in total, 58 of them
   single-syllable MeCab tokens: 세 = 世/勢/歲, 시 = 市/時/詩, 수 = 受/守/手/數 …), 37 are internal word
   formation (`affix`, `compound`), 29 other.
-- Arabic (50.4 % → 14.2 %): almost every Arabic section is a root box (`ar-root`, `ar-rootbox`,
+- Arabic (50.4 % → 17.7 %): almost every Arabic section is a root box (`ar-root`, `ar-rootbox`,
   "from the root ك ت ب") plus a pattern template (`ar-verbal noun`, `ar-active participle`,
   `adverbial accusative`); that is morphology inside Arabic, not an origin in another language, and
   the design deliberately does not display roots as etymology (spec §5f). Only borrowings and the
-  `etymon` trees reaching Proto-Semitic (42) yield an origin string.
-- Japanese (27.4 % → 13.8 %): of 284 such lemmas, 51 say "From Old Japanese" with no form
-  (`{{inh|ja|ojp|-}}`), 81 describe compounds/ren'yōkei derivations inside Japanese (`ja-compound`,
-  `ja-ryk`, `ja-com`, `compound`), 58 carry only `ja-r` cross-references, and kana-only spellings
-  are soft redirects (`飲む` → `ja-see`). Kango whose page carries no template still get edges
+  `etymon` trees reaching Proto-Semitic (59) yield an origin string.
+- Japanese (27.4 % → 14.5 %): of 318 such lemmas, 59 say "From Old Japanese" with no form
+  (`{{inh|ja|ojp|-}}`), 94 describe compounds/ren'yōkei derivations inside Japanese (`ja-compound`,
+  `ja-ryk`, `ja-com`, `compound`), 66 carry only `ja-r` cross-references, 99 other (kana-only
+  spellings are soft redirects, `飲む` → `ja-see`). Kango whose page carries no template still get edges
   through the Chinese descendants lists (飛行, 危険) but no origin string.
-- Chinese (24.5 % → 9.1 %): Chinese etymology sections are glyph-origin descriptions (`Han compound`,
+- Chinese (24.5 % → 10.3 %): Chinese etymology sections are glyph-origin descriptions (`Han compound`,
   `liushu`) or Proto-Sino-Tibetan reconstructions for single characters; compounds rarely have an
-  etymology at all. The Sinographic stratum shows up as **edges** instead (233 borrowing endpoints
+  etymology at all. The Sinographic stratum shows up as **edges** instead (242 borrowing endpoints
   to ja/ko), which is the claim the app needs.
 - European languages (≈ 50 % → 38–46 %): the residual are sections consisting of `affix`/`suffix`/
   `compound` templates (internal word formation) and `cog`-only sections.
@@ -209,9 +224,9 @@ deliberately left blank (07 §8).
 
 `build/enrich/sinographic.json` lists every traditional Han string attested for corpus lemmas in two
 or more of ja/ko/zh (Chinese headword or simplified form, Korean hanja form or `ko-etym-sino`,
-Japanese headword or kyūjitai form). On the Track-A lexicon: **37 full ja/ko/zh triples** (下 世界
-任務 使用 別 匿名 危險 參加 唯一 問題 單位 天才 失敗 安全 完全 完成 必要 惡魔 成功 我 投票 政治 時代 月
-材料 治療 準備 火山 特別 祕密 製作 讀者 貨幣 頭 魔女 魔法 點) and 170 two-language pairs — up from
+Japanese headword or kyūjitai form). On the Track-A lexicon: **37 full ja/ko/zh triples** (e.g. 單位 危險 參加 問題 安全 完成 必要
+惡魔 成功 政治 時代 治療 準備 火山 特別 祕密 魔女 魔法) and 174 two-language pairs; on the
+17-language lexicon 58 triples and 311 pairs — up from
 "a handful" in the EtymDB build (07 §5). The ceiling is the corpus: the P&C Korean folder covers
 14 of 23 episodes, so most Japanese/Chinese compounds have no Korean counterpart in the lexicon.
 Each record lists the corpus lemmas per language and `via` (which attestation supplied the form).
@@ -239,9 +254,24 @@ Each record lists the corpus lemmas per language and `via` (which attestation su
   for the colophon). `audioBy` is `Artist` with HTML stripped, else `Credit`. The audio itself is
   never downloaded; the app fetches on explicit user action (D-13).
 
-Run on the Track-A lexicon (`build/enrich/pronunciation_coverage.trackA.json`; ~5,200 distinct Commons files looked up over ~30 min of throttled requests, then served from the cache):
+Run on the Track-A lexicon (`build/enrich/pronunciation_coverage.trackA.json`): 5,243 distinct Commons files looked up in 117 requests (110 in the first pass, 1,721 s including 429 back-offs; 7 in the two cached re-runs), then served from the cache:
 
 <!-- PRON_TRACKA -->
+| Lang | Lemmas | Wiktionary entry found | With IPA | % | With permissive Commons audio | % | Audio present but excluded |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| en | 1832 | 1505 | 1310 | 71.5 % | 1246 | 68.0 % | 0 |
+| es | 1828 | 1062 | 1043 | 57.1 % | 3 | 0.2 % | 0 |
+| fr | 1863 | 1075 | 1049 | 56.3 % | 990 | 53.1 % | 0 |
+| it | 1845 | 988 | 958 | 51.9 % | 82 | 4.4 % | 0 |
+| nl | 1857 | 1002 | 874 | 47.1 % | 986 | 53.1 % | 0 |
+| ja | 2088 | 1068 | 961 | 46.0 % | 1 | 0.0 % | 0 |
+| ko | 867 | 729 | 709 | 81.8 % | 4 | 0.5 % | 0 |
+| zh | 1424 | 1325 | 265 | 18.6 % | 713 | 50.1 % | 0 |
+| ar | 605 | 487 | 408 | 67.4 % | 121 | 20.0 % | 0 |
+| de | 1923 | 1141 | 1006 | 52.3 % | 1102 | 57.3 % | 0 |
+
+Commons API: 6 requests in this run, 5183 answers served from the cache, 5243 files in `commons_cache.json`; excluded by reason: none. Runtime {'kaikki_match': 2.6, 'commons': 332.5, 'total': 340.1}.
+
 <!-- /PRON_TRACKA -->
 
 Nearly every Commons pronunciation file is permissively licensed (Lingua Libre CC BY-SA 4.0, Shtooka CC BY 2.0 fr, CC BY-SA 3.0, CC0 …); the licence check exists for the exceptions (a GPL-only file and deleted files) and for the record.
@@ -278,6 +308,20 @@ Run of 2026-09-02 on the Track-A lexicon (Tatoeba exports of 2026-08-29; 13.56 M
 2.04 M English), `build/enrich/sentence_coverage.trackA.json`:
 
 <!-- SENT_TRACKA -->
+| Lang | Tatoeba | Candidates | Kept | With permissive audio | With English | Lexicon lemmas covered | Lemmas in any candidate | % of lexicon |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| es | spa | 169,769 | 3,000 | 3 | 2,889 | 1,071 | 1,071 | 58.6 % |
+| fr | fra | 278,373 | 3,000 | 578 | 2,891 | 1,101 | 1,101 | 59.1 % |
+| it | ita | 413,928 | 3,000 | 581 | 2,906 | 1,047 | 1,047 | 56.7 % |
+| nl | nld | 88,440 | 3,000 | 0 | 2,935 | 965 | 965 | 52.0 % |
+| ja | jpn | 81,826 | 3,000 | 3 | 2,966 | 1,026 | 1,026 | 49.1 % |
+| ko | kor | 4,240 | 3,000 | 0 | 2,873 | 561 | 561 | 64.7 % |
+| zh | cmn | 19,596 | 3,000 | 0 | 2,912 | 1,131 | 1,131 | 79.4 % |
+| ar | ara | 610 | 610 | 0 | 432 | 229 | 229 | 37.9 % |
+| de | deu | 318,256 | 3,000 | 2,304 | 2,748 | 1,135 | 1,135 | 59.0 % |
+
+Audio rows among the candidates: {'excluded': 74774, 'permissive': 3469}. Runtime {'sentences_csv': 12.4, 'tokenise': 35.7, 'links_csv': 9.7, 'audio_csv': 0.7, 'detailed_csv': 9.2, 'total': 79.1}.
+
 <!-- /SENT_TRACKA -->
 
 The set cover reaches every lemma that occurs in any candidate in all nine languages. Permissive
@@ -357,14 +401,79 @@ them (next step: `python enrich_pronunciations.py --lexicon build/packs/lexicon/
 ### 6.1 Etymology
 
 <!-- ETYM_NEW -->
+| Lang | Lemmas | Wiktionary entry found | Has etymology section | With origin | % | With ≥ 1 edge | % | In graph | cog / bor / der endpoints | EtymDB-only (07 §4) | Top origin languages |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---|
+| es | 1627 | 1519 | 1420 (87.3 %) | 1218 | **74.9 %** | 1062 | 65.3 % | 76.7 % | 3675 / 122 / 282 | 36.8 % | Latin 597, Old Spanish 345, Late Latin 56, Vulgar Latin 53 |
+| fr | 1767 | 1585 | 1415 (80.1 %) | 1186 | **67.1 %** | 1036 | 58.6 % | 70.6 % | 3308 / 319 / 334 | 35.0 % | Middle French 422, Old French 359, Latin 270, Late Latin 29 |
+| it | 1598 | 1443 | 1314 (82.2 %) | 1086 | **68.0 %** | 938 | 58.7 % | 70.0 % | 3502 / 141 / 298 | 31.5 % | Latin 778, Late Latin 103, Vulgar Latin 73, French 27 |
+| de | 1770 | 1577 | 1389 (78.5 %) | 1015 | **57.3 %** | 663 | 37.5 % | 59.7 % | 1606 / 126 / 158 | 27.4 % | Middle High German 760, Latin 76, English 39, French 37 |
+| nl | 1700 | 1502 | 1415 (83.2 %) | 1158 | **68.1 %** | 774 | 45.5 % | 70.4 % | 1849 / 145 / 122 | 33.1 % | Middle Dutch 910, French 67, Latin 44, Middle French 34 |
+| ja | 2062 | 1701 | 941 (45.6 %) | 462 | **22.4 %** | 356 | 17.3 % | 27.4 % | 377 / 324 / 7 | 2.9 % | Middle Chinese 174, English 131, Proto-Japonic 84, Old Japanese 39 |
+| ko | 1115 | 923 | 863 (77.4 %) | 416 | **37.3 %** | 206 | 18.5 % | 40.0 % | 233 / 205 / 8 | 2.8 % | Chinese 268, Middle Korean 41, English 38, Old Korean 29 |
+| zh | 2439 | 2243 | 647 (26.5 %) | 218 | **8.9 %** | 300 | 12.3 % | 17.4 % | 44 / 387 / 11 | 0.6 % | Proto-Sino-Tibetan 103, Middle Chinese 57, English 20, Japanese 17 |
+| ar | 583 | 486 | 379 (65.0 %) | 106 | **18.2 %** | 38 | 6.5 % | 21.1 % | 33 / 11 / 20 | 4.5 % | Proto-Semitic 59, Aramaic 12, Proto-West Semitic 7, Hebrew 7 |
+| en | 1603 | 1570 | 1541 (96.1 %) | 1397 | **87.1 %** | 1062 | 66.3 % | 88.6 % | 3095 / 437 / 227 | 51.4 % | Middle English 1061, Latin 108, French 48, Middle French 48 |
+| pt | 1557 | 1395 | 1282 (82.3 %) | 1120 | **71.9 %** | 968 | 62.2 % | 74.0 % | 3463 / 143 / 258 | — | Old Galician-Portuguese 562, Latin 365, French 47, English 27 |
+| la | 642 | 638 | 612 (95.3 %) | 374 | **58.3 %** | 415 | 64.6 % | 75.2 % | 807 / 255 / 1025 | — | Proto-Italic 206, Proto-Indo-European 83, Ancient Greek 60, Old Latin 16 |
+| ru | 1757 | 1518 | 1321 (75.2 %) | 700 | **39.8 %** | 520 | 29.6 % | 46.6 % | 1012 / 88 / 20 | — | Proto-Slavic 239, Old East Slavic 226, Old Church Slavonic 62, French 36 |
+| pl | 1863 | 1682 | 1632 (87.6 %) | 921 | **49.4 %** | 442 | 23.7 % | 53.5 % | 1065 / 111 / 51 | — | Old Polish 562, Proto-Slavic 141, Latin 78, French 37 |
+| uk | 1431 | 1145 | 1024 (71.6 %) | 515 | **36.0 %** | 516 | 36.1 % | 45.8 % | 903 / 72 / 14 | — | Proto-Slavic 209, Old East Slavic 76, Borrowed from Old Ruthenian 58, Polish 52 |
+| tr | 437 | 381 | 340 (77.8 %) | 300 | **68.6 %** | 44 | 10.1 % | 68.6 % | 79 / 7 / 25 | — | Ottoman Turkish 277, French 8, Arabic 5, Proto-Turkic 3 |
+| hi | 45 | 41 | 39 (86.7 %) | 38 | **84.4 %** | 6 | 13.3 % | 84.4 % | 8 / 1 / 0 | — | Sanskrit 14, Prakrit 7, Sauraseni Prakrit 6, Old Hindi 6 |
+
+Totals: **12,230 origins** (9,128 inherited, 3,102 borrowed; 11,619 from Wiktionary, 611 from EtymDB where Wiktionary had none) and **30,813 edge endpoints** (25,059 cognate, 2,894 borrowing, 2,860 derivation; 24,700 from Wiktionary, 6,113 EtymDB-only) over 13,290 lemmas in the graph. Sinographic ja/ko/zh triples: 58 (+311 pairs). Top origin languages overall: Latin 2,369, Middle English 1,071, Middle Dutch 916, Middle High German 769, Proto-Slavic 590, Old Galician-Portuguese 563, Old Polish 563, Middle French 511, Old French 431, English 393, French 363, Old Spanish 345. Runtime {'kaikki_match': 66.7, 'wiktionary_graph': 3.6, 'etymdb_graph': 21.5, 'total': 92.9}.
+
 <!-- /ETYM_NEW -->
 
 ### 6.2 Pronunciations
 
 <!-- PRON_NEW -->
+| Lang | Lemmas | Wiktionary entry found | With IPA | % | With permissive Commons audio | % | Audio present but excluded |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| es | 1627 | 1519 | 1500 | 92.2 % | 3 | 0.2 % | 0 |
+| fr | 1767 | 1585 | 1564 | 88.5 % | 879 | 49.7 % | 644 |
+| it | 1598 | 1443 | 1411 | 88.3 % | 81 | 5.1 % | 63 |
+| de | 1770 | 1577 | 1418 | 80.1 % | 929 | 52.5 % | 619 |
+| nl | 1700 | 1502 | 1302 | 76.6 % | 871 | 51.2 % | 612 |
+| ja | 2062 | 1701 | 1556 | 75.5 % | 1 | 0.0 % | 0 |
+| ko | 1115 | 923 | 899 | 80.6 % | 4 | 0.4 % | 1 |
+| zh | 2439 | 2243 | 447 | 18.3 % | 728 | 29.8 % | 372 |
+| ar | 583 | 486 | 407 | 69.8 % | 121 | 20.8 % | 0 |
+| en | 1603 | 1570 | 1529 | 95.4 % | 964 | 60.1 % | 557 |
+| pt | 1557 | 1395 | 1378 | 88.5 % | 0 | 0.0 % | 690 |
+| la | 642 | 638 | 584 | 91.0 % | 0 | 0.0 % | 0 |
+| ru | 1757 | 1518 | 1505 | 85.7 % | 0 | 0.0 % | 1330 |
+| pl | 1863 | 1682 | 1682 | 90.3 % | 0 | 0.0 % | 0 |
+| uk | 1431 | 1145 | 1142 | 79.8 % | 0 | 0.0 % | 1032 |
+| tr | 437 | 381 | 316 | 72.3 % | 0 | 0.0 % | 206 |
+| hi | 45 | 41 | 39 | 86.7 % | 0 | 0.0 % | 14 |
+
+Commons API: 0 requests in this run, 4583 answers served from the cache, 5,243 files in `commons_cache.json`; 7,706 uncached files treated as unverified in this offline run; excluded by reason: {'unverified': 7706}. Runtime {'kaikki_match': 5.9, 'commons': 0.1, 'total': 21.6}.
+
 <!-- /PRON_NEW -->
 
 ### 6.3 Sentences
 
 <!-- SENT_NEW -->
+| Lang | Tatoeba | Candidates | Kept | With permissive audio | With English | Lexicon lemmas covered | Lemmas in any candidate | % of lexicon |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| es | spa | 201,882 | 3,000 | 3 | 2,871 | 1,478 | 1,478 | 90.8 % |
+| fr | fra | 352,785 | 3,000 | 643 | 2,850 | 1,607 | 1,607 | 90.9 % |
+| it | ita | 446,155 | 3,000 | 649 | 2,842 | 1,437 | 1,437 | 89.9 % |
+| de | deu | 370,338 | 3,000 | 2,319 | 2,735 | 1,569 | 1,569 | 88.6 % |
+| nl | nld | 99,832 | 3,000 | 0 | 2,896 | 1,401 | 1,401 | 82.4 % |
+| ja | jpn | 107,837 | 3,000 | 3 | 2,958 | 1,657 | 1,657 | 80.4 % |
+| ko | kor | 5,116 | 3,000 | 0 | 2,924 | 714 | 714 | 64.0 % |
+| zh | cmn | 30,028 | 3,000 | 0 | 2,851 | 1,959 | 1,959 | 80.3 % |
+| ar | ara | 610 | 610 | 0 | 432 | 229 | 229 | 39.3 % |
+| pt | por | 217,053 | 3,000 | 3 | 2,877 | 1,354 | 1,354 | 87.0 % |
+| la | lat | 6,512 | 3,000 | 0 | 2,960 | 481 | 481 | 74.9 % |
+| ru | rus | 510,280 | 3,000 | 1,998 | 2,587 | 1,494 | 1,494 | 85.0 % |
+| pl | pol | 47,840 | 3,000 | 28 | 2,819 | 1,440 | 1,440 | 77.3 % |
+| uk | ukr | 69,527 | 3,000 | 1 | 2,984 | 1,065 | 1,065 | 74.4 % |
+| tr | tur | 118,512 | 3,000 | 0 | 2,983 | 419 | 419 | 95.9 % |
+| hi | hin | 0 | 0 | 0 | 0 | 0 | 0 | 0.0 % |
+
+Audio rows among the candidates: {'excluded': 101310, 'permissive': 5712}. Runtime {'sentences_csv': 54.9, 'tokenise': 85.5, 'links_csv': 25.8, 'audio_csv': 2.8, 'detailed_csv': 71.7, 'total': 270.5}.
+
 <!-- /SENT_NEW -->
