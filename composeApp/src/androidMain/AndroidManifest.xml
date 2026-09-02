@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Offline-first: no permissions. Add INTERNET only with the feature that needs it. -->
+    <!-- Offline-first: no permissions (D-13). Add INTERNET only with the feature that needs it. -->
+
+    <!-- Package visibility for the system text-to-speech engines (Android 11+). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 
     <application
+        android:name=".ClavisApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
