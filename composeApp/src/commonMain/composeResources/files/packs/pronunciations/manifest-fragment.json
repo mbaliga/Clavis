@@ -1,0 +1,109 @@
+{
+ "id": "clavis-pronunciations",
+ "kind": "PRONUNCIATIONS",
+ "version": "2026.09.02",
+ "title": "Pronunciations (IPA + Commons audio references)",
+ "languages": [
+  "ar",
+  "de",
+  "en",
+  "es",
+  "fr",
+  "it",
+  "ja",
+  "ko",
+  "nl",
+  "zh"
+ ],
+ "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
+ "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
+ "generatedAt": "2026-09-02T04:57:09Z",
+ "attribution": [
+  {
+   "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
+   "role": "etymology, IPA and audio references",
+   "url": "https://kaikki.org/dictionary/",
+   "licence": "CC BY-SA 4.0"
+  },
+  {
+   "name": "Wikimedia Commons contributors (per-file licence and author in the pack)",
+   "role": "word audio",
+   "url": "https://commons.wikimedia.org/",
+   "licence": "CC0 / CC BY / CC BY-SA / public domain per file"
+  }
+ ],
+ "files": {
+  "en.json.gz": 44599,
+  "es.json.gz": 13068,
+  "fr.json.gz": 33468,
+  "it.json.gz": 14639,
+  "nl.json.gz": 29064,
+  "ja.json.gz": 12539,
+  "ko.json.gz": 9032,
+  "zh.json.gz": 22774,
+  "ar.json.gz": 8133,
+  "de.json.gz": 35795
+ },
+ "stats": {
+  "en": {
+   "lemmas": 1832,
+   "ipa": 1310,
+   "audio": 1246,
+   "audioExcluded": 0
+  },
+  "es": {
+   "lemmas": 1828,
+   "ipa": 1043,
+   "audio": 3,
+   "audioExcluded": 0
+  },
+  "fr": {
+   "lemmas": 1863,
+   "ipa": 1049,
+   "audio": 990,
+   "audioExcluded": 0
+  },
+  "it": {
+   "lemmas": 1845,
+   "ipa": 958,
+   "audio": 82,
+   "audioExcluded": 0
+  },
+  "nl": {
+   "lemmas": 1857,
+   "ipa": 874,
+   "audio": 986,
+   "audioExcluded": 0
+  },
+  "ja": {
+   "lemmas": 2088,
+   "ipa": 961,
+   "audio": 1,
+   "audioExcluded": 0
+  },
+  "ko": {
+   "lemmas": 867,
+   "ipa": 709,
+   "audio": 4,
+   "audioExcluded": 0
+  },
+  "zh": {
+   "lemmas": 1424,
+   "ipa": 265,
+   "audio": 713,
+   "audioExcluded": 0
+  },
+  "ar": {
+   "lemmas": 605,
+   "ipa": 408,
+   "audio": 121,
+   "audioExcluded": 0
+  },
+  "de": {
+   "lemmas": 1923,
+   "ipa": 1006,
+   "audio": 1102,
+   "audioExcluded": 0
+  }
+ }
+}

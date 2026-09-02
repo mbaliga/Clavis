@@ -101,6 +101,15 @@ dependencies {
     debugImplementation(compose.uiTooling)
 }
 
+// Headless desktop UI tests load the real 20 MB packs and 40 MB of fonts and render screenshots
+// into <root>/build/ui-shots (see ScreenshotTest); give the test JVM room and keep AWT headless.
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "2g"
+    jvmArgs("-Djava.awt.headless=true")
+    systemProperty("clavis.shots", rootProject.layout.buildDirectory.dir("ui-shots").get().asFile.absolutePath)
+    testLogging { events("failed"); showStackTraces = true; showStandardStreams = false; exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL }
+}
+
 compose.resources {
     // Generated accessor: io.github.mbaliga.clavis.resources.Res (strings, drawables, fonts, files
     // dropped under composeApp/src/commonMain/composeResources/).
@@ -130,15 +139,18 @@ compose.desktop {
             vendor = "mbaliga"
             copyright = "Copyright 2026 mbaliga. App code licensed separately from the CC BY-SA data pack."
 
+            // Brand icons (scratchpad/brand → src/desktopMain/resources/icons): one file per OS.
             linux {
                 packageName = "clavis"
                 debMaintainer = "mbaliga@users.noreply.github.com"
                 menuGroup = "Education"
                 appCategory = "Education"
+                iconFile.set(project.file("src/desktopMain/resources/icons/clavis.png"))
             }
             macOS {
                 bundleID = "io.github.mbaliga.clavis"
                 dockName = "Clavis"
+                iconFile.set(project.file("src/desktopMain/resources/icons/clavis.icns"))
             }
             windows {
                 menuGroup = "Clavis"
@@ -146,6 +158,7 @@ compose.desktop {
                 upgradeUuid = "1b0a9429-3b8e-45a2-9f95-a27591135e75"
                 menu = true
                 shortcut = true
+                iconFile.set(project.file("src/desktopMain/resources/icons/clavis.ico"))
             }
         }
     }

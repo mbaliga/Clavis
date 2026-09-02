@@ -1,0 +1,111 @@
+{
+ "id": "clavis-sentences",
+ "kind": "SENTENCES",
+ "version": "2026.09.02",
+ "title": "Example sentences (Tatoeba)",
+ "languages": [
+  "ar",
+  "de",
+  "es",
+  "fr",
+  "it",
+  "ja",
+  "ko",
+  "nl",
+  "zh"
+ ],
+ "licence": "CC BY 2.0 FR (text); audio per clip CC BY 4.0 / CC BY-SA 4.0 / CC0 1.0",
+ "source": "https://tatoeba.org/ (exports of 2026-08-29)",
+ "generatedAt": "2026-09-02T00:10:35Z",
+ "attribution": [
+  {
+   "name": "Tatoeba contributors",
+   "role": "example sentences",
+   "url": "https://tatoeba.org/",
+   "licence": "CC BY 2.0 FR"
+  },
+  {
+   "name": "Tatoeba audio contributors (per-clip licence, see ATTRIBUTION-tatoeba.json)",
+   "role": "sentence audio",
+   "url": "https://tatoeba.org/en/audio",
+   "licence": "CC BY 4.0 / CC BY-SA 4.0 / CC0 1.0 per clip"
+  }
+ ],
+ "files": {
+  "es.json.gz": 181784,
+  "fr.json.gz": 155582,
+  "it.json.gz": 141327,
+  "nl.json.gz": 162377,
+  "ja.json.gz": 166299,
+  "ko.json.gz": 123439,
+  "zh.json.gz": 137399,
+  "ar.json.gz": 20935,
+  "de.json.gz": 131902,
+  "ATTRIBUTION-tatoeba.json": 2042075
+ },
+ "stats": {
+  "es": {
+   "sentences": 3000,
+   "withAudio": 3,
+   "withEnglish": 2889,
+   "lemmasCovered": 1071,
+   "candidates": 169769
+  },
+  "fr": {
+   "sentences": 3000,
+   "withAudio": 578,
+   "withEnglish": 2891,
+   "lemmasCovered": 1101,
+   "candidates": 278373
+  },
+  "it": {
+   "sentences": 3000,
+   "withAudio": 581,
+   "withEnglish": 2906,
+   "lemmasCovered": 1047,
+   "candidates": 413928
+  },
+  "nl": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2935,
+   "lemmasCovered": 965,
+   "candidates": 88440
+  },
+  "ja": {
+   "sentences": 3000,
+   "withAudio": 3,
+   "withEnglish": 2966,
+   "lemmasCovered": 1026,
+   "candidates": 81826
+  },
+  "ko": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2873,
+   "lemmasCovered": 561,
+   "candidates": 4240
+  },
+  "zh": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2912,
+   "lemmasCovered": 1131,
+   "candidates": 19596
+  },
+  "ar": {
+   "sentences": 610,
+   "withAudio": 0,
+   "withEnglish": 432,
+   "lemmasCovered": 229,
+   "candidates": 610
+  },
+  "de": {
+   "sentences": 3000,
+   "withAudio": 2304,
+   "withEnglish": 2748,
+   "lemmasCovered": 1135,
+   "candidates": 318256
+  }
+ }
+}
