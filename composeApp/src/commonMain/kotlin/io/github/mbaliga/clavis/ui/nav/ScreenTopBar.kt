@@ -24,11 +24,14 @@ val LocalShowGear = staticCompositionLocalOf { false }
 /** True below the 600 dp breakpoint (product-spec §3.4); set once by the shell. */
 val LocalCompact = staticCompositionLocalOf { true }
 
+/** True while the rail is on screen — it carries the wordmark, so view topbars drop theirs. */
+val LocalRailShown = staticCompositionLocalOf { false }
+
 /** The topbar of a view: wordmark · `VIEWNAMES[view]` · gear (compact, non-modal only). */
 @Composable
 fun ScreenTopBar(store: ClavisStore, subtitle: String, modifier: Modifier = Modifier) {
     val showGear = LocalShowGear.current
-    TopBar(subtitle, modifier, trailing = if (showGear) ({ GearButton { store.setView("set") } }) else null)
+    TopBar(subtitle, modifier, showWordmark = !LocalRailShown.current, trailing = if (showGear) ({ GearButton { store.setView("set") } }) else null)
 }
 
 @Composable

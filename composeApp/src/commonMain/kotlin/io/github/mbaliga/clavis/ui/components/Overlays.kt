@@ -84,10 +84,10 @@ fun CoachBox(text: String, onCite: (Int) -> Unit, modifier: Modifier = Modifier)
 
 /** The topbar: wordmark `Clavis` · view sub-title (mono, upper-case) · optional trailing control. */
 @Composable
-fun TopBar(subtitle: String, modifier: Modifier = Modifier, trailing: (@Composable () -> Unit)? = null) {
+fun TopBar(subtitle: String, modifier: Modifier = Modifier, showWordmark: Boolean = true, trailing: (@Composable () -> Unit)? = null) {
     val p = ClavisTheme.palette
     Row(modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Clavis", style = ClavisTheme.type.wordmark, color = p.ink, modifier = Modifier.tagged("wordmark"))
+        if (showWordmark) Text("Clavis", style = ClavisTheme.type.wordmark, color = p.ink, modifier = Modifier.tagged("wordmark"))
         Spacer(Modifier.weight(1f))
         if (subtitle.isNotEmpty()) Text(subtitle.uppercase(), style = ClavisTheme.type.viewName, color = p.ink3)
         if (trailing != null) { Spacer(Modifier.width(10.dp)); trailing() }

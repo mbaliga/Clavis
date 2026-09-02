@@ -37,6 +37,8 @@ kotlin {
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            // `LocalDayKey`'s constructor exposes kotlinx-datetime's TimeZone in its signature.
+            implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
             implementation(compose.preview)

@@ -60,6 +60,7 @@ import io.github.mbaliga.clavis.ui.components.ToastHost
 import io.github.mbaliga.clavis.ui.components.tagged
 import io.github.mbaliga.clavis.ui.nav.Dock
 import io.github.mbaliga.clavis.ui.nav.LocalCompact
+import io.github.mbaliga.clavis.ui.nav.LocalRailShown
 import io.github.mbaliga.clavis.ui.nav.LocalShowGear
 import io.github.mbaliga.clavis.ui.nav.Rail
 import io.github.mbaliga.clavis.ui.nav.activeNav
@@ -135,7 +136,12 @@ private fun Shell(store: ClavisStore, ui: UiState, reduced: Boolean) {
             Box(Modifier.weight(1f).fillMaxHeight()) {
                 Box(Modifier.fillMaxSize().padding(horizontal = 14.dp), contentAlignment = Alignment.TopCenter) {
                     Box(Modifier.widthIn(max = if (compact) 600.dp else 640.dp).fillMaxSize()) {
-                        CompositionLocalProvider(LocalShowGear provides (showNav && compact), LocalCompact provides compact, LocalRev provides ui.rev) {
+                        CompositionLocalProvider(
+                            LocalShowGear provides (showNav && compact),
+                            LocalCompact provides compact,
+                            LocalRailShown provides (showNav && !compact),
+                            LocalRev provides ui.rev,
+                        ) {
                             Content(store, ui, reduced)
                         }
                     }
