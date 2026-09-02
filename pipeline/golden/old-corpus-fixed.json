@@ -1,0 +1,119 @@
+{
+ "raw_scenes": 824,
+ "raw_pages": 162,
+ "raw_per_lang": {
+  "es": 804,
+  "fr": 803,
+  "it": 823,
+  "nl": 808,
+  "ja": 823,
+  "ko": 418,
+  "zh": 786,
+  "ar": 235,
+  "en": 824,
+  "de": 813
+ },
+ "raw_src": {
+  "flow": 364,
+  "text": 460
+ },
+ "kept_scenes": 631,
+ "kept_pages": 156,
+ "kept_per_lang": {
+  "es": 616,
+  "fr": 616,
+  "it": 630,
+  "de": 624,
+  "nl": 623,
+  "ja": 630,
+  "ko": 326,
+  "zh": 607,
+  "ar": 177,
+  "en": 631
+ },
+ "lemmas": {
+  "es": 1805,
+  "fr": 1838,
+  "it": 1821,
+  "de": 1900,
+  "nl": 1835,
+  "ja": 2074,
+  "ko": 865,
+  "zh": 1410,
+  "ar": 605,
+  "en": 1807
+ },
+ "tokens": {
+  "es": 7468,
+  "fr": 7405,
+  "it": 7408,
+  "de": 7432,
+  "nl": 7518,
+  "ja": 9054,
+  "ko": 3240,
+  "zh": 4768,
+  "ar": 1141,
+  "en": 7688
+ },
+ "bridged_tokens": {
+  "es": 3683,
+  "fr": 3706,
+  "it": 3732,
+  "ja": 590,
+  "zh": 610,
+  "nl": 3357,
+  "de": 3314
+ },
+ "rect_ok_pct": {
+  "es": 89.9,
+  "fr": 90.1,
+  "it": 89.5,
+  "de": 89.7,
+  "nl": 89.7,
+  "ja": 90.0,
+  "ko": 80.7,
+  "zh": 90.1,
+  "ar": 81.9,
+  "en": 89.7
+ },
+ "pseudo": {
+  "es": 10,
+  "fr": 10,
+  "it": 10,
+  "de": 10,
+  "nl": 10
+ },
+ "hygiene_removed": {},
+ "check": [
+  "raw_scenes",
+  "raw_pages",
+  "raw_per_lang",
+  "raw_src",
+  "kept_scenes",
+  "kept_pages",
+  "kept_per_lang",
+  "lemmas",
+  "tokens",
+  "bridged_tokens",
+  "rect_ok_pct",
+  "pseudo",
+  "hygiene_removed"
+ ],
+ "tolerance": {
+  "pct_points": 0.5,
+  "relative": {}
+ },
+ "note": "2017 snapshot, frozen ten languages, hygiene OFF, with the nested-tspan fix (extract.py walks sodipodi:role=\"line\" tspans once; the reference counted text inside nested styling tspans twice in 57 scenes and 28 sound-effect duplicates then passed the >=2-word gate). Reference numbers (852->649) are in old-corpus.json; this file is the expected result of the current code: run.py --corpus <old> --languages core --no-hygiene --check golden/old-corpus-fixed.json",
+ "languages": [
+  "es",
+  "fr",
+  "it",
+  "de",
+  "nl",
+  "ja",
+  "ko",
+  "zh",
+  "ar",
+  "en"
+ ]
+}

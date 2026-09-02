@@ -43,11 +43,18 @@ mixes AGP versions, so AGP is not a free choice. Kotlin 2.1.20 rather than 2.1.0
 Multiplatform 1.8 requires ≥ 2.1.20 and 1.8 is the first line with stable multiplatform
 resources, navigation and adaptive layouts, all of which this app uses.
 
-**Cost.** Kotlin 2.1.20 + AGP 8.9.1 is outside KGP's officially tested AGP range and prints a
-compatibility warning; `Fyl-Manager` builds with exactly this pair, which is the evidence it is
-safe. Newer Kotlin/CMP lines are deferred until the constellation moves AGP.
+**Cost.** Kotlin 2.1.20 + AGP 8.9.1 is outside KGP's officially *tested* AGP range. In practice the
+first full build chain (debug + release APK, uber-jar, `.deb`, headless UI tests) completed with
+**zero** compatibility warnings under `--warning-mode all`, and `Fyl-Manager` ships on the same
+pair. Newer Kotlin/CMP lines are deferred until the constellation moves AGP; the upgrade recipe is
+in `build-platform.md` §1.
 
-**Status.** Provisional — confirmed by the first green build recorded in `build-platform.md`.
+**JDK.** The machine only had JDK 21; `org.gradle.toolchains.foojay-resolver-convention`
+auto-provisioned Eclipse Adoptium 17 for compilation, tests and jpackage, so every artifact is
+built on 17 as documented, and CI's `setup-java` 17 makes the resolver a no-op.
+
+**Status.** Settled — confirmed by the green build recorded in `build-platform.md` and by the
+first GitHub Actions run on a clean runner.
 
 ## D-3 · Repository layout: `:shared` (domain, no UI) · `:composeApp` (UI + entry points) · `pipeline/` (Python)
 

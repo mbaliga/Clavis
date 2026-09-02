@@ -110,7 +110,7 @@ class GraderTest {
         c.first = now - 46 * 60_000L; assertFalse(e.showFastReturnNotice(cloze(e, 1, "gato"), now))
         c.first = now - 10 * 60_000L; c.reps = 2; assertFalse(e.showFastReturnNotice(cloze(e, 1, "gato"), now))
         e.routeHelped(Fx.ES, Fx.EN); e.routeHelped(Fx.ES, Fx.EN); e.routeHelped(Fx.ES, Fx.FR)
-        assertEquals(mapOf("en" to 2, "fr" to 1), e.state.routes["es"])
+        assertEquals<Map<String, Int>?>(mapOf("en" to 2, "fr" to 1), e.state.routes["es"])
     }
 
     // ------------------------------------------------------------ read finish

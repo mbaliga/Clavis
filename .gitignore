@@ -31,3 +31,6 @@ composeApp/build/compose/
 *.dmg
 *.msi
 *.deb
+
+# agent worktrees
+.claude/worktrees/
