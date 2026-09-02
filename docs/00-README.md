@@ -8,13 +8,19 @@ Single self-contained HTML file. No server, no account, no network after load.
 
 ## Note on what is actually in this repo right now
 
-Everything below describes the *design* of Clavis and the state of a build that existed in a prior
-environment — "v0.10 ships and works" refers to that build, not to anything runnable here yet. This
-repo currently holds the concept documentation and the corpus-pipeline **generator** (under
-[`../reference-prototype/`](../reference-prototype/)), seeded fresh. It does not yet contain the
-corpus (Pepper&Carrot SVGs, EtymDB CSVs), any generated `scenes.json`/`lexicon.json`/`etym.json`, or
-a built `clavis.html`. **[10-build-plan.md](10-build-plan.md)** is the plan for closing that gap —
-read it first if you're picking this up to build something.
+The numbered documents below describe the *design* of Clavis and a v0.10 web build that existed in a
+prior environment — "v0.10 ships and works" refers to that build. What this repository now contains
+beyond the documents: the Kotlin Multiplatform app (`../shared/` — the domain layer ported from that
+build, with its tests; `../composeApp/` — the Compose Multiplatform shell for Android and desktop), the
+parameterised corpus pipeline (`../pipeline/`, the successor of the generator kept in
+[`../reference-prototype/`](../reference-prototype/), which stays as the frozen executable spec — D-1),
+the decision record ([DECISIONS.md](DECISIONS.md)), the verified toolchain
+([build-platform.md](build-platform.md)) and the release procedure ([RELEASE.md](RELEASE.md)). The
+generated packs are committed as app resources (`../composeApp/src/commonMain/composeResources/files/packs/`,
+with their `ATTRIBUTION.md`); the corpus and the kaikki extracts that produce them are not —
+`pipeline/README.md` says how to rebuild them, and the app's own `README.md` says where release
+builds come from. **[10-build-plan.md](10-build-plan.md)** remains the plan that got from the
+seed to here; where it and `DECISIONS.md` disagree, `DECISIONS.md` wins.
 
 ---
 
@@ -68,7 +74,7 @@ The builder's standing instruction was **evidence-based debate, not begrudging c
 
 ## Sources the project is built on
 
-- **Pepper&Carrot** — David Revoy, <https://www.peppercarrot.com/> — the comic corpus and its community parallel translations. *Licence undocumented in the research corpus; verify before any commercial step.*
+- **Pepper&Carrot** — David Revoy, <https://www.peppercarrot.com/> — the comic corpus and its community parallel translations. CC BY 4.0, stated in the framagit repository's README and verified on 2026-09-01 (`DECISIONS.md` D-4); the research corpus had left this undocumented.
 - **EtymDB**, release 2.1 (the paper describes 2.0) — Fourrier & Sagot 2020, CC BY-SA 4.0 — the etymology graph.
 - **AntV G6 v5.1.1** — MIT — graph rendering.
 - **FSRS-5** — the scheduler.

@@ -9,6 +9,46 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// --- versioning (release) ---
+// Single source of truth for versionName / versionCode / desktop package versions: gradle/version.gradle.kts
+// (-Pclavis.version= > CLAVIS_VERSION env > ClavisVersion.NAME in :shared). `./gradlew :composeApp:clavisVersion`
+// prints the resolved values; the scheme is documented in docs/RELEASE.md. The literal versionCode/versionName
+// and packageVersion further down remain as the documented fallbacks and are overridden from here, so this block
+// and the "release signing (release)" block inside android {} are the only lines a release engineer edits.
+apply(from = rootProject.file("gradle/version.gradle.kts"))
+val clavisVersionCode: Int by extra
+val clavisVersionName: String by extra
+val clavisBaseVersion: String by extra
+val clavisDebVersion: String by extra
+val clavisMsiVersion: String by extra
+val clavisDmgVersion: String by extra
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            output.versionCode.set(clavisVersionCode)
+            output.versionName.set(clavisVersionName)
+        }
+    }
+}
+// The Compose Desktop plugin reads nativeDistributions through providers when its packaging tasks are
+// realised, so applying the per-OS versions after the script body (i.e. after the literal packageVersion
+// below) is what keeps this block self-contained. Verified by the .deb / uber-jar names (docs/RELEASE.md).
+afterEvaluate {
+    compose.desktop.application.nativeDistributions {
+        packageVersion = clavisBaseVersion
+        linux { debPackageVersion = clavisDebVersion }
+        windows {
+            msiPackageVersion = clavisMsiVersion
+            exePackageVersion = clavisMsiVersion
+        }
+        macOS {
+            dmgPackageVersion = clavisDmgVersion
+            pkgPackageVersion = clavisDmgVersion
+        }
+    }
+}
+// --- end versioning (release) ---
+
 kotlin {
     // JDK 17 is the constellation's documented toolchain (auto-provisioned via foojay if absent).
     jvmToolchain(17)
@@ -95,6 +135,29 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // --- release signing (release) ---
+    // Opt-in only; nothing here runs on a plain checkout. gradle/release-signing.gradle.kts resolves the material
+    // from composeApp/keystore.properties (gitignored) or from CLAVIS_KEYSTORE_BASE64 + CLAVIS_KEYSTORE_PASSWORD +
+    // CLAVIS_KEY_ALIAS + CLAVIS_KEY_PASSWORD, and publishes an empty map when neither is complete. Then the release
+    // build stays unsigned: AGP emits composeApp-release-unsigned.apk, the .aab is unsigned, and CI labels both
+    // "-unsigned". Key generation, secret names and verification: docs/RELEASE.md.
+    project.apply(from = rootProject.file("gradle/release-signing.gradle.kts"))
+    val clavisReleaseSigning: Map<String, String> by project.extra
+    if (clavisReleaseSigning.isNotEmpty()) {
+        signingConfigs.create("release") {
+            storeFile = file(clavisReleaseSigning.getValue("storeFile"))
+            storePassword = clavisReleaseSigning.getValue("storePassword")
+            keyAlias = clavisReleaseSigning.getValue("keyAlias")
+            keyPassword = clavisReleaseSigning.getValue("keyPassword")
+            // minSdk 26: AGP's defaults (v1 + v2, v3/v4 added automatically) are right; nothing to override.
+        }
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
+        logger.lifecycle("Clavis: release signing enabled from ${clavisReleaseSigning.getValue("source")}")
+    } else {
+        logger.lifecycle("Clavis: no release signing configured; release outputs will be unsigned")
+    }
+    // --- end release signing (release) ---
 }
 
 dependencies {

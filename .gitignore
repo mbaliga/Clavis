@@ -34,3 +34,14 @@ composeApp/build/compose/
 
 # agent worktrees
 .claude/worktrees/
+
+# Signing material and secrets (release signing reads keystore.properties or CLAVIS_* env vars)
+keystore.properties
+*.p12
+*.b64
+.env
+.env.*
+
+# Built app binaries never enter the repo (Releases carry them)
+*.apk
+*.aab

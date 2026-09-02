@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security or privacy report
+    url: https://github.com/mbaliga/Clavis/security/policy
+    about: A vulnerability, or any network request the app makes without your explicit action, goes through SECURITY.md — not a public issue.

@@ -101,12 +101,17 @@ Clavis/
   `io.github.mbaliga.clavis.ui.theme`; generated resources `io.github.mbaliga.clavis.resources.Res`
   (configured via `compose.resources { packageOfResClass }`; generated under
   `composeApp/build/generated/compose/resourceGenerator/kotlin/`).
-- Android ids: applicationId `io.github.mbaliga.clavis`; debug adds `.debug`; versionCode 1 /
-  versionName 0.1.0 (mirror `ClavisVersion`).
-- Desktop: main class `io.github.mbaliga.clavis.MainKt`; `packageVersion = "1.0.0"` because
-  jpackage on macOS rejects a leading 0 (MAJOR must be > 0) and Windows needs `x.y.z` with
-  x,y ≤ 255, z ≤ 65535 — so the desktop package version is decoupled from the app's 0.x line.
+- Android ids: applicationId `io.github.mbaliga.clavis`; debug adds `.debug`. `versionCode` /
+  `versionName` and the desktop package versions are derived by `gradle/version.gradle.kts` from
+  `-Pclavis.version` / `CLAVIS_VERSION` / `ClavisVersion.NAME` (0.1.0 → versionCode 100; the literals
+  left in `composeApp/build.gradle.kts` are overridden fallbacks). Scheme and per-OS mapping:
+  `docs/RELEASE.md` §5; `./gradlew :composeApp:clavisVersion` prints the resolved values.
+- Desktop: main class `io.github.mbaliga.clavis.MainKt`. jpackage on macOS rejects a leading 0
+  (MAJOR must be > 0) and Windows needs numeric `x.y.z` with x,y ≤ 255, z ≤ 65535 — hence the
+  per-OS package versions (deb `0.1.0-1`, msi `0.1.99`, dmg `1.1.0` for app 0.1.0; RELEASE.md §5).
   MSI `upgradeUuid` is fixed to `1b0a9429-3b8e-45a2-9f95-a27591135e75`; never change it.
+- Release signing is opt-in through `composeApp/keystore.properties` or the `CLAVIS_KEYSTORE_*`
+  environment (`gradle/release-signing.gradle.kts`); absent, `assembleRelease` stays unsigned.
 - No extra jlink modules are configured. If a runtime `ClassNotFoundException` appears in a
   packaged app, run `./gradlew :composeApp:suggestRuntimeModules` and add the result to
   `nativeDistributions { modules(...) }`.
@@ -162,9 +167,13 @@ Full chain (`help`, `:shared:allTests`, `:composeApp:desktopTest`, `assembleDebu
 `packageUberJarForCurrentOS`, `assembleRelease`, `packageDeb`) with `--warning-mode all`:
 
 - Kotlin compiler warnings (`w:`): **none**.
-- Gradle deprecation warnings: **none** with configuration cache off. With it on, AGP 8.9.1 emits
-  three "Declaring an 'is-' property with a Boolean type has been deprecated" (Gradle 9.0)
-  notices for `isCrunchPngs`, `isUseProguard`, `isWearAppUnbundled` — AGP's to fix, harmless.
+- Gradle deprecation warnings: **none** with configuration cache off on a warm daemon. With it on,
+  AGP 8.9.1 emits three "Declaring an 'is-' property with a Boolean type has been deprecated"
+  (Gradle 9.0) notices for `isCrunchPngs`, `isUseProguard`, `isWearAppUnbundled` — AGP's to fix,
+  harmless. Correction (2026-09-02): the same three notices also print on a **cold JVM**
+  (`--no-daemon`, as CI runs) with configuration cache off — they come from Gradle generating AGP's
+  decorated DSL classes, which a warm daemon caches; verified identical (3 and 3) with and without the
+  versioning/signing blocks in `composeApp/build.gradle.kts`, so they are not ours.
 - KGP ↔ AGP / Gradle compatibility warning: **none printed**, although KGP 2.1.20 is above its
   tested AGP (8.7.2) and Gradle (8.12.1) ranges. D-2 anticipated a warning; there is none.
 - R8: `missing_rules.txt` was not produced — the serialization rules in `proguard-rules.pro` plus
@@ -214,16 +223,29 @@ If 429s still appear, add to `gradle.properties` for the download phase only:
 `systemProp.org.gradle.internal.repository.initial.backoff=2000`,
 `systemProp.org.gradle.internal.http.connectionTimeout=120000`, and `org.gradle.workers.max=1`.
 
-## 9. CI (`.github/workflows/ci.yml`)
+## 9. CI and release workflows
 
-`ubuntu-latest`, `actions/checkout@v4`, `actions/setup-java@v4` (temurin 17),
-`android-actions/setup-android@v3` (`platforms;android-35 build-tools;35.0.0 platform-tools`),
-`gradle/actions/setup-gradle@v4`, then
+`.github/workflows/ci.yml` (push to `main`, pull requests): `ubuntu-24.04`, `actions/checkout@v7`,
+`actions/setup-java@v6` (temurin 17), `android-actions/setup-android@v4`
+(`platforms;android-35 build-tools;35.0.0 platform-tools`), `gradle/actions/setup-gradle@v6`, then
 
 ```
-./gradlew :shared:allTests :composeApp:desktopTest :composeApp:assembleDebug \
-          :composeApp:packageUberJarForCurrentOS --no-daemon --stacktrace
+./gradlew :shared:allTests :composeApp:desktopTest :composeApp:lintDebug :composeApp:assembleDebug \
+          :composeApp:assembleRelease :composeApp:packageUberJarForCurrentOS --no-daemon --stacktrace
 ```
 
-Artifacts: `clavis-debug-apk` (the debug APK), `clavis-desktop-jar-linux` (the uber-jar), and
-`test-reports` on failure. Release/multi-OS packaging is deliberately not in this workflow.
+plus a 16 KB page-alignment check on the release APK, a headless smoke run of the uber-jar, and a
+second job that installs `pipeline/requirements.txt` and runs `pytest pipeline/tests`. Artifacts:
+`clavis-debug-apk`, `clavis-release-apk-unsigned` (with `mapping.txt`), `clavis-desktop-jar-linux-x64`,
+and `reports` on failure. Actions are pinned to major tags of Node-24 release lines (the policy is in
+the file header; Node 20 leaves the runners on 2026-09-23).
+
+`.github/workflows/release.yml` (tag `v*`, or manual dry run) builds the Android APK/AAB, the Linux
+`.deb` + jar, the macOS `.dmg` + jar (macos-15, optional Developer ID signing and notarization), the
+Windows `.msi` + jar (windows-2025, WiX 3 preinstalled) and the reference web build, then publishes one
+GitHub Release with `SHA256SUMS.txt`. Procedure, secrets and artifact names: `docs/RELEASE.md`.
+
+Verified 2026-09-02 on this machine after the versioning/signing change: `assembleRelease`,
+`bundleRelease`, `lintDebug`, `desktopTest`, `packageDeb` (`clavis_0.1.0-1_amd64.deb`) and
+`packageUberJarForCurrentOS` (`Clavis-linux-x64-0.1.0.jar`) green; `apksigner verify` passes on a
+build signed from a throwaway keystore via both configuration paths.

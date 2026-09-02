@@ -1,0 +1,48 @@
+name: Content or licence issue
+description: A credit is wrong or missing, a licence looks wrong, or you are a rights holder asking for a change.
+labels: ["content", "licence"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Clavis bundles or offers only CC0 / CC BY / CC BY-SA content (docs/DECISIONS.md D-7) and names every author,
+        translator and source in the `ATTRIBUTION.md` generated into each content pack. If we got any of that wrong,
+        this is the place. Take-down requests from rights holders are honoured while the facts are checked.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of issue
+      options:
+        - Missing or wrong attribution (author, translator, source link)
+        - Licence does not permit this use, or is stated wrongly
+        - Non-permissive (NC / ND / unknown) content slipped into a pack
+        - Wrong, offensive or mis-aligned text in a scene, sentence or etymology
+        - Take-down or correction request from a rights holder
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: item
+    attributes:
+      label: Pack and item
+      description: Pack id and the item — language, episode/page (e.g. E05P03), lemma, Tatoeba sentence id or Commons file name.
+      placeholder: "clavis-comics · fr · E12P04    or    clavis-etymology · ko · 학교"
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source of the original
+      description: URL of the original material — framagit path, Wiktionary page, Tatoeba sentence, Wikimedia Commons file — and the licence it states.
+  - type: textarea
+    id: change
+    attributes:
+      label: What should change
+    validations:
+      required: true
+  - type: checkboxes
+    id: holder
+    attributes:
+      label: Standing
+      options:
+        - label: I am the rights holder, or I am acting on their behalf.

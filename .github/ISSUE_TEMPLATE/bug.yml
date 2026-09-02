@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in the app, an installer or the build does not behave as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Security and privacy problems (a crash log with learner data in it, a network
+        request you did not start) go through [SECURITY.md](../blob/main/SECURITY.md) instead of a public issue.
+  - type: input
+    id: version
+    attributes:
+      label: Clavis version and platform
+      description: The version shown in the app (or the release file name you installed), plus OS / Android version and device.
+      placeholder: "0.1.0 · Android 15 · Pixel 7a    or    0.1.0 · Ubuntu 24.04 (.deb)    or    0.1.0 · macOS 15 (unsigned .dmg)"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Learn (sessions, cloze, echo)
+        - Cosmos (word field, word web)
+        - Paths
+        - Letters (scripts)
+        - You (stats, export / import)
+        - Languages and content packs
+        - Speech (system TTS, Piper voice)
+        - Import of .txt / .srt / .lrc
+        - Android packaging or install
+        - Desktop packaging or install (.deb / .jar / .dmg / .msi)
+        - Pipeline (pipeline/)
+        - Documentation
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What the screen, the docs or the changelog led you to expect.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed
+      description: What happened instead. Screenshots and desktop console output are welcome; blur imported text you do not want public.
+    validations:
+      required: true
+  - type: textarea
+    id: state
+    attributes:
+      label: Learner-state export (optional)
+      description: For scheduling or state bugs, attach a You → Export JSON with anything personal removed. Never attach keystores, passwords or signing material.
