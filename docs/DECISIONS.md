@@ -397,3 +397,44 @@ Chinese etymology sections describe glyph origins, so the Sinographic stratum sh
 ja/ko ↔ zh borrowing *edges* rather than origin text; Arabic root boxes are morphology, not an
 origin language, and are not displayed as etymology. Every emitted fact is traceable in
 `pipeline/build/enrich/etym_provenance.jsonl`.
+
+## D-19 · Baseline-test word pool admits Unicode letters, not only ASCII
+
+**Decision.** The yes/no baseline test draws candidate words with a Unicode-letter test (`\p{L}`)
+rather than the web build's `/^[^\W\d_]+$/u`, which in JavaScript admits only ASCII letters.
+
+**Why.** Reproducing the original regex exactly (as the first port did, for parity) means no
+accented lemma — `poción`, `über`, `città`, every Polish or Turkish word with a diacritic — can
+ever appear in the test, which silently biases the threshold toward the plainest vocabulary and
+gets worse with every language added under D-6. The web behaviour is a bug, not a design.
+
+**Cost.** A learner's threshold from the native test is not numerically comparable with one taken
+in the web build. `tests{l}` records which pool rule produced it (`pool: "unicode"`).
+
+**Status.** Settled; applied in the review pass after the first UI merge.
+
+## D-20 · Script is a rendering property; the language-ID game groups by it as-is
+
+**Decision.** `LanguageInfo.script` stays truthful (Korean is `HANGUL`, Japanese and Chinese are
+`CJK`), and the language-ID game's "same script first" option ordering follows that field. The web
+build's coarser `t: 'cjk'` grouping, which listed Korean beside Japanese and Chinese, is not
+reproduced.
+
+**Why.** Script drives fonts, spacing metrics and lettering; overloading it for a game heuristic
+would break those. The game still draws from every language present in the corpus, so Korean
+appears as an option — it simply isn't privileged as a look-alike of kanji/hanzi, which it isn't.
+
+**Status.** Settled.
+
+## D-21 · The Letters branch clears itself when the learner visits the script
+
+**Decision.** The Paths `LETTERS` branch (D-14) is offered until `coach["letters:<iso>"]` is set;
+that flag is set both by taking the branch and by the learner opening that language's tab in
+Letters on their own. Languages whose registry entry says `needsScriptPrimer` but for which no
+primer content exists yet (Russian, Ukrainian, Hindi, …) show an honest "no primer yet" card
+rather than an empty screen, and their branch is suppressed until a primer ships.
+
+**Why.** A branch that keeps nagging after the learner has already found the primer is the kind
+of manufactured urgency `01-premise.md` §5 rules out.
+
+**Status.** Settled.

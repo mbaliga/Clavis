@@ -45,7 +45,7 @@ Maintainers will acknowledge a complete report, assess impact, work on a fix, an
 
 The foundation:
 
-- declares no Android permissions — `aapt2 dump badging` on a release APK shows only the `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` that the Android Gradle plugin injects into every app; without `INTERNET` the app cannot open a network connection today;
+- declares exactly one Android permission, `INTERNET`, used by exactly one code path: fetching a public recording (Wikimedia Commons or Tatoeba) or an optional voice/pack when the user taps *Download* or *Play* on it (D-13). Nothing is fetched at start-up, in the background, or without that tap; `aapt2 dump badging` on a release APK shows `INTERNET` plus the `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` that the Android Gradle plugin injects into every app, and nothing else;
 - has no analytics, no advertising SDK, no crash upload and no third-party service SDK (the full dependency inventory is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md));
 - stores learner state as one JSON document per profile, written to a temporary file and atomically renamed over the previous one (D-12);
 - bundles its content packs at build time; downloading optional packs and voices is not implemented yet and will be user-initiated when it is (D-7, D-8);
