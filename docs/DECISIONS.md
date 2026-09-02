@@ -328,3 +328,72 @@ state that the method is being tested on one person and is not a validated pedag
 (`01-premise.md` §6).
 
 **Status.** Settled.
+
+## D-19 · Baseline-test pool admits Unicode letters, not only ASCII
+
+**Decision.** The yes/no baseline test's candidate filter uses Unicode letter classes (`\p{L}`)
+for Latin- and Cyrillic-script languages. The v0.10 web build's regex `^[^\W\d_]+$` admits only
+ASCII letters in JavaScript, so `poción`, `über`, and every accented lemma were silently excluded
+from the test — a defect, not a design choice, and one that would have hit Portuguese, Polish and
+Turkish harder still.
+
+**Cost.** A deliberate parity divergence (template-spec §4.1, checklist item 31); recorded in
+`shared/README.md`.
+
+**Status.** Settled; implemented in the review pass.
+
+## D-20 · Korean is `HANGUL`, and the language-ID game groups options by family
+
+**Decision.** The registry keeps Korean's script as `HANGUL` (fonts, spacing and lettering metrics
+need it). The "which language is this?" game, which in v0.10 grouped ja/ko/zh as one `cjk` script
+for its "same script first" distractors, groups by **family** for CJK so Korean lines still get
+Japanese and Chinese as the hard options.
+
+**Status.** Settled.
+
+## D-21 · The Paths fan may hold six branches when a Letters branch is present
+
+**Decision.** The fan cap stays at five, except that a `LETTERS` branch (D-14) is added as a sixth
+rather than displacing the game or free-reading floors — otherwise a learner with three CJK/Arabic
+lanes never sees the language-ID game until they have visited Letters. The Letters screen also
+marks a script as visited when the learner opens its tab themselves.
+
+**Status.** Settled; implemented in the review pass.
+
+## D-22 · Generated content packs are committed to the repository
+
+**Decision.** `pipeline/run.py --install` copies the generated packs (about 22 MB: comics pages,
+lexicon, etymology, pronunciations, sentences, registry, manifest, attribution) into
+`composeApp/src/commonMain/composeResources/files/packs/`, and that directory is committed. CI
+therefore builds every artifact without MeCab, jieba, 2 GB of comics or network access.
+
+**Cost.** Repository growth on every regeneration whose page art changes (WebP pages are ~15 MB).
+Reopen when regenerations become frequent; the escape hatch is Git LFS or a release-asset pack
+downloaded at build time.
+
+**Status.** Settled.
+
+## D-23 · Which languages ship, and how thin ones are shown
+
+**Decision.** Seventeen languages are processed and shipped: the nine originals (on by default),
+plus Portuguese, Latin, Russian, Polish, Ukrainian, Turkish and Hindi as opt-in receptive
+languages. Measured on the 39-episode corpus (2026‑09‑02): Arabic has no translations beyond the
+first eight episodes (177 scenes), Latin 389, Turkish 223, Korean 470, and **Hindi only 16 scenes
+in two episodes** — the Languages screen shows a "thin" badge below 200 scenes or 6 episodes and
+the real counts next to every language, and never implies uniform coverage (D-4). Latin has no
+`wordfreq` data, so its Zipf values are derived from corpus counts and labelled as such.
+
+**Status.** Settled for v1.0; the list grows as the pipeline's tokenizer table does.
+
+## D-24 · Etymology coverage after the migration (record)
+
+Measured on the 17-language lexicon with Wiktionary primary + EtymDB secondary (D-5), share of
+lemmas with an origin / with at least one edge: es 74.9/65.3, fr 67.1/58.6, it 68.0/58.7,
+de 57.3/37.5, nl 68.1/45.5, en 87.1/66.3, pt 71.9/62.2, la 58.3/64.6, ru 39.8/29.6, pl 49.4/23.7,
+uk 36.0/36.1, ko 37.3/18.5, ja 22.4/17.3, ar 18.2/6.5, zh 8.9/12.3, tr 68.6/10.1, hi 84.4/13.3;
+30,813 typed edges (25,059 cognate, 2,894 borrowing, 2,860 derivation) against 5,546 before, and
+58 Sino-Japanese/Sino-Korean/Chinese triples. Chinese origin strings stay low by design: Wiktionary's
+Chinese etymology sections describe glyph origins, so the Sinographic stratum shows up as
+ja/ko ↔ zh borrowing *edges* rather than origin text; Arabic root boxes are morphology, not an
+origin language, and are not displayed as etymology. Every emitted fact is traceable in
+`pipeline/build/enrich/etym_provenance.jsonl`.
