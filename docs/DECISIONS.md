@@ -299,8 +299,8 @@ evidential one (`03-evidence.md` §10). Reopen after the first real usage data e
 ## D-16 · Release shape
 
 **Decision.** Semantic versions; one GitHub Release per tag carrying: Android APK (universal) and
-AAB (signed when the CI secrets exist, otherwise unsigned and clearly named), Linux `.deb` and a
-cross-platform uber-jar, macOS `.dmg` (unsigned unless signing secrets exist; the Gatekeeper
+AAB (signed when the CI secrets exist, otherwise unsigned and clearly named), Linux `.deb` and per-OS
+uber-jars (each bundles its platform's Skia — there is no single jar for all systems), macOS `.dmg` (unsigned unless signing secrets exist; the Gatekeeper
 caveat is documented), Windows `.msi`. Desktop installers are built on their own OS runners
 (jpackage cannot cross-build). Application code is Apache-2.0 (constellation convention); the
 data packs are CC BY-SA 4.0 with an `ATTRIBUTION.md` naming Pepper&Carrot's author and

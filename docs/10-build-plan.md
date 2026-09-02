@@ -1,5 +1,15 @@
 # Build plan
 
+> **Status (2026‑09‑02).** Both tracks in this plan have been executed on this branch. Track A: the
+> reference pipeline was reproduced exactly (every documented number matched) and then superseded by
+> `pipeline/` running on the 39‑episode framagit corpus. Track B: the Kotlin Multiplatform app exists —
+> `:shared` domain layer (180 tests on every target), `:composeApp` Compose UI, committed content packs,
+> signing/versioning and CI + multi‑OS release workflows. The open decisions in §7 were settled in
+> `DECISIONS.md` (D‑10 adaptive navigation, D‑11 no `evidence-schema` in v1, D‑4 licence confirmed CC BY 4.0).
+> What remains before a stable tag is listed in `docs/RELEASE.md` §9 and `CHANGELOG.md`. This document is
+> kept as the record of how the build was planned; `DECISIONS.md` wins where they disagree.
+
+
 How to get from what is seeded in this repo to a running Clavis prototype. Written the same way
 the rest of this set is written: the tradeoffs stated plainly, the open decisions left open rather
 than silently resolved.
