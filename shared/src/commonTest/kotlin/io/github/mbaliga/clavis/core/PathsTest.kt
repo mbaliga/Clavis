@@ -91,9 +91,13 @@ class PathsTest {
 
     @Test fun readFloorPrefersATestedLaneAndGameNeedsThreeLanes() {
         val e = Fx.engine(); Fx.tested(e.state, Fx.FR, 5.0)
+        e.state.coach["letters:ja"] = true // no primer branch: the classic fan
         val b = e.computeBranches(now)
-        assertEquals(Fx.FR, b.first { it.kind == BranchKind.READ }.l)
-        assertTrue(b.any { it.kind == BranchKind.GAME })
+        assertEquals(listOf(BranchKind.TEST, BranchKind.TEST, BranchKind.NEW, BranchKind.READ, BranchKind.GAME), b.map { it.kind })
+        assertEquals(Fx.FR, b.first { it.kind == BranchKind.READ }.l) // the tested lane reads freely
+        e.state.coach.remove("letters:ja") // D-14: LETTERS precedes READ and GAME, so at the fan cap of 5 the game drops
+        val b1 = e.computeBranches(now)
+        assertEquals(listOf(BranchKind.TEST, BranchKind.TEST, BranchKind.NEW, BranchKind.LETTERS, BranchKind.READ), b1.map { it.kind })
         e.state.lanes["ja"] = LaneMode.OFF
         val b2 = e.computeBranches(now)
         assertFalse(b2.any { it.kind == BranchKind.GAME }); assertFalse(b2.any { it.kind == BranchKind.LETTERS })
@@ -178,7 +182,7 @@ class PathsTest {
         e.state.newToday["es"] = 3; e.state.pin = "es"
         e.state.inter["es"] = mutableMapOf("fr" to 2, "it" to 0); e.state.routes["es"] = mutableMapOf("en" to 1)
         val o = e.laneOverview(Fx.ES, now)
-        assertEquals("still watching you · 1 ready · 1 held · 40% readable · new today 3/10 · assumes the top ~2,000", o.meta)
+        assertEquals("still watching you · 1 ready · 1 held · 60% readable · new today 3/10 · assumes the top ~2,000", o.meta)
         assertTrue(o.pinned); assertEquals(LaneMode.PROD, o.mode); assertEquals(listOf("French" to 2), o.lookAlikes); assertEquals(listOf("English" to 1), o.bridges)
         assertEquals("look-alikes that fooled you: French ×2", Copy.lookAlikes(o.lookAlikes))
         val fr = e.laneOverview(Fx.FR, now)

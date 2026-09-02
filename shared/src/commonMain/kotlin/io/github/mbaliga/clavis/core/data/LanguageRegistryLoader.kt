@@ -74,7 +74,7 @@ object LanguageRegistryLoader {
             ttsLocale = str("ttsLocale", "locale") ?: "",
             colour = parseColour(o["colour"] ?: o["color"] ?: o["col"]),
             spaceSeparated = bool("spaceSeparated") ?: (iso != "ja" && iso != "zh"),
-            enabledByDefault = bool("enabledByDefault", "enabled") ?: false,
+            enabledByDefault = bool("enabledByDefault") ?: false, // the pipeline's own `enabled` flag is deliberately NOT an alias
             needsScriptPrimer = bool("needsScriptPrimer") ?: false,
         )
     }

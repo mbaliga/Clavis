@@ -131,8 +131,8 @@ class SelectionTest {
         assertNull(e.learningProgress(Fx.ES))
         b.hist.add(0.0)
         assertEquals(1.0, e.learningProgress(Fx.ES)!!, 1e-12) // n = 4: |mean(0,0,0,0) − mean(1,1,1,1)|
-        b.hist.add(1.0) // 9 entries → n = 4: rec (0,0,0,1) vs old (1,1,0,0)
-        assertEquals(0.25, e.learningProgress(Fx.ES)!!, 1e-12)
+        b.hist.add(1.0) // 9 entries → n = 4: rec = (0,0,0,1) mean .25, old = slice(-8,-4) = (1,1,1,0) mean .75
+        assertEquals(0.5, e.learningProgress(Fx.ES)!!, 1e-12)
         b.hist.clear(); repeat(20) { b.hist.add(0.0) }; repeat(20) { b.hist.add(0.5) }
         assertEquals(0.0, e.learningProgress(Fx.ES)!!, 1e-12) // n = 8: last 16 are all 0.5
     }

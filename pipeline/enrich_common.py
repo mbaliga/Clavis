@@ -375,7 +375,7 @@ def tokenizer(lang: str, registry: dict | None = None) -> Tokenizer:
 # kaikki streaming matcher
 # --------------------------------------------------------------------------------------
 KEEP_ENTRY_FIELDS = ("w", "p", "l", "tp", "f", "so", "en")
-MATCH_VERSION = "m4"   # bump when the matching rules change so stale caches are not reused
+MATCH_VERSION = "m5"   # bump when the matching rules change so stale caches are not reused
 
 
 def _lexicon_digest(lex_lang: dict) -> str:
@@ -445,8 +445,15 @@ def match_kaikki_language(args):
     # through its forms) beats a derived candidate (so Korean 단어 is not explained by the entry for 단).
     for lemma, entries in list(by_lemma.items()):
         best = min(e["_prio"] for e in entries)
-        kept = [e for e in entries if e["_prio"] == best]
-        if any(e["_via"] == "head" for e in kept):
+        level = [e for e in entries if e["_prio"] == best]
+        heads = [e for e in level if e["_via"] == "head"]
+        forms = [e for e in level if e["_via"] != "head"]
+        kept = heads or forms
+        # a headword that is only a soft redirect (simplified Chinese 电话 → 電話, kana spellings)
+        # carries neither templates nor sounds: fall through to the entries reached via forms
+        if heads and forms and not any(e.get("tp") or e.get("so") or e.get("et") for e in heads):
+            kept = heads + forms
+        if heads:
             head_hit.add(lemma)
         # cap pathological cases (a very common inflected form can hit hundreds of entries)
         by_lemma[lemma] = kept[:24]

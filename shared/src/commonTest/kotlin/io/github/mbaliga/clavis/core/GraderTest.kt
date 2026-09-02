@@ -34,7 +34,7 @@ class GraderTest {
         val sib = opts.first { it.sib != null }
         assertEquals("Potion", sib.w); assertEquals(Fx.FR, sib.sib)
         val other = opts.first { !it.right && it.sib == null }
-        assertTrue(other.w in setOf("duerme", "gata"), other.w) // zipf within (1.7, 4.1) and length within 2 of "poción"
+        assertTrue(other.w in setOf("duerme", "gata", "ratón"), other.w) // |zipf − 2.9| < 1.2 (4.1 − 2.9 is 1.1999… in IEEE doubles, as in JS) and length within 2 of "poción"
         assertEquals("poción", opts.first { it.right }.w)
     }
 
@@ -256,7 +256,7 @@ class GraderTest {
         e.state.log.add(LogEntry(t = now, l = "fr", type = "test", thr = 9.0, fa = 0.0))
         val m = e.youMetrics(now + DAY_MS + 1)
         assertEquals(3, m.encounters); assertEquals(2, m.daysShowedUp); assertEquals(0.5, m.recall)
-        assertEquals(3, m.rows.size) // es fr ja — the non-off registry lanes with scenes are 3, but rows list every non-off lane
+        assertEquals(9, m.rows.size) // every non-off registry lane, like the template's LANE_ORDER loop (not only lanes with scenes)
         val es = m.rows.first { it.l == Fx.ES }
         assertEquals("the top ~2,000", es.assumes); assertEquals(0.5, es.recall); assertEquals(3, es.mixUps); assertTrue(es.tested)
         val fr = m.rows.first { it.l == Fx.FR }
