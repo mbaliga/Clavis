@@ -18,6 +18,10 @@ object Copy {
     const val ECHO = "an echo from earlier"
     /** D-14: `chooseLane` guard when no active lane has scenes. */
     const val NOTHING_ELSE_OPEN = "nothing else is open"
+    /** D-6: `startSession` when every lane is OFF — shown instead of a session; the Learn pool is disabled with it. */
+    const val ALL_RESTING = "Every language is resting — turn one on in Languages"
+    const val POOL_RESTING = "resting"
+    const val OPEN_LANGUAGES = "Languages"
 
     // ---------- encounter chrome, §5 ----------
     const val SUB_CLOZE = "· do you remember?"
@@ -215,6 +219,12 @@ object Copy {
     const val SELECT_AND_COPY = "Select and copy"
     const val RESTORED = "Restored"
     const val NOT_A_BACKUP = "That doesn't look like a Clavis backup"
+    /** The stored document could not be decoded; it was renamed `clavis-state.json.corrupt-<epoch>` beside the fresh one. */
+    const val STATE_UNREADABLE = "Your previous record could not be read; a copy was kept beside it."
+    /** User-media import limits (`ImportLimits`). */
+    const val IMPORT_TOO_LARGE = "That file is bigger than 2 MB — Clavis reads short texts: lyrics, subtitles, a chapter"
+    const val IMPORT_NOT_TEXT = "That file doesn't look like text"
+    const val IMPORT_TRUNCATED = "Long text — only the first 5,000 lines were kept"
 
     // ---------- Settings / misc, §7.9, §8 ----------
     const val ERASE_CONFIRM = "Erase all local progress?"

@@ -18,12 +18,18 @@ class BaselineTestTest {
         val m = linkedMapOf<String, LexEntry>()
         for ((lo, name) in bandNames) for (k in 0 until 12) { val w = "$name${'a' + k}"; m[w] = Fx.lex(1, lo + 0.5, w) }
         m["ab"] = Fx.lex(1, 5.5, "ab") // too short
-        m["poción"] = Fx.lex(1, 5.5, "poción") // non-ASCII letter: rejected by the template's /^[^\W\d_]+$/u (JS quirk)
+        m["poción"] = Fx.lex(1, 5.5, "poción") // D-19: a non-ASCII letter is a letter — admitted (the web build's ASCII-only \w rejected it)
+        m["über"] = Fx.lex(1, 5.5, "über") // D-19: admitted
+        m["città"] = Fx.lex(1, 5.5, "città") // D-19: admitted
         m["madrid"] = Fx.lex(1, 5.5, "Madrid") // capitalised surface → proper noun
+        m["école"] = Fx.lex(1, 5.5, "École") // capitalised with a non-ASCII capital → proper noun too (Unicode-aware filter)
         m["zero"] = Fx.lex(1, 0.0, "zero") // zipf 0
         m["ninety"] = Fx.lex(1, 9.5, "ninety") // above every band: passes the filter but lands in no band
         return m
     }
+
+    /** Lemmas the D-19 pool admits although no band name prefixes them. */
+    private val accented = setOf("poción", "über", "città")
 
     private fun engine(random: Random = Random(3)): ClavisEngine {
         val lex = mapOf(Fx.ES to bandedLexicon(), Fx.JA to linkedMapOf("猫" to Fx.lex(1, 4.4, "猫", "neko"), "が" to Fx.lex(1, 7.0, "が", "ga")))
@@ -41,11 +47,18 @@ class BaselineTestTest {
         assertEquals(40, real.size)
         for (lo in listOf(6, 5, 4, 3, 2)) assertEquals(8, real.count { bandOf(it.z) == lo }, "band $lo")
         val allowed = bandNames.values.toSet()
-        for (it in real) assertTrue(allowed.any { p -> it.lm.startsWith(p) }, it.lm)
+        for (it in real) assertTrue(allowed.any { p -> it.lm.startsWith(p) } || it.lm in accented, it.lm)
         val pseudo = t.items.filter { !it.real }
         assertEquals(8, pseudo.size)
         for (p in pseudo) { assertEquals(0.0, p.z); assertEquals("", p.r); assertTrue(p.w in Fx.PSEUDO_ES); assertEquals(p.w, p.lm) }
         assertTrue(t.items.map { it.lm }.toSet().size >= 40) // no repeats within a band (guarded draw)
+    }
+
+    @Test fun poolAdmitsUnicodeLettersAndRejectsCapitalisedSurfaces() { // D-19
+        val e = engine()
+        val drawn = (1..60).flatMap { seed -> e.start(Fx.ES, now, Random(seed)).items.filter { it.real }.map { it.lm } }.toSet()
+        for (lm in accented) assertTrue(lm in drawn, "$lm must be drawable; drawn = $drawn")
+        for (lm in listOf("ab", "madrid", "école", "zero")) assertFalse(lm in drawn, "$lm must never be drawn")
     }
 
     @Test fun startIsShuffledDeterministicallyByTheGivenRandom() {
@@ -90,6 +103,7 @@ class BaselineTestTest {
         val t = e.start(Fx.ES, now, Random(1))
         val (res, toast) = run(e, t) { it.real }
         assertEquals(0.0, res.fa); assertEquals(2.0, res.thr); assertEquals(90_000, res.ms); assertEquals(now + 90_000, res.done)
+        assertEquals(ClavisEngine.TEST_POOL_UNICODE, res.pool) // D-19: the result records which pool rule produced it
         assertEquals(5, res.bands.size); assertTrue(res.bands.all { it.n == 8 && it.hit == 1.0 }); assertEquals("the ~500 commonest words", res.bands[0].lab)
         assertEquals("Spanish: Clavis now assumes you know rare words", toast)
         assertEquals(40, e.state.cardsOf(Fx.ES).size); assertTrue(e.state.cardsOf(Fx.ES).values.all { it.prov })

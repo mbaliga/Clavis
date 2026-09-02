@@ -67,6 +67,11 @@ class Session(
     var newWords: Int = 0
     var done: Boolean = false
     var cur: Encounter? = null
+    /**
+     * Why nothing could be served at all — every lane is resting (D-6). Then [cur] is null, [done]
+     * is false, nothing was mutated, and the UI shows this text instead of opening a session.
+     */
+    var blocked: String? = null
 }
 
 /** Options for a cloze prompt. */

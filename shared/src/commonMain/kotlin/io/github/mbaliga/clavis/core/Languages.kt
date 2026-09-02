@@ -39,8 +39,14 @@ data class LanguageInfo(
     val spaceSeparated: Boolean = true,
     /** Whether this language is on for a new profile. */
     val enabledByDefault: Boolean = false,
-    /** Whether a script primer (Letters) exists / is needed before reading. */
+    /** Whether the script should be learned before reading (a Paths LETTERS branch is offered, D-14). */
     val needsScriptPrimer: Boolean = false,
+    /**
+     * Whether the app ships a Letters primer for this script (ja, ko, zh, ar). A LETTERS branch is
+     * offered only when both flags hold; a language that needs a primer nobody has written yet
+     * gets the honest "no primer yet" card in Letters and no branch (D-21).
+     */
+    val hasScriptPrimer: Boolean = false,
 )
 
 /** Registry access. Implemented in :shared from the bundled `languages.json`. */

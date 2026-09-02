@@ -331,34 +331,70 @@ state that the method is being tested on one person and is not a validated pedag
 
 ## D-19 · Baseline-test pool admits Unicode letters, not only ASCII
 
-**Decision.** The yes/no baseline test's candidate filter uses Unicode letter classes (`\p{L}`)
-for Latin- and Cyrillic-script languages. The v0.10 web build's regex `^[^\W\d_]+$` admits only
-ASCII letters in JavaScript, so `poción`, `über`, and every accented lemma were silently excluded
-from the test — a defect, not a design choice, and one that would have hit Portuguese, Polish and
-Turkish harder still.
+**Decision.** The yes/no baseline test draws its candidates with a Unicode-letter test
+(`^\p{L}+$`) for Latin-script lanes and drops capitalised surfaces with a Unicode-aware check
+(`isUpperCase()`), instead of the web build's `/^[^\W\d_]+$/u`, which in JavaScript keeps `\w`
+ASCII-only, and its `^[A-Z]` proper-noun test.
 
-**Cost.** A deliberate parity divergence (template-spec §4.1, checklist item 31); recorded in
+**Why.** Reproducing the original regex exactly (as the first port did, for parity) meant no accented
+lemma — `poción`, `über`, `città`, every Polish or Turkish word with a diacritic — could ever appear
+in the test, which silently biased the threshold toward the plainest vocabulary and got worse with
+every language added under D-6. Measured on the shipped lexicon after the other pre-filters, the
+ASCII rule alone excluded 52 % of otherwise-eligible Polish lemmas, 40 % of Turkish, 24 % of French,
+17 % of Portuguese, 15 % of German and 14 % of Spanish, including top-band words such as `się`,
+`być`, `être`, `für`, `über`, `más`, `também`, `você`, `için` and `çok`. The web behaviour is a
+defect, not a design.
+
+**Cost.** A learner's threshold from the native test is not numerically comparable with one taken in
+the web build. `tests{l}.pool` records which pool rule produced a result (`"unicode"`; a result
+imported from the web build has none). A deliberate parity divergence (template-spec §4.1), listed in
 `shared/README.md`.
 
-**Status.** Settled; implemented in the review pass.
+**Status.** Settled; implemented in the review pass of 2026‑09‑02 (`ClavisEngine.start`,
+`TestResult.pool`, `BaselineTestTest`).
 
-## D-20 · Korean is `HANGUL`, and the language-ID game groups options by family
+## D-20 · Script is a rendering property; the language-ID game groups by it as-is
 
-**Decision.** The registry keeps Korean's script as `HANGUL` (fonts, spacing and lettering metrics
-need it). The "which language is this?" game, which in v0.10 grouped ja/ko/zh as one `cjk` script
-for its "same script first" distractors, groups by **family** for CJK so Korean lines still get
-Japanese and Chinese as the hard options.
+**Decision.** `LanguageInfo.script` stays truthful (Korean is `HANGUL`, Japanese and Chinese are
+`CJK`), and the language-ID game's "same script first" option ordering follows that field
+(`ClavisEngine.makeLangId`).
+
+**Considered and rejected.** Grouping the CJK *family* for the game so that Korean lines still get
+Japanese and Chinese as the hard options — what the web build's coarser `t: 'cjk'` table did.
+Script drives fonts, spacing metrics and lettering; overloading it (or adding a second grouping
+axis) for a game heuristic would either break those or leave two notions of "script" to keep in
+step. The game still draws from every language present in the corpus, so Korean appears as an
+option — it simply is not privileged as a look-alike of kanji/hanzi, which it is not.
 
 **Status.** Settled.
 
-## D-21 · The Paths fan may hold six branches when a Letters branch is present
+## D-21 · The Letters branch: cleared by a visit, never displacing the floors, offered only where a primer exists
 
-**Decision.** The fan cap stays at five, except that a `LETTERS` branch (D-14) is added as a sixth
-rather than displacing the game or free-reading floors — otherwise a learner with three CJK/Arabic
-lanes never sees the language-ID game until they have visited Letters. The Letters screen also
-marks a script as visited when the learner opens its tab themselves.
+**Decision.** Three rules for the Paths `LETTERS` branch (D-14):
 
-**Status.** Settled; implemented in the review pass.
+1. **A visit clears it.** The branch is offered until `coach["letters:<iso>"]` is set, and that flag
+   is set both by taking the branch and by the learner opening that language's tab in Letters on
+   their own.
+2. **It never displaces the floors.** The READ and GAME floors are decided on the lane-branch count
+   alone, exactly as template §6.2 does (READ whenever fewer than five lane branches exist — always,
+   given the cap of four; GAME when it still fits under five). LETTERS is then inserted before them
+   without counting against the cap, so the fan may hold six entries. The alternative — LETTERS
+   taking one of the five slots — meant a learner with three CJK/Arabic lanes never saw the
+   language-ID game, and one with four lane branches saw neither free reading nor the game, until
+   they had visited Letters.
+3. **Only where a primer exists.** The branch requires the registry entry to say both
+   `needsScriptPrimer` and `hasScriptPrimer` (Japanese, Korean, Chinese and Arabic today; the loader
+   defaults the second flag to true for exactly those four when a registry omits it). A language that
+   needs a primer nobody has written yet (Russian, Ukrainian, Hindi, …) shows the honest "no primer
+   yet" card in Letters and gets no branch whose "then" promises that "Letters stops being a wall".
+
+**Why.** A branch that keeps nagging after the learner has found the primer, a branch that hides the
+game, and a branch that opens onto an empty room are all the kind of manufactured urgency
+`01-premise.md` §5 rules out.
+
+**Status.** Settled; all three implemented in the review pass of 2026‑09‑02
+(`ClavisEngine.computeBranches`, `LanguageInfo.hasScriptPrimer`, `LettersScreen`,
+`ClavisStore.setLetterTab`, `PathsTest`).
 
 ## D-22 · Generated content packs are committed to the repository
 
@@ -398,43 +434,33 @@ ja/ko ↔ zh borrowing *edges* rather than origin text; Arabic root boxes are mo
 origin language, and are not displayed as etymology. Every emitted fact is traceable in
 `pipeline/build/enrich/etym_provenance.jsonl`.
 
-## D-19 · Baseline-test word pool admits Unicode letters, not only ASCII
+## D-25 · Review pass 2026‑09‑02 (record)
 
-**Decision.** The yes/no baseline test draws candidate words with a Unicode-letter test (`\p{L}`)
-rather than the web build's `/^[^\W\d_]+$/u`, which in JavaScript admits only ASCII letters.
+An adversarial review of the merged application, verified finding by finding against the code and
+the built artifacts, was applied in one pass. Fixed — domain: the ASCII-only baseline pool (F1,
+D-19); the Letters branch displacing the READ/GAME floors (F2) and being offered for languages
+without a primer (F3), both D-21; an unreadable state document being silently replaced on the next
+save — it is now moved to `clavis-state.json.corrupt-<epoch>` and the app says so (F7); a session
+served in a language the learner had paused when every lane was off — it is now refused with the
+reason and the Learn pool is disabled (F12); `ClavisVersion.CODE` disagreeing with the emitted
+`versionCode` (F-10, now 100 with the `MAJOR·10000 + MINOR·100 + PATCH` rule documented). Fixed —
+application: unbounded file import, now 2 MB read through a bounded stream, 5,000 stored lines and a
+printable-text check (F5); learner-state serialisation and `fsync` on the UI thread, now encoded on
+the UI thread once per burst of commits and written by one ordered writer thread (F6); the only
+network path accepting `http://`, any size and leaving `.part` files, now HTTPS-only including
+redirects, capped at 25 MB, cleaned up, with cache names derived from a SHA-256 of the URL (F8); the
+Android `TextToSpeech` never shut down (F9); key auto-repeat grading consecutive reads (F10); system
+TTS receiving the utterance where a leading hyphen made it an option, now after `--` or via the
+environment for PowerShell (F11); `junit:junit:3.8.2` (CPL 1.0) riding into the desktop runtime
+through jlayer's POM (F-3). Fixed — documents and release: the privacy policy, store listing and
+third-party notices still denying the `INTERNET` permission the manifest declares for tapped
+recordings (F4, F-4); the LGPL 2.1 text absent from every desktop distribution, now shipped in the
+application resources, shown in the colophon and appended to `THIRD_PARTY_NOTICES.md` (F-2); the
+fonts table and pack versions (F-6); the Linux data-directory casing and the missing cache directory
+in `PRIVACY.md` (F-7); the stale API-35 and desktop-icon wording in `CHANGELOG.md` and `RELEASE.md`
+(F-5); the release preflight admitting pre-release numbers the build rejects (F-9); the web job
+uploading `pack_web`'s side files (F-11); blank translator credits reaching `ATTRIBUTION.md` and the
+manifest (F-8); and this file's duplicated D-19–D-21 entries, merged above. Refuted and left alone:
+the blank P00 title pages (F-1) — they are the upstream header artwork, faithfully rendered.
 
-**Why.** Reproducing the original regex exactly (as the first port did, for parity) means no
-accented lemma — `poción`, `über`, `città`, every Polish or Turkish word with a diacritic — can
-ever appear in the test, which silently biases the threshold toward the plainest vocabulary and
-gets worse with every language added under D-6. The web behaviour is a bug, not a design.
-
-**Cost.** A learner's threshold from the native test is not numerically comparable with one taken
-in the web build. `tests{l}` records which pool rule produced it (`pool: "unicode"`).
-
-**Status.** Settled; applied in the review pass after the first UI merge.
-
-## D-20 · Script is a rendering property; the language-ID game groups by it as-is
-
-**Decision.** `LanguageInfo.script` stays truthful (Korean is `HANGUL`, Japanese and Chinese are
-`CJK`), and the language-ID game's "same script first" option ordering follows that field. The web
-build's coarser `t: 'cjk'` grouping, which listed Korean beside Japanese and Chinese, is not
-reproduced.
-
-**Why.** Script drives fonts, spacing metrics and lettering; overloading it for a game heuristic
-would break those. The game still draws from every language present in the corpus, so Korean
-appears as an option — it simply isn't privileged as a look-alike of kanji/hanzi, which it isn't.
-
-**Status.** Settled.
-
-## D-21 · The Letters branch clears itself when the learner visits the script
-
-**Decision.** The Paths `LETTERS` branch (D-14) is offered until `coach["letters:<iso>"]` is set;
-that flag is set both by taking the branch and by the learner opening that language's tab in
-Letters on their own. Languages whose registry entry says `needsScriptPrimer` but for which no
-primer content exists yet (Russian, Ukrainian, Hindi, …) show an honest "no primer yet" card
-rather than an empty screen, and their branch is suppressed until a primer ships.
-
-**Why.** A branch that keeps nagging after the learner has already found the primer is the kind
-of manufactured urgency `01-premise.md` §5 rules out.
-
-**Status.** Settled.
+**Status.** Record.

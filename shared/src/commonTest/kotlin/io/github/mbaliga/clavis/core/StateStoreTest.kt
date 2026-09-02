@@ -9,6 +9,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.random.Random
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -64,7 +65,7 @@ class StateStoreTest {
         val d = dirs(); val s = store(d)
         val st = freshState(Fx.registry, now)
         st.cardsOf(Fx.ES)["gato"] = Fx.knownCard(); st.cardsOf(Fx.ES)["p"] = io.github.mbaliga.clavis.core.engine.Fsrs5.provisionalCard(now)
-        st.tests["es"] = TestResult(now, 5.0, 0.125, listOf(Band(6.0, 9.0, "x", 8, 1.0), Band(3.0, 4.0, "y", 0, null)), 1234)
+        st.tests["es"] = TestResult(now, 5.0, 0.125, listOf(Band(6.0, 9.0, "x", 8, 1.0), Band(3.0, 4.0, "y", 0, null)), 1234, pool = "unicode")
         st.log.add(LogEntry(now, "es", "cloze", sc = 3, lm = "gato", ok = 1, ms = 800, sib = null))
         st.settings.retention = 0.85; st.settings.voices["es"] = "piper:x"; st.coach["read"] = true
         st.intent = Intent("es", 2); st.pathLog.add(PathLogEntry(now, "new", "es", "t")); st.seen["3"] = now; st.pin = "ja"
@@ -118,6 +119,7 @@ class StateStoreTest {
         assertTrue(st.cards["es"]!!["hola"]!!.prov); assertTrue(st.cards["es"]!!["vuelo"]!!.intro)
         val t = st.tests["es"]!!
         assertEquals(5.0, t.thr); assertEquals(0.125, t.fa); assertEquals(5, t.bands.size); assertNull(t.bands[3].hit); assertEquals(0.75, t.bands[1].hit); assertEquals(123456L, t.ms)
+        assertNull(t.pool) // a web-build result carries no pool rule (D-19)
         assertEquals(1756700500000L, st.seen["40"]); assertEquals(listOf(1.0, 0.0, 1.0, 1.0, 0.5), st.bandit["es"]!!.hist); assertEquals(0.31, st.bandit["es"]!!.w)
         assertEquals(6, st.log.size); assertEquals("fr", st.log[2].sib); assertNull(st.log[3].sib); assertEquals(0, st.log[5].ok); assertEquals("zh", st.log[5].guess); assertEquals(5.0, st.log[0].thr)
         assertEquals(1, st.inter["es"]!!["fr"]); assertEquals(2, st.routes["es"]!!["en"]); assertEquals("2025-9-1", st.newDay); assertEquals(2, st.newToday["es"]); assertNull(st.pin)
@@ -158,11 +160,33 @@ class StateStoreTest {
         assertEquals(listOf(1, 0, 1), st.log.map { it.ok })
     }
 
-    @Test fun corruptFileLoadsAsAFreshDocument() = runTest {
+    @Test fun corruptFileLoadsAsAFreshDocumentAndIsKeptBesideIt() = runTest {
         val d = dirs()
-        FileIo.mkdirs(d.data); FileIo.write("${d.data}/clavis-state.json", "{{{ not json".encodeToByteArray())
-        val st = assertNotNull(store(d).load())
+        val bad = "{{{ not json".encodeToByteArray()
+        FileIo.mkdirs(d.data); FileIo.write("${d.data}/clavis-state.json", bad)
+        val s = store(d)
+        val st = assertNotNull(s.load())
+        assertTrue(s.lastLoadWasCorrupt)
         assertEquals(3, st.v); assertEquals(9, st.lanes.size); assertTrue(st.cards["es"]!!.isEmpty())
+        val copy = "${d.data}/clavis-state.json.corrupt-$now"
+        assertTrue(FileIo.exists(copy)); assertContentEquals(bad, FileIo.read(copy))
+        assertFalse(FileIo.exists("${d.data}/clavis-state.json")) // moved aside, not overwritten
+        s.save(st)
+        assertContentEquals(bad, FileIo.read(copy)) // the copy survives the first save of the fresh document
+        val again = store(d)
+        assertEquals(st, again.load()); assertFalse(again.lastLoadWasCorrupt)
+        // a second unreadable document at the same instant gets its own name
+        FileIo.write("${d.data}/clavis-state.json", bad)
+        store(d).load()
+        assertTrue(FileIo.exists("$copy.2")); assertContentEquals(bad, FileIo.read(copy))
+    }
+
+    @Test fun aRejectedImportLeavesTheStoredDocumentAlone() = runTest {
+        val d = dirs(); val s = store(d)
+        val st = s.loadOrFresh(); st.settings.newPerDay = 4; s.save(st)
+        assertFailsWith<IllegalArgumentException> { s.importJson("""{"cards":{},"lanes":{"es":"read"}}""") } // a lane mode the model does not know
+        assertTrue(st === s.current); assertFalse(s.lastLoadWasCorrupt)
+        assertEquals(4, store(d).load()!!.settings.newPerDay)
     }
 
     @Test fun resetDeletesTheDocument() = runTest {

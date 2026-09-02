@@ -29,12 +29,44 @@ interface AppDirs {
     val downloads: String
 }
 
-/** Opens a platform picker and returns the chosen text file's name and contents (D-7 user media). */
+/**
+ * Opens a platform picker and returns the chosen text file's name and contents (D-7 user media),
+ * or null when the user cancelled. A file over [ImportLimits.MAX_BYTES] or one that is not mostly
+ * text is refused with an [ImportRefusedException] carrying the user-facing reason — before it is
+ * read whole into memory.
+ */
 interface FileImporter {
     suspend fun pickText(allowedExtensions: List<String> = listOf("txt", "srt", "lrc")): ImportedFile?
 }
 
 data class ImportedFile(val name: String, val text: String)
+
+/** A [FileImporter] refused the chosen file; [message] is copy the UI shows as a toast. */
+class ImportRefusedException(message: String) : Exception(message)
+
+/**
+ * Bounds on user-imported text: the importers read at most [MAX_BYTES] through a bounded stream,
+ * the store keeps at most [MAX_LINES] lines of a text, and a decoded file whose printable share is
+ * under [MIN_PRINTABLE] (a binary renamed `.srt`) is refused.
+ */
+object ImportLimits {
+    const val MAX_BYTES: Long = 2L * 1024 * 1024
+    const val MAX_LINES: Int = 5_000
+    const val MIN_PRINTABLE: Double = 0.9
+
+    /** Share of characters that are text: anything but control characters (tab and line breaks allowed), NUL and U+FFFD. */
+    fun printableShare(text: String): Double {
+        if (text.isEmpty()) return 1.0
+        var ok = 0
+        for (ch in text) if (isPrintable(ch)) ok++
+        return ok.toDouble() / text.length
+    }
+
+    fun isText(text: String): Boolean = !text.contains('\u0000') && printableShare(text) >= MIN_PRINTABLE
+
+    private fun isPrintable(ch: Char): Boolean =
+        ch == '\n' || ch == '\r' || ch == '\t' || ch == '\uFEFF' || (!ch.isISOControl() && ch != '\uFFFD')
+}
 
 /** Explicit, user-initiated downloads only (D-13). */
 interface Downloader {

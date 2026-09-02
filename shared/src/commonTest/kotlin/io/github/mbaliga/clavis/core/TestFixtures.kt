@@ -22,7 +22,7 @@ object Fx {
     ) = LanguageInfo(
         iso = Lang(iso), name = name, nativeName = name, family = family, script = script, rtl = rtl, defaultLane = mode,
         siblings = sib.map(::Lang), readingSystem = reading, ttsLocale = locale, colour = colour, spaceSeparated = space,
-        enabledByDefault = true, needsScriptPrimer = primer,
+        enabledByDefault = true, needsScriptPrimer = primer, hasScriptPrimer = primer,
     )
 
     val registry: LanguageRegistry = ListLanguageRegistry(

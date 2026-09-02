@@ -90,7 +90,10 @@ kotlin {
             // MP3 / OGG decoding for downloaded recordings (javax.sound only knows WAV). The decoders are
             // instantiated explicitly (no ServiceLoader), so the uber-jar's duplicate META-INF/services
             // handling cannot silently drop one of them.
-            implementation(libs.mp3spi)
+            // jlayer's POM declares junit:junit:3.8.2 at compile scope by mistake (CPL 1.0; no class of
+            // jlayer references it), which would put it on the desktop runtime classpath and into the
+            // uber-jar / jpackage image. THIRD_PARTY_NOTICES.md lists only what is actually shipped.
+            libs.mp3spi.get().let { dep -> implementation("${dep.module}:${dep.versionConstraint.requiredVersion}") { exclude(group = "junit") } }
             implementation(libs.vorbisspi)
         }
         commonTest.dependencies {
@@ -113,8 +116,8 @@ android {
         applicationId = "io.github.mbaliga.clavis"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        // Keep in step with io.github.mbaliga.clavis.core.ClavisVersion.
-        versionCode = 1
+        // Keep in step with io.github.mbaliga.clavis.core.ClavisVersion (CODE = MAJOR·10000 + MINOR·100 + PATCH).
+        versionCode = 100
         versionName = "0.1.0"
     }
 

@@ -65,13 +65,35 @@ class JsonStateStore(
 
     private val knownKeys: Set<String> = ClavisState.serializer().descriptor.elementNames.toSet()
 
+    /**
+     * True when the last [load] met a document it could not decode. That file was moved to
+     * [corruptPath] before the fresh document took its place, so no later save can overwrite it;
+     * the UI turns this into the [Copy.STATE_UNREADABLE] notice.
+     */
+    var lastLoadWasCorrupt: Boolean = false
+        private set
+
+    /** Where an unreadable document is moved: `clavis-state.json.corrupt-<epochMillis>` (`.2`, `.3`… when taken). */
+    fun corruptPath(epochMillis: Long): String {
+        val base = "$path.corrupt-$epochMillis"
+        var p = base
+        var n = 2
+        while (FileIo.exists(p)) p = "$base.${n++}"
+        return p
+    }
+
     override suspend fun load(): ClavisState? {
         val bytes = FileIo.read(path) ?: return null
+        lastLoadWasCorrupt = false
         val state = try {
             merge(json.parseToJsonElement(bytes.decodeToString()).jsonObject)
         } catch (e: Exception) {
+            // Web parity: any failure yields a fresh document — but the unreadable bytes are kept beside it,
+            // never replaced by the next save.
             extras = emptyMap()
-            freshState(registry, clock.now()) // any exception → a fresh document, like load()
+            lastLoadWasCorrupt = true
+            runCatching { FileIo.rename(path, corruptPath(clock.now())) }
+            freshState(registry, clock.now())
         }
         current = state
         return state
@@ -151,12 +173,20 @@ class JsonStateStore(
         return json.encodeToString(JsonObject.serializer(), JsonObject(obj))
     }
 
-    override suspend fun save(state: ClavisState) {
-        current = state
+    /**
+     * Writes an already-encoded document atomically: temp file, fsync, rename over the previous
+     * one. Blocking; the UI runs it on its single writer thread after encoding on the UI thread.
+     */
+    fun writeEncoded(jsonText: String) {
         val dir = dirs.data
         if (dir.isNotEmpty()) FileIo.mkdirs(dir)
-        FileIo.write(tmpPath, encode(state).encodeToByteArray())
+        FileIo.write(tmpPath, jsonText.encodeToByteArray())
         FileIo.rename(tmpPath, path)
+    }
+
+    override suspend fun save(state: ClavisState) {
+        current = state
+        writeEncoded(encode(state))
     }
 
     override suspend fun exportJson(): String = encode(current ?: loadOrFresh())
@@ -164,7 +194,9 @@ class JsonStateStore(
     /**
      * Web-build import (template L2323): requires a `cards` key, otherwise throws
      * [IllegalArgumentException] carrying [Copy.NOT_A_BACKUP] for the UI's toast. On success the
-     * merged document becomes [current], is saved, and is returned.
+     * merged document becomes [current], is saved, and is returned. Every failure path throws
+     * before anything is written, so neither [current] nor the stored file is touched by a bad
+     * backup.
      */
     override suspend fun importJson(json: String): ClavisState {
         val obj = try { this.json.parseToJsonElement(json) as? JsonObject } catch (e: Exception) { null }

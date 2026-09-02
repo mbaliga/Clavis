@@ -7,7 +7,9 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 ### Domain (`:shared`)
 
 - Added the Kotlin Multiplatform domain layer ported from the v0.10 web build: corpus model and gzip pack decoder, language registry, FSRS-5 scheduler (19-weight vector, `DECAY` −0.5, `FACTOR` 19/81), selection and grading engines (lane hopping, the 6-hour scene rule, one productive language per family), the baseline vocabulary test with pseudoword foils, the Paths engine, and the balloon-geometry and cloze-mask helpers.
-- Added the learner-state store: one JSON document per profile (`clavis-state.json`) written to a temporary file and atomically renamed, with a schema version for migrations (D-12).
+- Added the learner-state store: one JSON document per profile (`clavis-state.json`) written to a temporary file and atomically renamed, with a schema version for migrations (D-12). A document that cannot be decoded is kept beside the fresh one as `clavis-state.json.corrupt-<epoch>` and the app says so; a rejected backup import never touches the stored file.
+- The baseline test's candidate pool admits every Unicode letter and drops capitalised surfaces with a Unicode-aware check (D-19); results record the rule as `tests{l}.pool = "unicode"` (a web-build import has none).
+- Paths: the Letters branch is an extra that never displaces the free-reading and game floors (the fan may hold six), is offered only for scripts a primer ships for (`hasScriptPrimer` in the registry: ja, ko, zh, ar), and is cleared by opening the tab in Letters (D-21). When every language is resting, a session is refused with the reason instead of serving a paused language (D-6).
 - Added about 180 JVM unit tests that run on desktop and on both Android unit-test variants (`:shared:allTests`), plus an integration test against the real packs when `pipeline/build/packs` is present.
 
 ### Content pipeline (`pipeline/`)
@@ -16,21 +18,23 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 - Added lexicon hygiene (wordfreq and Wiktionary attestation) so translator names and credit tokens can no longer become cloze targets (D-7).
 - Added enrichment stages: etymology (Wiktionary via wiktextract/kaikki.org and EtymDB 2.1), example sentences (Tatoeba, permissive audio only) and pronunciations (IPA plus Wikimedia Commons audio references with per-file licences) (D-5, D-7).
 - Committed the generated packs as app resources (`composeApp/src/commonMain/composeResources/files/packs/`, about 22 MB with the page art) so the app and CI build without the corpus (D-3).
-- Generated packs: `clavis-comics` 2026.09.01 (CC BY 4.0; 1,460 balloons from 305 pages of 39 Pepper&Carrot episodes), `clavis-lexicon` 2026.09.01 (CC BY-SA 4.0), `clavis-etymology` 2026.09.02 (CC BY-SA 4.0), `clavis-sentences` 2026.09.02 (CC BY 2.0 FR), `clavis-pronunciations` 2026.09.02 (CC BY-SA 4.0; audio per file). Every pack carries a generated `ATTRIBUTION.md`.
+- Generated packs: `clavis-comics` 2026.09.02 (CC BY 4.0; 1,460 balloons from 305 pages of 39 Pepper&Carrot episodes), `clavis-lexicon` 2026.09.02 (CC BY-SA 4.0), `clavis-etymology` 2026.09.02 (CC BY-SA 4.0), `clavis-sentences` 2026.09.02 (CC BY 2.0 FR), `clavis-pronunciations` 2026.09.02 (CC BY-SA 4.0; audio per file). Every pack carries a generated `ATTRIBUTION.md`; blank translator credits in an episode's `info.json` are skipped.
 
 ### Application (`:composeApp`)
 
 - Added the Compose Multiplatform app for Android and desktop: the full light/dark token set and type ramp (Hind, Rozha One, IBM Plex Mono; Noto script fallbacks bundled on desktop), a floating dock on phones and a navigation rail on wide windows, modal states that suppress navigation, persisted view state, and desktop keyboard shortcuts.
 - Added onboarding (five steps with the language picker), the per-language baseline test, the Learn pool with the lane row, coverage bars and "Just reading", the complete session loop — cloze, read, echo and language-ID encounters over the real comic pages with cropped and whole-page lettering sharing one cloze mask — the session summary, Settings (languages with the one-productive-per-family warning, rhythm, appearance, voices, export/import, feedback via the share sheet, reset), You (record, per-lane table and the H1/H4′/H8/H9 panels with N=1 caveats) and the Colophon (claims, all forty references, generated credits, glossary, notices) with citations that return to the claim.
-- Added platform services: app directories, text-to-speech (Android system voices; desktop Piper → system voice → none), WAV playback on desktop and MediaPlayer on Android, file import, and a downloader that refuses unless the user asked (D-13).
+- Added platform services: app directories, text-to-speech (Android system voices, shut down with the Activity; desktop Piper → system voice → none, each a separate process that receives the utterance after `--`, on stdin or through the environment — never as a parsable option), WAV playback on desktop and MediaPlayer on Android, bounded file import (2 MB read through a bounded stream, mostly-text check, at most 5,000 lines kept) and an HTTPS-only downloader (redirects only to HTTPS, 25 MB cap, `.part` file cleaned up, cache names from a SHA-256 of the URL) that runs only when the user taps a recording (D-13).
 - Bundled the generated content packs and the app icon set; headless desktop UI tests cover the boot-to-summary flow on the real packs, the cloze-leak regression on both render paths, navigation, theme and font fallbacks.
 - Added Cosmos — the Field (pseudo-3D word cloud with camera, entry wave, picking and focus web) and Explore (force-directed graph of the 1,250-word subsample with Families hulls and a Relations lens) — with a word card showing reading, IPA, origin with its provenance, relations, memory, and one clearly labelled play control: a Commons/Tatoeba recording fetched only on tap, otherwise the device's synthetic voice.
 - Added Paths (branch fan as a tree and as a force map, the longer view per language, undo), Story (free page-by-page reading with numbered balloons and tap-to-speak), Languages (the catalogue with speak/read/off per language, the cited one-productive-per-family warning, honest per-language coverage from the pack manifests and presets), Letters (Japanese, Korean, Chinese and Arabic primers), Media (import .txt/.srt/.lrc and read them against your vocabulary, with "met this word out here" logging) and Sentences (Tatoeba sentences ranked by how much of them you already know, with CC-licensed recordings on tap).
-- The Android manifest declares `INTERNET` for that single download-on-tap path; nothing is fetched otherwise (D-13). Desktop audio playback supports WAV, MP3 and OGG.
+- The Android manifest declares `INTERNET` for that single download-on-tap path; nothing is fetched otherwise (D-13). Desktop audio playback supports WAV, MP3 and OGG (LGPL 2.1 decoders; the licence text ships in the app resources, in the colophon and in `THIRD_PARTY_NOTICES.md`).
+- The learner document is encoded on the UI thread once per burst of commits and written (temp file, fsync, rename) by a single writer thread, so a tap no longer waits for the disk; the activity flushes on stop and the desktop window on close. The Learn pool is disabled with an explanation when every language is resting. Keyboard auto-repeat and double presses no longer grade two reads in a row.
 
 ### Release engineering
 
-- Added single-source versioning (`gradle/version.gradle.kts`): `-Pclavis.version` > `CLAVIS_VERSION` > `ClavisVersion.kt`; `versionCode = MAJOR·10000 + MINOR·100 + PATCH`; per-OS desktop package versions so jpackage accepts a 0.x app (docs/RELEASE.md §5).
+- Added single-source versioning (`gradle/version.gradle.kts`): `-Pclavis.version` > `CLAVIS_VERSION` > `ClavisVersion.kt`; `versionCode = MAJOR·10000 + MINOR·100 + PATCH` (`ClavisVersion.CODE` is 100 for 0.1.0 and a unit test keeps it derived from `NAME`); per-OS desktop package versions so jpackage accepts a 0.x app (docs/RELEASE.md §5). The release preflight accepts the same pre-release numbers as the build (1..29), and the web job uploads only `clavis-<version>-web.html`.
+- The desktop runtime classpath excludes `junit:junit:3.8.2`, which jlayer's POM declares by mistake; `THIRD_PARTY_NOTICES.md` lists the bundled fonts and the LGPL decoders exactly and carries the LGPL 2.1 text as an appendix.
 - Added opt-in Android release signing from `keystore.properties` or the `CLAVIS_KEYSTORE_*` secrets; without them the release build stays unsigned and the artifacts say so in their names.
 - Added the CI workflow (domain and UI tests, lint, debug and R8 release APK with a 16 KB page-size check, Linux uber-jar smoke test, pipeline unit tests) and the tag-triggered release workflow (Android APK and AAB, Linux `.deb` and uber-jar, macOS `.dmg` with optional Developer ID signing and notarization, Windows `.msi`, dependency graphs, `SHA256SUMS.txt`, GitHub Release with pre-release marking).
 - Added `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PRIVACY.md`, `SECURITY.md`, `CONTRIBUTING.md`, `docs/RELEASE.md`, `docs/STORE-LISTING.md`, Dependabot configuration and issue templates.
@@ -38,12 +42,12 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 
 ### Documentation
 
-- Added `docs/DECISIONS.md` (D-1 … D-18) and `docs/build-platform.md` (the verified toolchain matrix and build commands).
+- Added `docs/DECISIONS.md` (D-1 … D-25, D-25 being the record of the 2026-09-02 review pass) and `docs/build-platform.md` (the verified toolchain matrix and build commands).
 
 ### Known pre-release requirements
 
 - The method is being tested on one person; nothing here is validated pedagogy (D-18).
-- Google Play requires `targetSdk` 36 for new apps and updates since 2026-08-31; the build targets API 35 until the SDK bump is verified on the pinned toolchain (docs/RELEASE.md §9).
+- Google Play requires `targetSdk` 36 for new apps and updates since 2026-08-31; the build compiles against and targets API 36 on the pinned toolchain. The API-36 device pass (predictive back, edge-to-edge insets, Arabic line height, TalkBack, RTL, 200 % text) is still to be recorded (docs/RELEASE.md §9).
 - Device and desktop acceptance (TalkBack, RTL, 200% text, machines without CJK/Arabic system fonts, in-place upgrades) is not yet recorded.
 - macOS and Windows installers are unsigned until certificates exist; the release notes and README carry the Gatekeeper and SmartScreen steps.
 - The learner-state document is not yet excluded from Android cloud backup (PRIVACY.md).

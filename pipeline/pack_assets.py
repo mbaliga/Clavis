@@ -156,6 +156,8 @@ def attribution_md(cfg: Config, credits: dict, manifests: list[dict], sections: 
         for role, lst in c.get('roles', {}).items():
             for p in lst:
                 name, url = person(p)
+                if not name:
+                    continue  # a blank credit is not a person
                 people.append(f'{name} ({url})' if url else name)
         eps = c.get('episodes', [])
         lines.append(f'- **{L.name}** ({L.iso}; {len(eps)} episode{"s" if len(eps) != 1 else ""}): ' + ', '.join(dict.fromkeys(people)))
@@ -261,6 +263,8 @@ def run(cfg: Config, version: str | None = None, install: bool = False) -> dict:
         for role, lst in c.get('roles', {}).items():
             for p in lst:
                 name, url = person(p)
+                if not name:
+                    continue
                 attribution.append({'name': name, 'role': f'{role} ({L.name})', 'url': url, 'licence': 'CC-BY-4.0'})
     comics_files = {k: v for k, v in files.items() if k.startswith('comics/')} | {'languages.json': files['languages.json']}
     manifests = [{

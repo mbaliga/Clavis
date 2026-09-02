@@ -57,7 +57,7 @@ object TestBoot {
     fun store(seed: Int = 7, dir: File = tempDir(), now: Long = NOW, boot: Boolean = true, prepare: (ClavisStore) -> Unit = {}): ClavisStore {
         val s = ClavisStore(services(dir), { Res.readBytes(it) }, clock = Clock { now }, random = Random(seed), dayKey = DayKey { "2026-9-2" })
         if (boot) runBlocking { s.boot(loaded) }
-        if (boot) { s.state.settings.motion = false; prepare(s); s.save() }
+        if (boot) { s.state.settings.motion = false; prepare(s); s.save(); s.flushSaves() } // written before any test reads the file back
         return s
     }
 

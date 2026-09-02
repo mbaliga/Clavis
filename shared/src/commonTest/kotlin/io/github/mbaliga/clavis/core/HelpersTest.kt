@@ -155,4 +155,15 @@ class HelpersTest {
         assertEquals("猫 (neko) — you met it earlier. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35].",
             Copy.echoResult("猫", "neko", null, null))
     }
+
+    @Test fun importLimitsTellTextFromBinary() {
+        assertEquals(1.0, ImportLimits.printableShare(""))
+        assertEquals(1.0, ImportLimits.printableShare("Hola, mundo.\r\n\t¿Qué tal? 猫が好き — ok"))
+        assertTrue(ImportLimits.isText("\uFEFF1\n00:00:01,000 --> 00:00:03,500\nHola.\n")) // a BOM is not a strike against a subtitle file
+        val binary = ByteArray(200) { (it * 7 % 256).toByte() }.decodeToString() // control bytes and U+FFFD replacements
+        assertTrue(ImportLimits.printableShare(binary) < ImportLimits.MIN_PRINTABLE)
+        assertFalse(ImportLimits.isText(binary))
+        assertFalse(ImportLimits.isText("text with a NUL\u0000inside")) // NUL is never text, whatever the share
+        assertEquals(2L * 1024 * 1024, ImportLimits.MAX_BYTES); assertEquals(5_000, ImportLimits.MAX_LINES)
+    }
 }

@@ -77,6 +77,7 @@ class Language:
     spaceSeparated: bool
     enabledByDefault: bool
     needsScriptPrimer: bool
+    hasScriptPrimer: bool = False     # the app ships a Letters primer (ja/ko/zh/ar); Paths offers the branch only then (D-21)
     role: str = 'target'
     enabled: bool = False
     tokenizer: str = 'whitespace'

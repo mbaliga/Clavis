@@ -17,12 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -40,7 +42,8 @@ import kotlin.math.sin
  * The Learn pool (`orb`, template-spec §11.6): up to five soft radial drops in the active lanes'
  * `COSMOS_COL`, orbiting slowly and breathing — faster and brighter when words are due. Holds
  * still when motion is off or the platform asks for reduced motion (R-18b makes the Settings copy
- * true). `role=button`, `Start a session`.
+ * true). `role=button`, `Start a session`. When [enabled] is false (every language resting, D-6)
+ * the pool is still, dimmed, not clickable and says so.
  */
 @Composable
 fun Pool(
@@ -49,10 +52,11 @@ fun Pool(
     onStart: () -> Unit,
     modifier: Modifier = Modifier,
     size: Dp = 290.dp,
+    enabled: Boolean = true,
 ) {
     val p = ClavisTheme.palette
     val t = ClavisTheme.type
-    val reduced = LocalReducedMotion.current
+    val reduced = LocalReducedMotion.current || !enabled
     var time by remember { mutableFloatStateOf(0f) }
     if (!reduced) {
         LaunchedEffect(Unit) {
@@ -70,13 +74,14 @@ fun Pool(
             Drop(col, a = i * 2.39996f + 0.8f, sp = 0.10f + 0.035f * i, rr = 0.30f + 0.13f * hash01("drop$code").toFloat())
         }
     }
-    val sub = if (due > 0) Copy.pulling(due) else Copy.TWO_MINUTE_DIP
+    val sub = when { !enabled -> Copy.POOL_RESTING; due > 0 -> Copy.pulling(due); else -> Copy.TWO_MINUTE_DIP }
     Box(
         modifier
             .size(size)
             .clip(CircleShape)
-            .clickable(role = Role.Button, onClick = onStart)
-            .semantics { contentDescription = "${Copy.START_SESSION_ARIA}, $sub" }
+            .clickable(enabled = enabled, role = Role.Button, onClick = onStart)
+            .alpha(if (enabled) 1f else 0.55f)
+            .semantics { contentDescription = "${Copy.START_SESSION_ARIA}, $sub"; if (!enabled) disabled() }
             .tagged("pool"),
         contentAlignment = Alignment.Center,
     ) {

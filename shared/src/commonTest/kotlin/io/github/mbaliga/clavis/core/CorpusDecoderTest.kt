@@ -134,16 +134,20 @@ class CorpusDecoderTest {
         val json = """[
           {"iso":"es","name":"Spanish","nativeName":"Español","family":"romance","script":"latin","rtl":false,"defaultLane":"prod","siblings":["fr","it"],"readingSystem":null,"ttsLocale":"es-ES","colour":"0xFFB3543B","spaceSeparated":true,"enabledByDefault":true,"needsScriptPrimer":false,"pcFolder":"es","tokenizer":"simplemma"},
           {"iso":"ja","name":"Japanese","nativeName":"日本語","family":"cjk","script":"cjk","defaultLane":"rec","siblings":["zh","ko"],"readingSystem":"rōmaji","ttsLocale":"ja-JP","colour":"0xFFB84A6E","spaceSeparated":false,"enabledByDefault":true,"needsScriptPrimer":true},
-          {"iso":"hi","name":"Hindi","family":"indic","script":"devanagari","defaultLane":"rec","ttsLocale":"hi-IN","colour":"#8B8F9C"}
+          {"iso":"hi","name":"Hindi","family":"indic","script":"devanagari","defaultLane":"rec","ttsLocale":"hi-IN","colour":"#8B8F9C","needsScriptPrimer":true},
+          {"iso":"ko","name":"Korean","family":"cjk","script":"hangul","defaultLane":"rec","ttsLocale":"ko-KR","colour":"#2E8F8A","needsScriptPrimer":true,"hasScriptPrimer":false}
         ]"""
         val reg = LanguageRegistryLoader.parse(json)
-        assertEquals(listOf("es", "ja", "hi"), reg.order.map { it.code })
+        assertEquals(listOf("es", "ja", "hi", "ko"), reg.order.map { it.code })
         val es = reg.require(Fx.ES)
-        assertEquals(LanguageInfo(Fx.ES, "Spanish", "Español", Family.ROMANCE, Script.LATIN, false, LaneMode.PROD, listOf(Fx.FR, Fx.IT), null, "es-ES", 0xFFB3543BL, true, true, false), es)
+        assertEquals(LanguageInfo(Fx.ES, "Spanish", "Español", Family.ROMANCE, Script.LATIN, false, LaneMode.PROD, listOf(Fx.FR, Fx.IT), null, "es-ES", 0xFFB3543BL, true, true, false, false), es)
         val ja = reg.require(Fx.JA)
         assertEquals(Script.CJK, ja.script); assertFalse(ja.spaceSeparated); assertTrue(ja.needsScriptPrimer); assertEquals("rōmaji", ja.readingSystem); assertEquals("日本語", ja.nativeName)
+        assertTrue(ja.hasScriptPrimer) // D-21: absent in the document → the shipped primers (ja/ko/zh/ar) default to true
         val hi = reg.require(Lang("hi"))
         assertEquals(Family.INDIC, hi.family); assertEquals(Script.DEVANAGARI, hi.script); assertFalse(hi.enabledByDefault); assertEquals(0xFF8B8F9CL, hi.colour); assertEquals("Hindi", hi.nativeName); assertTrue(hi.siblings.isEmpty())
+        assertTrue(hi.needsScriptPrimer); assertFalse(hi.hasScriptPrimer) // needs one, none ships
+        assertFalse(reg.require(Fx.KO).hasScriptPrimer) // an explicit value wins over the default
         assertNull(reg[Lang("xx")])
     }
 

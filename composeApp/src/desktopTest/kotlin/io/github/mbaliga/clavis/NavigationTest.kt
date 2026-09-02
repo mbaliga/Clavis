@@ -2,11 +2,15 @@ package io.github.mbaliga.clavis
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runSkikoComposeUiTest
+import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.Lang
+import io.github.mbaliga.clavis.core.LaneMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -90,5 +94,19 @@ class NavigationTest {
         b.save()
         val c = TestBoot.store(dir = dir)
         assertEquals("learn", c.state.view)
+    }
+
+    @Test
+    fun learnPoolIsDisabledWhenEveryLanguageIsResting() = runSkikoComposeUiTest(size = Size(1280f, 800f)) { // D-6
+        val store = TestBoot.onboarded { s -> for (l in s.registry.order) s.state.lanes[l.code] = LaneMode.OFF }
+        setContent { ClavisApp(store, darkOverride = false) }
+        onNodeWithText(Copy.ALL_RESTING).assertExists()
+        onNodeWithTag("pool").assertIsNotEnabled()
+        onNodeWithTag("open-languages").assertExists()
+        store.startSession() // the keyboard path reaches the store directly: still no session, the reason as a toast
+        waitForIdle()
+        assertNull(store.current.session)
+        assertEquals(Copy.ALL_RESTING, store.current.toast?.text)
+        assertEquals(0, store.state.log.size)
     }
 }

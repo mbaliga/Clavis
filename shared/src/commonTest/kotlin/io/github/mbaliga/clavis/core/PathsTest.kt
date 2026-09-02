@@ -1,6 +1,8 @@
 package io.github.mbaliga.clavis.core
 
+import io.github.mbaliga.clavis.core.data.ListLanguageRegistry
 import io.github.mbaliga.clavis.core.engine.ClavisEngine
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -80,9 +82,11 @@ class PathsTest {
         for (l in listOf("es", "fr", "de")) e.state.cardsOf(Lang(l))["${l}one"] = Fx.knownCard(due = now - 1)
         val b = e.computeBranches(now)
         // scores: es DUE .85, nl TEST .77, fr DUE .65, de DUE .65 (third due → dropped), ja TEST .63, it NEW .28 (fifth lane → cut at 4)
-        assertEquals(listOf(BranchKind.DUE, BranchKind.TEST, BranchKind.DUE, BranchKind.TEST, BranchKind.LETTERS), b.map { it.kind })
-        assertEquals(listOf(Fx.ES, Fx.NL, Fx.FR, Fx.JA, Fx.JA), b.map { it.l })
-        assertEquals(5, b.size) // max fan reached: no read floor, no game
+        // Four lane branches leave room for the READ floor but not the game (4 + 1 = the fan cap of 5);
+        // LETTERS is an extra that displaces neither (D-21), so the fan holds six.
+        assertEquals(listOf(BranchKind.DUE, BranchKind.TEST, BranchKind.DUE, BranchKind.TEST, BranchKind.LETTERS, BranchKind.READ), b.map { it.kind })
+        assertEquals(listOf(Fx.ES, Fx.NL, Fx.FR, Fx.JA, Fx.JA, Fx.ES), b.map { it.l })
+        assertEquals(ClavisEngine.PATHS_MAX_FAN + 1, b.size)
         e.state.coach["letters:ja"] = true
         val b2 = e.computeBranches(now)
         assertEquals(listOf(BranchKind.DUE, BranchKind.TEST, BranchKind.DUE, BranchKind.TEST, BranchKind.READ), b2.map { it.kind })
@@ -95,13 +99,29 @@ class PathsTest {
         val b = e.computeBranches(now)
         assertEquals(listOf(BranchKind.TEST, BranchKind.TEST, BranchKind.NEW, BranchKind.READ, BranchKind.GAME), b.map { it.kind })
         assertEquals(Fx.FR, b.first { it.kind == BranchKind.READ }.l) // the tested lane reads freely
-        e.state.coach.remove("letters:ja") // D-14: LETTERS precedes READ and GAME, so at the fan cap of 5 the game drops
+        e.state.coach.remove("letters:ja") // D-14 order: LETTERS before READ and GAME; D-21: it never displaces them
         val b1 = e.computeBranches(now)
-        assertEquals(listOf(BranchKind.TEST, BranchKind.TEST, BranchKind.NEW, BranchKind.LETTERS, BranchKind.READ), b1.map { it.kind })
+        assertEquals(listOf(BranchKind.TEST, BranchKind.TEST, BranchKind.NEW, BranchKind.LETTERS, BranchKind.READ, BranchKind.GAME), b1.map { it.kind })
         e.state.lanes["ja"] = LaneMode.OFF
         val b2 = e.computeBranches(now)
         assertFalse(b2.any { it.kind == BranchKind.GAME }); assertFalse(b2.any { it.kind == BranchKind.LETTERS })
         assertEquals(listOf(BranchKind.TEST, BranchKind.NEW, BranchKind.READ), b2.map { it.kind })
+    }
+
+    @Test fun lettersBranchIsSuppressedWhenNoPrimerShips() { // D-21
+        val ru = LanguageInfo(
+            iso = Lang("ru"), name = "Russian", nativeName = "Русский", family = Family.SLAVIC, script = Script.CYRILLIC,
+            defaultLane = LaneMode.REC, ttsLocale = "ru-RU", colour = 0xFF888888L, enabledByDefault = true,
+            needsScriptPrimer = true, hasScriptPrimer = false,
+        )
+        val reg = ListLanguageRegistry(Fx.registry.all.filter { it.iso.code in setOf("es", "fr") } + ru)
+        val e = ClavisEngine(multi(listOf("es", "fr", "ru")), reg, freshState(reg, now), Clock { now }, Random(1), DayKey { "d" })
+        val b = e.computeBranches(now)
+        assertFalse(b.any { it.kind == BranchKind.LETTERS }, "no primer content → no branch and no false promise")
+        assertEquals(listOf(BranchKind.TEST, BranchKind.TEST, BranchKind.READ, BranchKind.GAME), b.map { it.kind })
+        val withPrimer = ListLanguageRegistry(Fx.registry.all.filter { it.iso.code in setOf("es", "fr") } + ru.copy(hasScriptPrimer = true))
+        val e2 = ClavisEngine(multi(listOf("es", "fr", "ru")), withPrimer, freshState(withPrimer, now), Clock { now }, Random(1), DayKey { "d" })
+        assertEquals(Lang("ru"), e2.computeBranches(now).first { it.kind == BranchKind.LETTERS }.l)
     }
 
     @Test fun takeTestBranchLogsAndReturnsStartTest() {

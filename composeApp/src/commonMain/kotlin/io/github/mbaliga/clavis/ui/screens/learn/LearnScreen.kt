@@ -58,19 +58,25 @@ fun LearnScreen(store: ClavisStore, ui: UiState) {
     val due = store.engine.dueTotal(now)
     val untested = store.engine.untestedLanes()
     val settings = store.state.settings
+    val resting = lanes.isEmpty() // D-6: every language is OFF — the pool cannot start a session
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).tagged("learn")) {
         ScreenTopBar(store, "")
         BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 12.dp)) {
             val size = minOf(maxWidth * 0.72f, 290.dp)
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Pool(lanes = lanes.map { it.code to poolColour(store, it) }, due = minOf(24, due), onStart = { store.startSession(SessionOrigin.POOL) }, size = size)
+                Pool(lanes = lanes.map { it.code to poolColour(store, it) }, due = minOf(24, due), onStart = { store.startSession(SessionOrigin.POOL) }, size = size, enabled = !resting)
             }
         }
         Text(
-            if (due > 0) Copy.POOL_DUE else Copy.POOL_STILL,
+            when { resting -> Copy.ALL_RESTING; due > 0 -> Copy.POOL_DUE; else -> Copy.POOL_STILL },
             style = t.body, color = p.ink2, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp).tagged("pool-caption"),
         )
+        if (resting) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                QuietButton(Copy.OPEN_LANGUAGES, onClick = { store.setView("languages") }, testTag = "open-languages")
+            }
+        }
 
         // D-14(3): the pedagogically significant switches where the pedagogy happens.
         SoftCard {

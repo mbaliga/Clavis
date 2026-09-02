@@ -10,6 +10,7 @@ import io.github.mbaliga.clavis.core.ImportedFile
 import io.github.mbaliga.clavis.core.Lang
 import io.github.mbaliga.clavis.core.Speaker
 import io.github.mbaliga.clavis.core.platformName
+import kotlinx.coroutines.CoroutineDispatcher
 
 /**
  * Everything the UI needs from the platform, bundled so `ClavisApp` takes one argument. Each
@@ -81,3 +82,9 @@ expect fun scriptFallbackFonts(): List<Font>
 
 /** The platform's reduced-motion preference (Android: animator duration scale 0; desktop: false). */
 expect fun platformReducedMotion(): Boolean
+
+/** A dispatcher for blocking file writes, limited to one thread so writes stay ordered (`ClavisStore.save`). */
+expect fun ioDispatcher(): CoroutineDispatcher
+
+/** Runs [block] to completion on the calling thread (`runBlocking`; not part of the common coroutines API). */
+expect fun <T> runBlockingCompat(block: suspend () -> T): T

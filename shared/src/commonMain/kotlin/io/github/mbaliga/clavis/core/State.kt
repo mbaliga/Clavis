@@ -46,9 +46,13 @@ data class Settings(
 @Serializable
 data class Band(val lo: Double, val hi: Double, val lab: String, val n: Int, val hit: Double? = null)
 
-/** Baseline-test result (template-spec §1.8). */
+/**
+ * Baseline-test result (template-spec §1.8). [pool] names the candidate-filter rule that produced
+ * it (`"unicode"`, D-19); null for results imported from the web build, whose ASCII-only pool
+ * makes the threshold not numerically comparable.
+ */
 @Serializable
-data class TestResult(val done: Long, val thr: Double, val fa: Double, val bands: List<Band>, val ms: Long)
+data class TestResult(val done: Long, val thr: Double, val fa: Double, val bands: List<Band>, val ms: Long, val pool: String? = null)
 
 @Serializable
 data class BanditState(var w: Double = 0.2, val hist: MutableList<Double> = mutableListOf())

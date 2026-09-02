@@ -224,7 +224,8 @@ def read_credits(ep, folder):
         warn(f'ep{ep.num:02d} {folder}/info.json unreadable: {e}')
         return None
     cr = d.get('credits') or {}
-    return {k: [str(x) for x in (v or [])] for k, v in cr.items() if isinstance(v, list)}
+    # blank entries (ep33 ja/ru proofreading) would become dangling ', ' in ATTRIBUTION.md and empty names in the manifest
+    return {k: [s for x in (v or []) if (s := str(x).strip())] for k, v in cr.items() if isinstance(v, list)}
 
 
 # ----------------------------------------------------------------------------- main

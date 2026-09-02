@@ -11,14 +11,19 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import io.github.mbaliga.clavis.core.AppDirs
 import io.github.mbaliga.clavis.core.AudioPlayer
+import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.FileImporter
+import io.github.mbaliga.clavis.core.ImportLimits
+import io.github.mbaliga.clavis.core.ImportRefusedException
 import io.github.mbaliga.clavis.core.ImportedFile
 import io.github.mbaliga.clavis.core.Lang
 import io.github.mbaliga.clavis.core.Speaker
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
 import java.util.Locale
 
 class AndroidAppDirs(ctx: Context) : AppDirs {
@@ -31,10 +36,19 @@ class AndroidAppDirs(ctx: Context) : AppDirs {
  * Android `TextToSpeech` (D-8, brief K): locale matching exact → language → none, rate 0.85,
  * cancel-before-speak; `canSpeak` is true only when a voice for the locale is installed.
  */
-class AndroidSpeaker(ctx: Context) : Speaker, LocaleAware {
+class AndroidSpeaker(ctx: Context, private val onReady: () -> Unit = {}) : Speaker, LocaleAware {
     override var localeFor: (Lang) -> String? = { null }
     @Volatile private var ready = false
-    private val tts: TextToSpeech = TextToSpeech(ctx.applicationContext) { status -> ready = status == TextToSpeech.SUCCESS }
+    private val tts: TextToSpeech = TextToSpeech(ctx.applicationContext) { status ->
+        ready = status == TextToSpeech.SUCCESS
+        if (ready) onReady() // Speak buttons composed before the engine bound can now appear
+    }
+
+    /** Releases the engine binding; the Activity calls this from `onDestroy` (a `TextToSpeech` must be shut down). */
+    fun shutdown() {
+        ready = false
+        runCatching { tts.stop(); tts.shutdown() }
+    }
 
     private fun locale(l: Lang): Locale? {
         if (!ready) return null
@@ -101,13 +115,41 @@ class AndroidFileImporter(private val activity: ComponentActivity) : FileImporte
         return withContext(Dispatchers.IO) {
             val cr = activity.contentResolver
             var name = "import.txt"
-            cr.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) name = c.getString(0) ?: name }
+            var declared: Long? = null
+            cr.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use { c ->
+                if (c.moveToFirst()) {
+                    name = c.getString(0) ?: name
+                    if (!c.isNull(1)) declared = c.getLong(1)
+                }
+            }
             val ext = name.substringAfterLast('.', "").lowercase()
             if (allowedExtensions.isNotEmpty() && ext !in allowedExtensions) return@withContext null
-            val text = cr.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: return@withContext null
+            val text = cr.openInputStream(uri)?.use { readBoundedText(it, declared) } ?: return@withContext null
             ImportedFile(name, text)
         }
     }
+}
+
+/**
+ * Reads at most [ImportLimits.MAX_BYTES] from [input] (the picker's filters are advisory, so a
+ * 500 MB file or a binary renamed `.srt` can arrive here) and refuses anything larger or not
+ * mostly text with an [ImportRefusedException] the UI shows as a toast.
+ */
+internal fun readBoundedText(input: InputStream, declaredSize: Long?): String {
+    if (declaredSize != null && declaredSize > ImportLimits.MAX_BYTES) throw ImportRefusedException(Copy.IMPORT_TOO_LARGE)
+    val out = ByteArrayOutputStream()
+    val buf = ByteArray(64 * 1024)
+    var total = 0L
+    while (true) {
+        val n = input.read(buf)
+        if (n < 0) break
+        total += n
+        if (total > ImportLimits.MAX_BYTES) throw ImportRefusedException(Copy.IMPORT_TOO_LARGE)
+        out.write(buf, 0, n)
+    }
+    val text = out.toByteArray().decodeToString()
+    if (!ImportLimits.isText(text)) throw ImportRefusedException(Copy.IMPORT_NOT_TEXT)
+    return text
 }
 
 /** The platform share sheet (opt-in feedback flow, D-11; nothing is sent by the app itself, D-13). */

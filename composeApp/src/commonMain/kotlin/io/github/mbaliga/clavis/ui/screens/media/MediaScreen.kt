@@ -38,6 +38,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.mbaliga.clavis.core.Copy
+import io.github.mbaliga.clavis.core.ImportLimits
+import io.github.mbaliga.clavis.core.ImportRefusedException
 import io.github.mbaliga.clavis.core.ImportedFile
 import io.github.mbaliga.clavis.core.ImportedMedia
 import io.github.mbaliga.clavis.core.Lang
@@ -133,7 +135,19 @@ fun MediaScreen(store: ClavisStore, ui: UiState) {
 
     fun stage(file: ImportedFile) {
         val (_, lines) = MediaParse.parse(file.name, file.text)
+        if (lines.size > ImportLimits.MAX_LINES) store.toast(Copy.IMPORT_TRUNCATED) // the store keeps the first MAX_LINES
         pending = file to MediaParse.guessLang(lines, lanes, store.registry, store.corpus)
+    }
+
+    /** Opens the platform picker; a refused file (too big, not text) becomes a toast, never a crash. */
+    fun importFile() {
+        scope.launch {
+            try {
+                store.services.importer.pickText()?.let { stage(it) }
+            } catch (e: ImportRefusedException) {
+                store.toast(e.message ?: Copy.IMPORT_NOT_TEXT)
+            }
+        }
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).tagged("view-media")) {
@@ -142,7 +156,7 @@ fun MediaScreen(store: ClavisStore, ui: UiState) {
         Text(MediaCopy.INTRO, style = t.body, color = p.ink2, modifier = Modifier.padding(top = 6.dp))
         CitedText(MediaCopy.INTRO_2, onCite = store::openColophon, color = p.ink2, style = t.small, modifier = Modifier.padding(top = 4.dp, bottom = 10.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            PrimaryButton(MediaCopy.IMPORT, onClick = { scope.launch { store.services.importer.pickText()?.let { stage(it) } } }, testTag = "media-import")
+            PrimaryButton(MediaCopy.IMPORT, onClick = { importFile() }, testTag = "media-import")
             QuietButton(MediaCopy.PASTE, onClick = { showPaste = !showPaste }, testTag = "media-paste")
         }
         if (showPaste) {
@@ -157,7 +171,7 @@ fun MediaScreen(store: ClavisStore, ui: UiState) {
         val pend = pending
         if (pend != null) {
             val (file, guess) = pend
-            val (kind, lines) = remember(file) { MediaParse.parse(file.name, file.text) }
+            val (kind, lines) = remember(file) { MediaParse.parse(file.name, file.text).let { (k, ls) -> k to ls.take(ImportLimits.MAX_LINES) } }
             SoftCard(Modifier.padding(top = 10.dp).tagged("media-pending")) {
                 Text(file.name, style = t.h3, color = p.ink)
                 Text("${kind.uppercase()} · ${MediaCopy.lines(lines.size)}", style = t.small, color = p.ink2)

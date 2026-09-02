@@ -130,12 +130,15 @@ class ClavisEngine(
         const val PATHS_WORDS_SHOWN = 3
         const val STORY_MIN_SCENES = 6
 
+        /** Value of `tests{l}.pool` written by [finish]: the candidate filter admitted Unicode letters (D-19). */
+        const val TEST_POOL_UNICODE = "unicode"
+
         /**
-         * The template's pool filter is `/^[^\W\d_]+$/u`. With the `u` flag JavaScript's `\w` is
-         * still ASCII-only, so the class admits A–Z/a–z and nothing else ("poción" fails —
-         * verified in Node). Reproduced exactly; see README "quirks preserved".
+         * D-19: the baseline pool admits any Unicode letter. The template's `/^[^\W\d_]+$/u` keeps
+         * `\w` ASCII-only in JavaScript, so `poción`, `über`, `città` and every diacritic-bearing
+         * lemma could never be drawn — a defect, not a design choice — and it is not reproduced.
          */
-        private val ASCII_LETTERS = Regex("^[A-Za-z]+$")
+        private val UNICODE_LETTERS = Regex("^\\p{L}+$")
     }
 
     // ------------------------------------------------------------------ state accessors
@@ -381,6 +384,10 @@ class ClavisEngine(
     override fun startSession(now: Long): Session {
         rollDay(now)
         val s = Session(n = state.settings.sessionSize, start = now)
+        if (activeLanes().isEmpty()) { // D-6: a resting language is never served; the UI shows the reason instead of a session
+            s.blocked = Copy.ALL_RESTING
+            return s
+        }
         val intent = state.intent
         if (intent != null) {
             s.hold = Lang(intent.l)
@@ -400,7 +407,7 @@ class ClavisEngine(
     fun startGameSession(now: Long): Session {
         state.intent = null
         val s = startSession(now)
-        s.cur = makeLangId(now)
+        if (s.blocked == null) s.cur = makeLangId(now)
         return s
     }
 
@@ -617,8 +624,8 @@ class ClavisEngine(
         val latin = registry[l]?.script == Script.LATIN
         val pool = corpus.lexArr[l].orEmpty().filter { x ->
             x.zipf > 0 &&
-                (!latin || (x.lemma.length >= TEST_LATIN_MIN_LEN && ASCII_LETTERS.matches(x.lemma))) &&
-                !(x.surface.firstOrNull()?.let { it in 'A'..'Z' } ?: false)
+                (!latin || (x.lemma.length >= TEST_LATIN_MIN_LEN && UNICODE_LETTERS.matches(x.lemma))) &&
+                x.surface.firstOrNull()?.isUpperCase() != true // proper-noun filter, Unicode-aware (D-19: `École` is capitalised too)
         }
         val items = mutableListOf<TestItem>()
         for (b in BANDS) {
@@ -667,7 +674,7 @@ class ClavisEngine(
                 if (cs[x.lm] == null) cs[x.lm] = scheduler.introCard(now)
             }
         }
-        val res = TestResult(done = now, thr = thrZ, fa = fa, bands = bands, ms = now - t.start)
+        val res = TestResult(done = now, thr = thrZ, fa = fa, bands = bands, ms = now - t.start, pool = TEST_POOL_UNICODE)
         state.tests[l.code] = res
         log(LogEntry(t = now, l = l.code, type = "test", thr = thrZ, fa = fa))
         val toast = if (thrZ >= UNTESTED_THR) Copy.testBrandNew(langName(l)) else Copy.testAssumes(langName(l), bandLabel(thrZ))
@@ -731,18 +738,29 @@ class ClavisEngine(
             out.add(b)
             if (out.size >= PATHS_MAX_LANE_BRANCHES) break
         }
-        // D-14: a script primer comes before free reading when a lane needs one and Letters has not been visited
-        val primer = active.firstOrNull { registry[it]?.needsScriptPrimer == true && state.coach["letters:${it.code}"] != true }
-        if (primer != null && out.size < PATHS_MAX_FAN) {
+        // The floors (template §6.2) are decided on the lane-branch count alone: READ whenever fewer than
+        // PATHS_MAX_FAN lane branches exist (always, given the cap of 4), GAME when it still fits under the cap.
+        val laneBranches = out.size
+        val floors = mutableListOf<Branch>()
+        val readLane = active.firstOrNull { state.tests[it.code] != null } ?: active.firstOrNull()
+        if (readLane != null && laneBranches < PATHS_MAX_FAN) {
+            floors.add(Branch(BranchKind.READ, readLane, 0.0, Copy.readTitle(langName(readLane)), Copy.READ_WHY, Copy.READ_THEN, cites = listOf(15, 17)))
+        }
+        if (active.size >= PATHS_GAME_MIN_LANES && laneBranches + floors.size < PATHS_MAX_FAN) {
+            floors.add(Branch(BranchKind.GAME, null, 0.0, Copy.GAME_TITLE, Copy.GAME_WHY, Copy.GAME_THEN, cites = listOf(33)))
+        }
+        // D-14 / D-21: a script primer comes before free reading when an active lane needs one, the app
+        // ships a primer for it, and Letters has not been visited (taking the branch or opening the tab
+        // clears it). It is an extra branch that never displaces the floors, so the fan may hold
+        // PATHS_MAX_FAN + 1 entries.
+        val primer = active.firstOrNull { l ->
+            val info = registry[l]
+            info != null && info.needsScriptPrimer && info.hasScriptPrimer && state.coach["letters:${l.code}"] != true
+        }
+        if (primer != null) {
             out.add(Branch(BranchKind.LETTERS, primer, 0.0, Copy.lettersTitle(langName(primer)), Copy.LETTERS_WHY, Copy.LETTERS_THEN))
         }
-        val readLane = active.firstOrNull { state.tests[it.code] != null } ?: active.firstOrNull()
-        if (readLane != null && out.size < PATHS_MAX_FAN) {
-            out.add(Branch(BranchKind.READ, readLane, 0.0, Copy.readTitle(langName(readLane)), Copy.READ_WHY, Copy.READ_THEN, cites = listOf(15, 17)))
-        }
-        if (active.size >= PATHS_GAME_MIN_LANES && out.size < PATHS_MAX_FAN) {
-            out.add(Branch(BranchKind.GAME, null, 0.0, Copy.GAME_TITLE, Copy.GAME_WHY, Copy.GAME_THEN, cites = listOf(33)))
-        }
+        out.addAll(floors)
         return out
     }
 

@@ -19,6 +19,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 class MainActivity : ComponentActivity() {
     private var store: ClavisStore? = null
+    private var speaker: AndroidSpeaker? = null
 
     @OptIn(ExperimentalResourceApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,9 +27,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if (!AndroidApp.ready) AndroidApp.context = applicationContext
         val importer = AndroidFileImporter(this) // must be registered before STARTED
+        // The engine binds asynchronously; once it is ready the store re-renders so Speak buttons appear.
+        val tts = AndroidSpeaker(applicationContext) { runOnUiThread { store?.refresh() } }
+        speaker = tts
         val services = PlatformServices(
             dirs = AndroidAppDirs(applicationContext),
-            speaker = AndroidSpeaker(applicationContext),
+            speaker = tts,
             audio = AndroidAudioPlayer(applicationContext),
             importer = importer,
             downloader = HttpDownloader(),
@@ -43,8 +47,15 @@ class MainActivity : ComponentActivity() {
         setContent { ClavisApp(s) }
     }
 
+    /** The process may be killed any time after this: write the learner document now. */
+    override fun onStop() {
+        store?.flushSaves()
+        super.onStop()
+    }
+
     override fun onDestroy() {
-        store?.services?.speaker?.stop()
+        speaker?.shutdown() // a TextToSpeech binding must be released, not just stopped
+        speaker = null
         super.onDestroy()
     }
 }

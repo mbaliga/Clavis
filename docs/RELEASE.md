@@ -75,7 +75,7 @@ Create the app with package `io.github.mbaliga.clavis`. Under *App integrity →
 
 ## 2. Before tagging
 
-1. Bump `shared/src/commonMain/kotlin/io/github/mbaliga/clavis/core/ClavisVersion.kt` (`NAME`, and `CODE` to the value `./gradlew :composeApp:clavisVersion` prints for it). The build derives everything else from the version; `preflight` fails a tag that disagrees with `NAME`.
+1. Bump `shared/src/commonMain/kotlin/io/github/mbaliga/clavis/core/ClavisVersion.kt` (`NAME`, and `CODE` to the value `./gradlew :composeApp:clavisVersion` prints for it — `MAJOR·10000 + MINOR·100 + PATCH`; `FsrsTest` fails when the two disagree). The build derives everything else from the version; `preflight` fails a tag that disagrees with `NAME`.
 2. `CHANGELOG.md`: move *Unreleased* into `## [X.Y.Z] — YYYY-MM-DD`; every `@Serializable` state change has a *State migration* line, every regenerated pack its version and licence (D-7, D-12); *Known pre-release requirements* keeps the D-18 sentence.
 3. `THIRD_PARTY_NOTICES.md` and `NOTICE`: run the review procedure in `THIRD_PARTY_NOTICES.md`; regenerate the packs' `ATTRIBUTION.md` from the pipeline run that produced the shipped packs — never by hand.
 4. `README.md`, `PRIVACY.md`, `SECURITY.md`, `docs/STORE-LISTING.md`: still true?
@@ -123,10 +123,10 @@ Non-tag builds (`CLAVIS_VERSION` unset) carry `ClavisVersion.NAME`; CI's debug A
 ## 6. Google Play
 
 - *Testing → Closed testing*: upload `clavis-X.Y.Z-android.aab` (signed). Personal developer accounts created after 13 November 2023 must run a closed test with at least 12 testers opted in for 14 days before applying for production.
-- *App content → Data safety*: "Does your app collect or share any of the required user data types?" → **No**. Nothing is transmitted; learner state, review log and settings stay on the device; no accounts; crash logs are not collected (crash recovery is local-only, D-11/D-13). When optional downloads ship they are user-initiated fetches of public files and the answer stays **No** (the `INTERNET` permission will then appear in the manifest). Deletion: uninstall or Settings → Reset everything.
+- *App content → Data safety*: "Does your app collect or share any of the required user data types?" → **No**. Nothing is transmitted; learner state, review log and settings stay on the device; no accounts; crash logs are not collected (crash recovery is local-only, D-11/D-13). Recording downloads are user-initiated fetches of public files over HTTPS and the answer stays **No**; the manifest declares `INTERNET` for exactly that path (packs and voices will use it when they ship). Deletion: uninstall or Settings → Reset everything.
 - Other declarations: Ads → none; App access → no restricted access; Content rating questionnaire (IARC, Education/Reference); Target audience → 18 and over (Clavis is not for children, docs/04-personas.md); News, Government, Financial, Health → no; Privacy policy URL → the raw `PRIVACY.md` of the tagged commit (recommended even though not required for a no-data app).
 - Store listing: copy from `docs/STORE-LISTING.md` only — it is written to D-18 (N=1 stated up front, no forbidden vocabulary). Assets: icon 512 × 512 PNG with alpha (≤ 1 MB), feature graphic 1024 × 500 JPEG/PNG without alpha, ≥ 2 (aim for 4+) phone screenshots and 4+ tablet screenshots, 320–3840 px. The R8 mapping is read from the AAB automatically.
-- Target API: Play requires `targetSdk` 36 for new apps and updates since 2026-08-31 (extension possible to 2026-11-01). The build targets 35 until the bump is verified — §9.
+- Target API: Play requires `targetSdk` 36 for new apps and updates since 2026-08-31 (extension possible to 2026-11-01). The build compiles against and targets API 36 (`gradle/libs.versions.toml`, bumped 2026-09-02); the API-36 device pass in §9 is still open.
 - Promote to production only after the closed-test window and the acceptance pass.
 
 ## 7. Unsigned desktop installers, and signing later
@@ -141,20 +141,18 @@ Non-tag builds (`CLAVIS_VERSION` unset) carry `ClavisVersion.NAME`; CI's debug A
 
 - Actions are pinned to **major tags** of release lines that run on Node 24 (GitHub removes Node 20 from hosted runners on 2026-09-23): `checkout@v7`, `setup-java@v6`, `gradle/actions/setup-gradle@v6`, `upload-artifact@v7`, `download-artifact@v8`, `setup-android@v4`, `setup-python@v7`, `softprops/action-gh-release@v3`. Dependabot proposes bumps monthly. Full-SHA pinning is stricter and was not adopted for a single-maintainer repo; if the repo gains contributors with write access, switch and keep the version in a trailing comment.
 - Runners are pinned images (`ubuntu-24.04`, `macos-15`, `windows-2025`), never `-latest`; image jumps are deliberate. macOS x64 is not built (no `macos-15-intel` job); add one if a user needs it.
-- The Android SDK numbers appear in three places: `gradle/libs.versions.toml`, the `setup-android` `packages:` input and the `build-tools/35.0.0` path in both workflows. Bump them together.
+- The Android SDK numbers appear in three places: `gradle/libs.versions.toml`, the `setup-android` `packages:` input and the `build-tools/36.0.0` path in both workflows. Bump them together.
 - Secrets reach Gradle only through `env:` on the steps that need them; `secrets` cannot be used in `if:`, so presence is converted into a step output first. Never run the signing steps with `--info`/`--debug`.
 - `-Dorg.gradle.jvmargs` is passed on the command line per job (3 GB on Linux/Windows, 2 GB plus a 1.5 GB Kotlin daemon on the 7 GB macOS runner); command-line values beat `gradle.properties`.
 - Validate edits with `actionlint` and `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"` before pushing.
 
 ## 9. Open items before the first stable tag
 
-- **`targetSdk` / `compileSdk` 36** (Play requirement since 2026-08-31): bump `android-compileSdk` and `android-targetSdk` in `gradle/libs.versions.toml`, install `platforms;android-36` and `build-tools;36.0.0`, update the two workflows' SDK strings and re-run `docs/build-platform.md` §5; then test on an API 36 emulator: predictive back through the navigation, edge-to-edge insets, Arabic line height (`elegantTextHeight` is ignored from 36), TalkBack, RTL, 200 % font scale, ≥ 600 dp widths.
+- **API-36 device pass** (`compileSdk`/`targetSdk` are 36 since 2026-09-02, both workflows install `platforms;android-36` and `build-tools;36.0.0`, `docs/build-platform.md` §5 records the green build): test on an API 36 emulator — predictive back through the navigation, edge-to-edge insets, Arabic line height (`elegantTextHeight` is ignored from 36), TalkBack, RTL, 200 % font scale, ≥ 600 dp widths.
 - **Android backup rules**: exclude `clavis-state.json` from cloud backup (`android:dataExtractionRules`), keep device-to-device transfer, and update `PRIVACY.md`.
-- **Desktop data directory**: the desktop shell must resolve the paths `PRIVACY.md` names (`$XDG_DATA_HOME/clavis`, `~/Library/Application Support/Clavis`, `%APPDATA%\Clavis`) or the document must be corrected.
 - **Font notices**: the OFL header files for the Noto families were not retrievable when the fonts were fetched; the notice table in `THIRD_PARTY_NOTICES.md` uses the upstream copyright lines — confirm against the bundled files' `name` tables.
-- **Icons**: `nativeDistributions` has no `iconFile` yet for Linux/macOS/Windows; the desktop icon work is tracked separately.
 - **Name**: "Clavis" is a working name; a trademark check precedes the first store listing.
-- Removing the literal `versionCode = 1` / `versionName = "0.1.0"` / `packageVersion = "1.0.0"` fallbacks from `composeApp/build.gradle.kts` once the parallel desktop-icon change has merged (the versioning block overrides them today).
+- Removing the literal `versionCode = 100` / `versionName = "0.1.0"` / `packageVersion = "1.0.0"` fallbacks from `composeApp/build.gradle.kts` (the versioning block overrides them today).
 
 ## 10. Rollback
 

@@ -22,7 +22,7 @@ fun main() = application {
     val store = remember { ClavisStore(services, readResource = { path -> Res.readBytes(path) }) }
     val icon = remember { runCatching { BitmapPainter(useResource("icons/icon-256.png", ::loadImageBitmap)) }.getOrNull() }
     Window(
-        onCloseRequest = ::exitApplication,
+        onCloseRequest = { store.flushSaves(); exitApplication() }, // write the learner document before the JVM goes
         title = "Clavis",
         icon = icon,
         state = rememberWindowState(size = DpSize(1100.dp, 780.dp)),

@@ -205,6 +205,19 @@ class SelectionTest {
         assertEquals(LaneChoice(Fx.ES, "nothing else is open"), e.chooseLane(now, null))
     }
 
+    @Test fun startSessionIsBlockedWhenEveryLaneIsResting() { // D-6: a paused language is never served
+        val e = Fx.engine()
+        for (l in Fx.registry.order) e.state.lanes[l.code] = LaneMode.OFF
+        val s = e.startSession(now)
+        assertNull(s.cur); assertEquals(Copy.ALL_RESTING, s.blocked); assertFalse(s.done); assertTrue(s.lanes.isEmpty())
+        assertTrue(e.state.log.isEmpty()); assertTrue(e.state.cards.values.all { it.isEmpty() }); assertTrue(e.state.newToday.values.all { it == 0 })
+        val g = e.startGameSession(now)
+        assertNull(g.cur); assertEquals(Copy.ALL_RESTING, g.blocked)
+        e.state.lanes["es"] = LaneMode.REC
+        val open = e.startSession(now)
+        assertNull(open.blocked); assertNotNull(open.cur); assertEquals(Fx.ES, open.cur!!.l)
+    }
+
     // ------------------------------------------------------------ echo / langid
 
     private fun echoReady(e: ClavisEngine) {

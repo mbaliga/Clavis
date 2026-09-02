@@ -4,24 +4,24 @@ Clavis collects no data. There is no account, no server, no sync, no analytics, 
 
 ## What the app stores
 
-One JSON document per profile, `clavis-state.json`, containing your learning state: enabled languages and their productive/receptive setting, cards and their spaced-repetition schedule, the review log, baseline-test results, Paths history, settings, and the notebook of words you looked up or imported. Downloaded content packs and voices, when that feature ships, are stored next to it as plain files. Nothing is encrypted at rest beyond what the operating system provides for per-app storage; nothing in the document identifies you unless you type it in.
+One JSON document per profile, `clavis-state.json`, containing your learning state: enabled languages and their productive/receptive setting, cards and their spaced-repetition schedule, the review log, baseline-test results, Paths history, settings, and the texts you imported. Recordings you tap to play (Wikimedia Commons word audio, Tatoeba sentence audio) are cached as plain files under the app's cache directory, named by a hash of their address; optional content packs and voices, when they ship, will be stored next to the state document. If the state document cannot be read at start-up, it is kept beside a fresh one as `clavis-state.json.corrupt-<timestamp>` and the app says so. Nothing is encrypted at rest beyond what the operating system provides for per-app storage; nothing in the document identifies you unless you type it in.
 
 ## Where it lives
 
-| Platform | Location |
-|---|---|
-| Android | the app's private storage (`Context.filesDir`, i.e. `/data/data/io.github.mbaliga.clavis/files/`), readable only by Clavis |
-| Linux | `$XDG_DATA_HOME/clavis/` (default `~/.local/share/clavis/`) |
-| macOS | `~/Library/Application Support/Clavis/` |
-| Windows | `%APPDATA%\Clavis\` |
+| Platform | Learner state | Cache (tapped recordings) |
+|---|---|---|
+| Android | the app's private storage (`Context.filesDir`, i.e. `/data/data/io.github.mbaliga.clavis/files/`), readable only by Clavis | the app's private cache (`Context.cacheDir`) |
+| Linux | `$XDG_DATA_HOME/Clavis/` (default `~/.local/share/Clavis/`) | `$XDG_CACHE_HOME/Clavis/` (default `~/.cache/Clavis/`) |
+| macOS | `~/Library/Application Support/Clavis/` | `~/Library/Caches/Clavis/` |
+| Windows | `%APPDATA%\Clavis\` | `%LOCALAPPDATA%\Clavis\cache\` |
 
-The desktop paths are the ones the packaged app resolves; the debug/desktop entry points name the directory they use when started from a terminal.
+These are the directories the desktop shell resolves (`DesktopAppDirs`; the directory name is `Clavis` with a capital C on every platform, which matters on case-sensitive file systems).
 
 ## What can leave the device, and only when you act
 
 1. **Export.** You → Export writes your state document to a file you choose. Where that file goes afterwards is up to you; it contains everything in the section above.
 2. **Feedback.** The feedback flow, when present, opens your system share sheet with text you see and edit first; Clavis does not send it anywhere itself (docs/DECISIONS.md D-11).
-3. **Optional downloads.** When you start a download of an optional content pack, a Piper voice or a word recording, the app fetches public files over HTTPS from the source named in that dialog. Such a request carries what any HTTPS download carries (your IP address and a user agent) and nothing else; Clavis keeps only the downloaded file. Until that feature ships the Android build has no `INTERNET` permission at all.
+3. **Downloads you start.** When you tap *Play* or *Download* on a recording, the app fetches that one public file over HTTPS — from Wikimedia Commons or Tatoeba — and caches it under the cache directory above; optional content packs and Piper voices (from the Piper voice repository) will use the same path when they ship. Such a request carries what any HTTPS download carries (your IP address and a user agent naming Clavis and its version) and nothing else; Clavis keeps only the downloaded file, refuses anything that is not HTTPS, and stops at 25 MB. The Android build declares the `INTERNET` permission solely for this user-initiated path; nothing else in the app uses the network — nothing at start-up, nothing in the background.
 
 ## Android backup
 

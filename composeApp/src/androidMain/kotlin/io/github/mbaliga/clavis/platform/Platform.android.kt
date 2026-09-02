@@ -4,6 +4,9 @@ import android.content.Context
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.Font
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 /** Application context holder, set by [io.github.mbaliga.clavis.ClavisApplication]. */
 object AndroidApp {
@@ -21,3 +24,9 @@ actual fun platformReducedMotion(): Boolean = try {
 } catch (e: Exception) {
     false
 }
+
+private val singleWriter: CoroutineDispatcher by lazy { Dispatchers.IO.limitedParallelism(1) }
+
+actual fun ioDispatcher(): CoroutineDispatcher = singleWriter
+
+actual fun <T> runBlockingCompat(block: suspend () -> T): T = runBlocking { block() }

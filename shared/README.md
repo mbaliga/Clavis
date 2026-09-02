@@ -22,8 +22,11 @@ val registry = loader.languages()                    // packs/languages.json
 val corpus   = loader.loadCorpus()                   // scenes + lexicon (+ etym, pseudo, pages)
 val store    = JsonStateStore(appDirs, registry)     // clock = SystemClock, fileName = "clavis-state.json"
 val state    = store.loadOrFresh()                   // merge-on-load (§1.4) + D-12 lane fill; never rejects on `v`
+if (store.lastLoadWasCorrupt) toast(Copy.STATE_UNREADABLE) // the unreadable file was moved to clavis-state.json.corrupt-<epoch>, never overwritten
 val engine   = ClavisEngine(corpus, registry, state, SystemClock, Random.Default, LocalDayKey())
 ```
+
+`store.writeEncoded(json)` writes an already-encoded document atomically (temp file → fsync → rename); the UI encodes on its thread and hands the string to a single writer thread (composeApp `ClavisStore.save`). `startSession(now)` returns a session with `blocked != null` and `cur == null` when every lane is OFF — show `blocked` instead of opening the session.
 
 Call sequence for one session (the engine never calls back into the UI; the UI calls `store.save(engine.state)` after every mutation, like the web build's explicit `save()`):
 
@@ -48,7 +51,9 @@ Every method takes `now` explicitly (the web build's `Date.now()`), and the engi
 |---|---|---|
 | `activeLanes()` | registry order, lane not OFF **and present in the corpus** (the web filtered `byLang` at each call site, and counted lanes without scenes toward the ≥3-lane langid/game rule) | D-6 |
 | `chooseLane()` | when no lane is open returns the first registry language with scenes, why `nothing else is open` (the web threw) | D-14 |
-| `computeBranches()` | new floor branch `LETTERS` ("Learn the {Lang} script first") when an active lane `needsScriptPrimer` and `coach["letters:<iso>"] != true`; placed before READ and GAME within the fan cap of 5; `takeBranch` sets the coach flag and `letterTab` | D-14 |
+| `startSession()` | when every lane is OFF the session comes back *blocked* (`Session.blocked = Copy.ALL_RESTING`, `cur == null`, nothing mutated) instead of serving a paused language; the UI shows the reason and disables the Learn pool | D-6 |
+| `start()` (baseline test) | the candidate filter admits Unicode letters (`^\p{L}+$`) and drops capitalised surfaces with `isUpperCase()`; the web's `/^[^\W\d_]+$/u` keeps `\w` ASCII-only, so `poción`, `über`, `città` could never be drawn. `tests{l}.pool = "unicode"` records which rule produced a result (a web import has `pool == null`) | D-19 |
+| `computeBranches()` | new branch `LETTERS` ("Learn the {Lang} script first") when an active lane `needsScriptPrimer` **and** `hasScriptPrimer` and `coach["letters:<iso>"] != true`; placed before READ and GAME, but as an extra that never displaces those floors (they are decided on the lane-branch count alone), so the fan may hold 6 entries; `takeBranch` sets the coach flag and `letterTab`, and opening the tab in Letters sets it too | D-14, D-21 |
 | `startSession()` / `nextEncounter()` | `state.intent` is kept until the first encounter is consumed (`advance`), so Paths' `↶ undo` is reachable; the web nulled it immediately | D-14 |
 | `JsonStateStore.load()` | per-lane maps missing from a stored document are filled from the registry defaults (the web left them missing) | D-12 |
 | log | the 6000-entry cap is applied on every push (the web trimmed only on read/cloze pushes) | uniform bound |
@@ -58,7 +63,6 @@ Every method takes `now` explicitly (the web build's `Date.now()`), and the engi
 
 ## Quirks preserved on purpose
 
-- Baseline-test pool filter: the template's `/^[^\W\d_]+$/u` admits only ASCII letters in JavaScript (`\w` stays ASCII under the `u` flag), so Latin-script lemmas with accents (`poción`, `über`) never appear in the test — reproduced exactly (`ASCII_LETTERS`).
 - `pickForLane`'s due-scene sort breaks full ties at random; the port picks uniformly among the tied top group.
 - `unlockCount` keeps the redundant `unk.size <= learned.size + 1` bound.
 - `makeLangId` draws options from every registry language present in the corpus, including lanes set to OFF.

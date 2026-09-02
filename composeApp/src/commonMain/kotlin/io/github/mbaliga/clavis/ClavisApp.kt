@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -81,6 +82,7 @@ import io.github.mbaliga.clavis.ui.screens.you.YouScreen
 import io.github.mbaliga.clavis.ui.theme.ClavisMotion
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
 import io.github.mbaliga.clavis.ui.theme.ThemeMode
+import kotlinx.coroutines.delay
 
 /** Compact/expanded breakpoint (Material 3 window size classes; product-spec §3.4). */
 val COMPACT_MAX_WIDTH = 600.dp
@@ -99,6 +101,16 @@ fun ClavisApp(store: ClavisStore, darkOverride: Boolean? = null) {
     val dark = darkOverride ?: when (ui.theme) { ThemeMode.SYSTEM -> systemDark; ThemeMode.LIGHT -> false; ThemeMode.DARK -> true }
     val reduced = (ui.ready && !store.state.settings.motion) || store.services.reducedMotion()
     LaunchedEffect(Unit) { if (store.current.phase is Phase.Loading) store.boot() }
+    // Persistence: while the shell is composed a commit only marks the document dirty; the snapshot is
+    // taken here, on the UI thread, once the commits pause (see ClavisStore "persistence"), and written
+    // off-thread. Leaving the composition flushes synchronously so nothing is lost.
+    DisposableEffect(store) {
+        store.deferSnapshots = true
+        onDispose { store.deferSnapshots = false; store.flushSaves() }
+    }
+    LaunchedEffect(ui.rev) {
+        if (store.hasPendingSnapshot) { delay(ClavisStore.SAVE_COALESCE_MS); store.snapshot() }
+    }
     ClavisTheme(darkTheme = dark, reducedMotion = reduced) {
         Surface(color = ClavisTheme.palette.paper, modifier = Modifier.fillMaxSize()) {
             when (val ph = ui.phase) {
@@ -124,9 +136,10 @@ private fun CentredMessage(text: String, tag: String) {
 private fun Shell(store: ClavisStore, ui: UiState, reduced: Boolean) {
     val st = store.state
     val focus = remember { FocusRequester() }
+    val keys = remember { KeyGuard() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     BoxWithConstraints(
-        Modifier.fillMaxSize().focusRequester(focus).focusable().onKeyEvent { handleKey(store, ui, it) }.safeDrawingPadding(),
+        Modifier.fillMaxSize().focusRequester(focus).focusable().onKeyEvent { handleKey(store, ui, it, keys) }.safeDrawingPadding(),
     ) {
         val compact = maxWidth < COMPACT_MAX_WIDTH
         val active = activeNav(st.view)
@@ -212,11 +225,40 @@ private fun digitIndex(k: Key): Int? = when (k) {
 }
 
 /**
+ * Keyboard re-entrancy guard: OS auto-repeat delivers KeyDown after KeyDown while a key is held,
+ * and a read encounter is finished by a single press — so a read is finished only on the first
+ * KeyDown after a KeyUp of that key, and never twice within [READ_DEBOUNCE_MS] (the next
+ * encounter may be a read too, under the same key).
+ */
+class KeyGuard(private val wall: () -> Long = { io.github.mbaliga.clavis.core.SystemClock.now() }) {
+    private val held = HashSet<Key>()
+    private var lastReadFinish = 0L
+
+    /** Records the event; true when this KeyDown repeats a key that was never released. */
+    fun isRepeat(ev: KeyEvent): Boolean = when (ev.type) {
+        KeyEventType.KeyDown -> !held.add(ev.key)
+        KeyEventType.KeyUp -> { held.remove(ev.key); false }
+        else -> false
+    }
+
+    /** True at most once per [READ_DEBOUNCE_MS]; the caller finishes the read only then. */
+    fun allowReadFinish(): Boolean {
+        val t = wall()
+        if (t - lastReadFinish < READ_DEBOUNCE_MS) return false
+        lastReadFinish = t
+        return true
+    }
+
+    companion object { const val READ_DEBOUNCE_MS = 600L }
+}
+
+/**
  * Desktop keyboard map (product-spec §8.9, brief C): 1–5 dock destinations; Esc leaves modal
  * states through the same confirm as the button; test ←/n →/y; cloze 1–3; langid 1–4; echo 1–3;
  * Space/Enter = primary action. Text fields consume their own keys before this sees them.
  */
-internal fun handleKey(store: ClavisStore, ui: UiState, ev: KeyEvent): Boolean {
+internal fun handleKey(store: ClavisStore, ui: UiState, ev: KeyEvent, guard: KeyGuard): Boolean {
+    val repeat = guard.isRepeat(ev)
     if (ev.type != KeyEventType.KeyDown || !store.ready) return false
     val st = store.state
     val k = ev.key
@@ -265,8 +307,9 @@ internal fun handleKey(store: ClavisStore, ui: UiState, ev: KeyEvent): Boolean {
                 if (k == Key.P) { store.toggleFullPage(); return true }
             }
             is Encounter.Read -> {
-                if (k == Key.U || primary) { store.finishRead(true); return true }
-                if (k == Key.T) { store.finishRead(false); return true }
+                // a held key or a second press within the debounce window must not grade the next read too
+                if (k == Key.U || primary) { if (!repeat && guard.allowReadFinish()) store.finishRead(true); return true }
+                if (k == Key.T) { if (!repeat && guard.allowReadFinish()) store.finishRead(false); return true }
                 if (k == Key.E) { store.showEnglish(); return true }
                 if (k == Key.P) { store.toggleFullPage(); return true }
             }

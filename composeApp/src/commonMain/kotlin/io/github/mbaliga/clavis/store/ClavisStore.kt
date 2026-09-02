@@ -9,6 +9,7 @@ import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.Corpus
 import io.github.mbaliga.clavis.core.DayKey
 import io.github.mbaliga.clavis.core.Encounter
+import io.github.mbaliga.clavis.core.ImportLimits
 import io.github.mbaliga.clavis.core.ImportedMedia
 import io.github.mbaliga.clavis.core.Lang
 import io.github.mbaliga.clavis.core.LaneMode
@@ -27,18 +28,24 @@ import io.github.mbaliga.clavis.core.data.DefaultContentPackLoader
 import io.github.mbaliga.clavis.core.engine.ClavisEngine
 import io.github.mbaliga.clavis.core.freshState
 import io.github.mbaliga.clavis.core.lineOf
+import io.github.mbaliga.clavis.core.sha256Hex
 import io.github.mbaliga.clavis.core.state.FileIo
 import io.github.mbaliga.clavis.core.state.JsonStateStore
 import io.github.mbaliga.clavis.platform.PlatformServices
+import io.github.mbaliga.clavis.platform.ioDispatcher
+import io.github.mbaliga.clavis.platform.runBlockingCompat
 import io.github.mbaliga.clavis.ui.theme.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
@@ -46,7 +53,9 @@ import kotlin.random.Random
  * The application holder: owns the loaded packs, the engine, the state store and the transient
  * UI state, and exposes intents. Every intent that changes the learner document is followed by a
  * save, like the web build's `save()`. All intents are synchronous and must be called from the
- * UI thread; only [boot] suspends.
+ * UI thread; only [boot] suspends. Persistence is cheap on that thread: a commit marks the
+ * document dirty, the shell snapshots it once per burst, and one writer thread does the file work
+ * (see "persistence" below).
  *
  * Determinism hook for tests: pass a seeded [random] and a fixed [clock].
  */
@@ -62,6 +71,10 @@ class ClavisStore(
         val PRIMARY_VIEWS = listOf("learn", "cosmos", "paths", "letters", "you")
         val VALID_VIEWS = PRIMARY_VIEWS + listOf("set", "colophon", "story", "languages", "media")
         val MORPH_VIEWS = setOf("learn", "cosmos", "paths")
+        /** Quiet time after the last commit before the shell snapshots the document. */
+        const val SAVE_COALESCE_MS = 100L
+        /** A burst of commits never postpones the snapshot longer than this. */
+        const val SAVE_MAX_DELAY_MS = 600L
     }
 
     /** A loaded pack bundle; tests share one across cases to avoid re-parsing 20 MB per test. */
@@ -123,6 +136,7 @@ class ClavisStore(
             engine.rollDay(now)
             val theme = prefs.load().theme
             _ui.update { it.copy(phase = Phase.Ready, theme = theme, rev = it.rev + 1) }
+            if (stateStore.lastLoadWasCorrupt) toast(Copy.STATE_UNREADABLE) // the unreadable file sits beside the fresh one
         } catch (e: Throwable) {
             _ui.update { it.copy(phase = Phase.Failed(Copy.couldNotLoad(e.message ?: (e::class.simpleName ?: "unknown error")))) }
         }
@@ -138,10 +152,83 @@ class ClavisStore(
         if (save) save()
     }
 
-    /** Persists the learner document (atomic replace). Synchronous: the store has no suspension points. */
+    /** Bumps the revision without touching the document (a platform service became ready, e.g. TTS). */
+    fun refresh() = commit(save = false)
+
+    // ------------------------------------------------------------------ persistence (D-12)
+    //
+    // Encoding runs on the UI thread — the only thread that mutates the document, so a snapshot is
+    // always consistent. Writing (temp file → fsync → rename) runs on one writer thread, in order,
+    // and when several snapshots queue up only the newest is written. While the shell is composed
+    // (`deferSnapshots`) a commit merely marks the document dirty; the shell calls `snapshot()` once,
+    // SAVE_COALESCE_MS after the last commit and at most SAVE_MAX_DELAY_MS after the first. Without
+    // a shell (tests, a bare store) `save()` snapshots and writes synchronously, as the web build did.
+
+    private class Snapshot(val seq: Long, val json: String)
+
+    private val writer = CoroutineScope(SupervisorJob() + ioDispatcher())
+    private val writeQueue = Channel<Snapshot>(Channel.CONFLATED)
+    private val writeMutex = Mutex()
+    private var writtenSeq = 0L // guarded by writeMutex
+    private var seq = 0L // UI thread
+    private var latest: Snapshot? = null // UI thread
+    private var dirtySince = 0L // UI thread: wall-clock ms of the first commit not yet snapshotted; 0 = clean
+
+    /** Set by the shell while it is composed: commits defer their snapshot to [snapshot]; cleared (with a flush) when it leaves. */
+    var deferSnapshots: Boolean = false
+
+    /** True when the document changed since the last [snapshot]. */
+    val hasPendingSnapshot: Boolean get() = dirtySince != 0L
+
+    init {
+        writer.launch { for (s in writeQueue) writeSnapshot(s) }
+    }
+
+    /** Persists the learner document: deferred and coalesced while the shell is composed, synchronous otherwise. */
     fun save() {
         if (!ready) return
-        runCatching { blocking { stateStore.save(engine.state) } }
+        val wall = SystemClock.now()
+        if (dirtySince == 0L) dirtySince = wall
+        when {
+            !deferSnapshots -> flushSaves()
+            wall - dirtySince >= SAVE_MAX_DELAY_MS -> snapshot()
+        }
+    }
+
+    /** Encodes the document now (call on the UI thread) and hands it to the writer; a no-op when nothing changed. */
+    fun snapshot() {
+        if (!ready || dirtySince == 0L) return
+        dirtySince = 0L
+        val json = runCatching { stateStore.encode(engine.state) }.getOrNull() ?: return
+        val s = Snapshot(++seq, json)
+        latest = s
+        writeQueue.trySend(s)
+    }
+
+    /**
+     * Snapshots and writes synchronously. The shell calls it when it leaves the composition, the
+     * entry points before the process may die (activity stop, window close), tests before reading
+     * the file back.
+     */
+    fun flushSaves() {
+        if (!ready) return
+        snapshot()
+        val s = latest ?: return
+        runBlockingCompat { writeSnapshot(s) }
+    }
+
+    private suspend fun writeSnapshot(s: Snapshot) {
+        writeMutex.withLock {
+            if (s.seq <= writtenSeq) return // already written, or superseded by a flush
+            runCatching { stateStore.writeEncoded(s.json) }
+            writtenSeq = s.seq
+        }
+    }
+
+    /** Drops every queued snapshot: the document about to be written (import, reset) supersedes them. */
+    private fun discardQueued() {
+        runBlockingCompat { writeMutex.withLock { writtenSeq = seq } }
+        dirtySince = 0L
     }
 
     /** Runs a suspend function that never actually suspends, on the calling thread. */
@@ -270,6 +357,7 @@ class ClavisStore(
         if (!ready) return
         engine.rollDay(now)
         val s = engine.startSession(now)
+        s.blocked?.let { toast(it); return } // every lane resting (D-6): no session, the reason instead
         val enc = encounterUi(s)
         commit { it.copy(session = s, enc = enc, sessionOrigin = origin, test = null, colophon = null) }
     }
@@ -278,6 +366,7 @@ class ClavisStore(
         if (!ready) return
         engine.rollDay(now)
         val s = engine.startGameSession(now)
+        s.blocked?.let { toast(it); return }
         commit { it.copy(session = s, enc = encounterUi(s), sessionOrigin = SessionOrigin.BRANCH, test = null, colophon = null) }
     }
 
@@ -427,10 +516,10 @@ class ClavisStore(
 
     // ------------------------------------------------------------------ media (D-7 user-media) & tingles (§5.5)
 
-    /** Stores an imported text; returns its id. Files never leave the device (D-13). */
+    /** Stores an imported text (at most [ImportLimits.MAX_LINES] lines); returns its id. Files never leave the device (D-13). */
     fun addMedia(title: String, l: Lang, kind: String, lines: List<String>): String {
         val id = "m${now}-${random.nextInt(1_000_000)}"
-        state.media[id] = ImportedMedia(id = id, title = title.ifBlank { "untitled" }, lang = l.code, addedAt = now, kind = kind, lines = lines)
+        state.media[id] = ImportedMedia(id = id, title = title.ifBlank { "untitled" }, lang = l.code, addedAt = now, kind = kind, lines = lines.take(ImportLimits.MAX_LINES))
         commit()
         return id
     }
@@ -482,12 +571,8 @@ class ClavisStore(
         return when (tail) { "mp3", "ogg", "wav", "oga" -> if (tail == "oga") "ogg" else tail; else -> "mp3" }
     }
 
-    /** Local cache path for a recording URL (`<cache>/audio/<fnv64>.<ext>`). */
-    fun clipPath(url: String): String {
-        var h = -0x340d631b7bdddcdbL // FNV-1a 64 offset basis
-        for (ch in url) { h = h xor ch.code.toLong(); h *= 0x100000001b3L }
-        return "${services.dirs.cache}/audio/${h.toULong().toString(16)}.${clipFormat(url)}"
-    }
+    /** Local cache path for a recording URL: `<cache>/audio/<sha256 of the URL>.<ext>` — nothing from the URL itself reaches the file system. */
+    fun clipPath(url: String): String = "${services.dirs.cache}/audio/${sha256Hex(url.encodeToByteArray())}.${clipFormat(url)}"
 
     fun clipCached(url: String): Boolean = FileIo.exists(clipPath(url))
 
@@ -531,15 +616,17 @@ class ClavisStore(
 
     fun setPin(l: Lang?) { state.pin = l?.code; commit() }
 
-    fun exportJson(): String = blocking { stateStore.exportJson() }
+    fun exportJson(): String = stateStore.encode(engine.state)
 
     /** Returns true on success; toasts either way (`Restored` / `That doesn't look like a Clavis backup`). */
     fun importJson(text: String): Boolean = try {
-        val st = blocking { stateStore.importJson(text) }
+        discardQueued() // nothing older may land on disk after the imported document
+        val st = blocking { stateStore.importJson(text) } // throws before writing when the backup is bad
         engine.state = st
         if (st.view !in VALID_VIEWS) st.view = "learn"
         engine.rollDay(now)
         commit { it.copy(session = null, enc = null, test = null) }
+        flushSaves()
         toast(Copy.RESTORED)
         true
     } catch (e: Exception) {
@@ -548,10 +635,12 @@ class ClavisStore(
     }
 
     fun resetAll() {
+        discardQueued()
         runCatching { blocking { stateStore.reset() } }
         engine.state = freshState(registry, now)
         engine.rollDay(now)
         commit { it.copy(session = null, enc = null, test = null, colophon = null, confirm = null) }
+        flushSaves()
     }
 
     /** Scenes on the same page carrying a line in [l] (`pageOf`). */

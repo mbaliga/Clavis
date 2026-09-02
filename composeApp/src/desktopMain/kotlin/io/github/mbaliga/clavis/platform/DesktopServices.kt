@@ -2,7 +2,10 @@ package io.github.mbaliga.clavis.platform
 
 import io.github.mbaliga.clavis.core.AppDirs
 import io.github.mbaliga.clavis.core.AudioPlayer
+import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.FileImporter
+import io.github.mbaliga.clavis.core.ImportLimits
+import io.github.mbaliga.clavis.core.ImportRefusedException
 import io.github.mbaliga.clavis.core.ImportedFile
 import io.github.mbaliga.clavis.core.Lang
 import io.github.mbaliga.clavis.core.Speaker
@@ -14,7 +17,10 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
@@ -88,10 +94,12 @@ class PiperSpeaker(private val dirs: AppDirs, private val audio: AudioPlayer) : 
         Thread {
             runCatching {
                 val out = File.createTempFile("clavis-piper", ".wav")
+                // The text goes through stdin (never argv); merged stdout is discarded so a chatty voice cannot
+                // fill the pipe and block us, and a hung engine is killed after PIPER_TIMEOUT_S.
                 val proc = ProcessBuilder(bin.absolutePath, "--model", model.absolutePath, "--output_file", out.absolutePath, "--length_scale", "1.18")
-                    .redirectErrorStream(true).start()
+                    .redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start()
                 proc.outputStream.use { it.write(text.toByteArray()); it.write('\n'.code) }
-                proc.waitFor()
+                if (!proc.waitFor(PIPER_TIMEOUT_S, TimeUnit.SECONDS)) { proc.destroyForcibly(); out.delete(); return@runCatching }
                 val bytes = out.readBytes()
                 out.delete()
                 kotlinx.coroutines.runBlocking { audio.play(bytes, "audio/wav") }
@@ -101,14 +109,37 @@ class PiperSpeaker(private val dirs: AppDirs, private val audio: AudioPlayer) : 
 
     override fun stop() { audio.stop() }
     override fun providerFor(l: Lang): String? = voice(l)?.let { "Piper voice ${it.nameWithoutExtension}" }
+
+    companion object { const val PIPER_TIMEOUT_S = 30L }
 }
 
-/** The operating system's own voices, invoked as a process. */
+/**
+ * The operating system's own voices, invoked as a process. The utterance is never parsed as an
+ * option or by a shell: `say`, `spd-say` and `espeak-ng` get it after `--` (comic lines such as
+ * "- Non !" start with a hyphen), and PowerShell reads it from an environment variable.
+ */
 class SystemSpeaker(private val localeFor: (Lang) -> String?) : Speaker {
     @Volatile private var current: Process? = null
     private val macVoices: Map<String, String> by lazy { listMacVoices() }
     private val linuxBin: File? by lazy { onPath("spd-say") ?: onPath("espeak-ng") ?: onPath("espeak") }
     private val powershell: File? by lazy { onPath("powershell") ?: onPath("pwsh") }
+
+    companion object {
+        const val ENV_TEXT = "CLAVIS_TTS_TEXT"
+        const val ENV_CULTURE = "CLAVIS_TTS_CULTURE"
+        const val ENV_LANG = "CLAVIS_TTS_LANG"
+
+        /** A constant script: the text and the culture arrive through the environment, so no quoting of user text is ever needed. */
+        internal val WINDOWS_SCRIPT = listOf(
+            "Add-Type -AssemblyName System.Speech",
+            "\$s = New-Object System.Speech.Synthesis.SpeechSynthesizer",
+            "\$c = \$env:$ENV_CULTURE; \$l = \$env:$ENV_LANG",
+            "\$v = \$s.GetInstalledVoices() | Where-Object { \$_.VoiceInfo.Culture.Name -eq \$c -or \$_.VoiceInfo.Culture.TwoLetterISOLanguageName -eq \$l } | Select-Object -First 1",
+            "if (\$v) { \$s.SelectVoice(\$v.VoiceInfo.Name) }",
+            "\$s.Rate = -2",
+            "\$s.Speak(\$env:$ENV_TEXT)",
+        ).joinToString("; ")
+    }
 
     private fun tag(l: Lang) = (localeFor(l) ?: l.code).replace('_', '-')
 
@@ -126,25 +157,26 @@ class SystemSpeaker(private val localeFor: (Lang) -> String?) : Speaker {
     override fun speak(l: Lang, text: String) {
         stop()
         val cmd: List<String> = when {
-            isMac -> listOf("say", "-v", macVoice(l) ?: return, "-r", "150", text)
+            isMac -> listOf("say", "-v", macVoice(l) ?: return, "-r", "150", "--", text)
             isWindows -> {
                 val ps = powershell ?: return
-                val safe = text.replace("'", "''")
-                val culture = tag(l)
-                listOf(
-                    ps.absolutePath, "-NoProfile", "-Command",
-                    "Add-Type -AssemblyName System.Speech; \$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; " +
-                        "\$v = \$s.GetInstalledVoices() | Where-Object { \$_.VoiceInfo.Culture.Name -eq '$culture' -or \$_.VoiceInfo.Culture.TwoLetterISOLanguageName -eq '${l.code}' } | Select-Object -First 1; " +
-                        "if (\$v) { \$s.SelectVoice(\$v.VoiceInfo.Name) }; \$s.Rate = -2; \$s.Speak('$safe')",
-                )
+                listOf(ps.absolutePath, "-NoProfile", "-NonInteractive", "-Command", WINDOWS_SCRIPT)
             }
             else -> {
                 val bin = linuxBin ?: return
-                if (bin.name.startsWith("spd-say")) listOf(bin.absolutePath, "-l", l.code, "-r", "-15", "-w", text)
-                else listOf(bin.absolutePath, "-v", l.code, "-s", "150", text)
+                if (bin.name.startsWith("spd-say")) listOf(bin.absolutePath, "-l", l.code, "-r", "-15", "-w", "--", text)
+                else listOf(bin.absolutePath, "-v", l.code, "-s", "150", "--", text)
             }
         }
-        current = runCatching { ProcessBuilder(cmd).redirectErrorStream(true).start() }.getOrNull()
+        current = runCatching {
+            ProcessBuilder(cmd).apply {
+                environment()[ENV_TEXT] = text
+                environment()[ENV_CULTURE] = tag(l)
+                environment()[ENV_LANG] = l.code
+                redirectErrorStream(true)
+                redirectOutput(ProcessBuilder.Redirect.DISCARD)
+            }.start()
+        }.getOrNull()
     }
 
     override fun stop() { current?.destroy(); current = null }
@@ -255,7 +287,7 @@ class DesktopAudioPlayer : AudioPlayer {
     }
 }
 
-/** AWT `FileDialog` on the Swing thread. */
+/** AWT `FileDialog` on the Swing thread. The file is size-checked before it is read, then read through a bounded stream. */
 class DesktopFileImporter : FileImporter {
     override suspend fun pickText(allowedExtensions: List<String>): ImportedFile? = withContext(Dispatchers.IO) {
         val dlg = FileDialog(null as Frame?, "Open a text", FileDialog.LOAD)
@@ -265,8 +297,29 @@ class DesktopFileImporter : FileImporter {
         val name = dlg.file ?: return@withContext null
         val f = File(dir, name)
         if (!f.isFile) return@withContext null
-        ImportedFile(name, f.readText())
+        if (f.length() > ImportLimits.MAX_BYTES) throw ImportRefusedException(Copy.IMPORT_TOO_LARGE)
+        ImportedFile(name, f.inputStream().use { readBoundedText(it) })
     }
+}
+
+/**
+ * Reads at most [ImportLimits.MAX_BYTES] from [input] and refuses a longer stream or one that is
+ * not mostly text (a binary renamed `.srt`) with an [ImportRefusedException] the UI toasts.
+ */
+internal fun readBoundedText(input: InputStream): String {
+    val out = ByteArrayOutputStream()
+    val buf = ByteArray(64 * 1024)
+    var total = 0L
+    while (true) {
+        val n = input.read(buf)
+        if (n < 0) break
+        total += n
+        if (total > ImportLimits.MAX_BYTES) throw ImportRefusedException(Copy.IMPORT_TOO_LARGE)
+        out.write(buf, 0, n)
+    }
+    val text = out.toByteArray().decodeToString()
+    if (!ImportLimits.isText(text)) throw ImportRefusedException(Copy.IMPORT_NOT_TEXT)
+    return text
 }
 
 /** Desktops have no share sheet: the draft goes to the clipboard and the UI says so. */

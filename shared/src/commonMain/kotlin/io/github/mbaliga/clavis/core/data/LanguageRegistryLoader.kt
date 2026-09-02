@@ -36,6 +36,9 @@ class ListLanguageRegistry(override val all: List<LanguageInfo>) : LanguageRegis
 object LanguageRegistryLoader {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
+    /** Scripts the app ships a Letters primer for (D-21) — the default of `hasScriptPrimer` when a registry omits the field. */
+    val DEFAULT_PRIMERS: Set<String> = setOf("ja", "ko", "zh", "ar")
+
     fun fromBytes(bytes: ByteArray): LanguageRegistry = parse(maybeGunzip(bytes).decodeToString())
 
     fun parse(text: String): LanguageRegistry = fromElement(json.parseToJsonElement(text))
@@ -76,6 +79,7 @@ object LanguageRegistryLoader {
             spaceSeparated = bool("spaceSeparated") ?: (iso != "ja" && iso != "zh"),
             enabledByDefault = bool("enabledByDefault") ?: false, // the pipeline's own `enabled` flag is deliberately NOT an alias
             needsScriptPrimer = bool("needsScriptPrimer") ?: false,
+            hasScriptPrimer = bool("hasScriptPrimer") ?: (iso in DEFAULT_PRIMERS),
         )
     }
 

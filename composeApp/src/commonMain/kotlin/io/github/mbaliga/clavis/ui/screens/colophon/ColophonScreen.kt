@@ -85,8 +85,11 @@ fun ColophonScreen(store: ClavisStore, ui: UiState, overlay: Boolean) {
         }
     }
     val attribution by produceState<String?>(null) { value = runCatching { store.readText("packs/ATTRIBUTION.md") }.getOrNull() }
+    // The OFL texts for the bundled typefaces and the LGPL 2.1 for the desktop audio decoders (MP3SPI,
+    // JLayer, VorbisSPI, JOrbis, Tritonus): these files are the copy of each licence that ships with
+    // every distribution (THIRD_PARTY_NOTICES.md), shown here in full.
     val licences by produceState<List<Pair<String, String>>>(emptyList()) {
-        value = listOf("OFL-Hind", "OFL-RozhaOne", "OFL-IBMPlexMono", "OFL-NotoSans", "OFL-NotoSansCJK").mapNotNull { n ->
+        value = listOf("OFL-Hind", "OFL-RozhaOne", "OFL-IBMPlexMono", "OFL-NotoSans", "OFL-NotoSansCJK", "LGPL-2.1").mapNotNull { n ->
             runCatching { store.readText("licenses/$n.txt") }.getOrNull()?.let { n to it }
         }
     }
@@ -151,7 +154,7 @@ fun ColophonScreen(store: ClavisStore, ui: UiState, overlay: Boolean) {
         item {
             SoftCard(Modifier.tagged("licences")) {
                 Eyebrow("Licences")
-                Text("Application code: Apache License 2.0. Data packs: CC BY-SA 4.0 (see the attribution below). Fonts: Hind, Rozha One, IBM Plex Mono and the Noto Sans families under the SIL Open Font License 1.1.", style = t.small, color = p.ink)
+                Text("Application code: Apache License 2.0. Data packs: CC BY-SA 4.0 (see the attribution below). Fonts: Hind, Rozha One, IBM Plex Mono and the Noto Sans families under the SIL Open Font License 1.1. Desktop builds decode MP3 and OGG recordings with JavaZOOM MP3SPI, JLayer, VorbisSPI, JCraft JOrbis and Tritonus, all under the GNU Lesser General Public License 2.1 — the full text is below.", style = t.small, color = p.ink)
                 var open by remember { mutableStateOf(false) }
                 LinkButton(if (open) "Hide the full notices" else "Show the full notices", onClick = { open = !open })
                 if (open) {

@@ -48,8 +48,10 @@ jobs:
           else
             version="${INPUT_VERSION#v}"; publish=false
           fi
-          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[1-9][0-9]?)?$ ]]; then
-            echo "::error::'$version' is not MAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N] (gradle/version.gradle.kts)"; exit 1
+          # Same shape as gradle/version.gradle.kts: MAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N] with N in 1..29
+          # (the MSI ProductVersion offsets cap N at 29; a tag the build would reject must fail here, not in four jobs).
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.([1-9]|[12][0-9]))?$ ]]; then
+            echo "::error::'$version' is not MAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N] with N in 1..29 (gradle/version.gradle.kts)"; exit 1
           fi
           fail_or_warn() { if [ "$publish" = true ]; then echo "::error::$1"; exit 1; else echo "::warning::$1"; fi; }
           kt=$(sed -n 's/.*const val NAME = "\([^"]*\)".*/\1/p' shared/src/commonMain/kotlin/io/github/mbaliga/clavis/core/ClavisVersion.kt)
@@ -417,13 +419,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      # pack_web.py needs only the standard library (pipeline/config.py); no downloads.
+      # pack_web.py needs only the standard library (pipeline/config.py); no downloads. It writes a standalone
+      # wrapper and pack_web-stats.json beside its output, so it builds into build/web and only the reference
+      # page is copied into dist — the release job uploads everything under dist/.
       - name: Build clavis.html from the committed packs
         if: steps.packs.outputs.present == 'true'
         run: |
-          mkdir -p dist
-          python pipeline/pack_web.py --packs "$PACKS" --out "dist/clavis-$CLAVIS_VERSION-web.html"
-          ls -la dist
+          mkdir -p build/web dist
+          python pipeline/pack_web.py --packs "$PACKS" --out "build/web/clavis-$CLAVIS_VERSION-web.html"
+          cp "build/web/clavis-$CLAVIS_VERSION-web.html" dist/
+          ls -la build/web dist
 
       - uses: actions/upload-artifact@v7
         if: steps.packs.outputs.present == 'true'

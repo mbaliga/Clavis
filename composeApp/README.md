@@ -47,7 +47,7 @@ platform services. Everything that schedules, selects, grades or persists lives 
   coverage lines are computed from `store.manifests` (`coverageOf`), never constants.
 - **Letters** (`letters`): `LetterData` holds the verbatim tables; opening a tab sets
   `coach["letters:<iso>"]` (D-21). Languages with `needsScriptPrimer` but no table get the
-  no-primer card.
+  no-primer card, and — because their registry entry lacks `hasScriptPrimer` — no Paths branch.
 - **Cosmos** (`cosmos`): `FieldModel.build(...)` is pure and deterministic (positions from
   `hash01`, familiarity from the cards); `FieldCanvas` batches points by (colour, alpha, size)
   into `drawPoints`; `FieldController` holds camera/selection/focus/history. `ExploreController`
@@ -86,7 +86,12 @@ Intents: `setView`, `openColophon(ref?)`/`closeColophon`, `obNext/obBack/setLane
 `openSentences`, `logTingle`, `playClip`; suspend loaders `pronunciations(l)`, `sentences(l)` (cached per run).
 Every intent that changes the document saves it (`store.save()`); a plain `state` mutation from a new
 screen must be followed by `store.save()` and something that bumps `rev` (use an existing intent or
-add one to the store — keep mutations inside the store).
+add one to the store — keep mutations inside the store). While `ClavisApp` is composed, `save()` only
+marks the document dirty: the shell encodes it on the UI thread 100 ms after the last commit (600 ms
+at most after the first) and one writer thread does the file work, newest snapshot wins; without a
+shell `save()` is synchronous. `store.flushSaves()` writes now — the Activity calls it on stop, the
+desktop window on close, and a test must call it before reading the file back after UI interaction.
+`startSession()` toasts `Copy.ALL_RESTING` and opens nothing when every lane is OFF.
 
 ## Lettering (`ui/components/SceneBox.kt`)
 

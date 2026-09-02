@@ -25,7 +25,7 @@
   ],
   "licence": "CC-BY-4.0",
   "source": "https://framagit.org/peppercarrot/webcomics",
-  "generatedAt": "2026-09-02T12:04:47Z",
+  "generatedAt": "2026-09-02T13:51:05Z",
   "attribution": [
    {
     "name": "David Revoy",
@@ -694,12 +694,6 @@
     "licence": "CC-BY-4.0"
    },
    {
-    "name": "",
-    "role": "proofreading (Japanese)",
-    "url": null,
-    "licence": "CC-BY-4.0"
-   },
-   {
     "name": "Shikamaru \"initbar\" Yamamoto",
     "role": "translation (Korean (Hangul))",
     "url": null,
@@ -1246,12 +1240,6 @@
     "licence": "CC-BY-4.0"
    },
    {
-    "name": "",
-    "role": "proofreading (Russian)",
-    "url": null,
-    "licence": "CC-BY-4.0"
-   },
-   {
     "name": "Sölve Svartskogen",
     "role": "translation (Polish)",
     "url": "https://framagit.org/WorkingWarrior",
@@ -1632,8 +1620,8 @@
    "comics/pages/E39P11.webp": 45908,
    "comics/pages/E39P12.webp": 159460,
    "comics/pages.json": 11923,
-   "languages.json": 46879,
-   "ATTRIBUTION.md": 10835
+   "languages.json": 46991,
+   "ATTRIBUTION.md": 10831
   },
   "stats": {
    "es": {
@@ -1766,7 +1754,7 @@
   ],
   "licence": "CC-BY-SA-4.0",
   "source": "wordfreq 3.1.1 (CC BY-SA 4.0) + Pepper&Carrot corpus counts",
-  "generatedAt": "2026-09-02T12:04:47Z",
+  "generatedAt": "2026-09-02T13:51:05Z",
   "attribution": [
    {
     "name": "Robyn Speer",
