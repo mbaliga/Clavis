@@ -1,0 +1,2399 @@
+[
+ {
+  "id": "clavis-comics",
+  "kind": "COMICS",
+  "version": "2026.09.02",
+  "title": "Pepper&Carrot scenes",
+  "languages": [
+   "es",
+   "fr",
+   "it",
+   "de",
+   "nl",
+   "ja",
+   "ko",
+   "zh",
+   "ar",
+   "en",
+   "pt",
+   "la",
+   "ru",
+   "pl",
+   "uk",
+   "tr",
+   "hi"
+  ],
+  "licence": "CC-BY-4.0",
+  "source": "https://framagit.org/peppercarrot/webcomics",
+  "generatedAt": "2026-09-02T05:06:01Z",
+  "attribution": [
+   {
+    "name": "David Revoy",
+    "role": "author of Pepper&Carrot (art and story)",
+    "url": "https://www.peppercarrot.com",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Juanjo Faico",
+    "role": "translation (Spanish)",
+    "url": "https://framagit.org/TheFaico",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Giovanni Alfredo Garciliano Díaz",
+    "role": "translation (Spanish)",
+    "url": "https://framagit.org/rapunzel",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Marno van der Maas",
+    "role": "translation (Spanish)",
+    "url": "https://framagit.org/MarnovanderMaas",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Raúl García",
+    "role": "translation (Spanish)",
+    "url": "https://framagit.org/rgarciag",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Andrej Ficko",
+    "role": "contribution (Spanish)",
+    "url": "https://framagit.org/fici",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hồ Nhựt Châu",
+    "role": "contribution (Spanish)",
+    "url": "https://framagit.org/Navi",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "contribution (Spanish)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "LuisR14",
+    "role": "proofreading (Spanish)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "R J Quiralta",
+    "role": "proofreading (Spanish)",
+    "url": "https://framagit.org/RJQuiralta",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Gatín Run Run",
+    "role": "proofreading (Spanish)",
+    "url": "https://framagit.org/lchongv",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Juanjo Faico",
+    "role": "proofreading (Spanish)",
+    "url": "https://framagit.org/TheFaico",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "David Revoy",
+    "role": "translation (French)",
+    "url": "https://framagit.org/Deevad",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "sitelen",
+    "role": "translation (French)",
+    "url": "https://librefan.eu.org/",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "original version",
+    "role": "translation (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "CalimeroTeknik",
+    "role": "translation (French)",
+    "url": "https://framagit.org/calimeroteknik",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Nicolas Artance",
+    "role": "translation (French)",
+    "url": "https://framagit.org/Nartance",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Valvin",
+    "role": "translation (French)",
+    "url": "https://framagit.org/valvin",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "translation (French)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Quetzal2",
+    "role": "translation (French)",
+    "url": "https://framagit.org/Quetzal2",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alexandre Alapetite",
+    "role": "translation (French)",
+    "url": "https://framagit.org/Alkarex",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Zeograd",
+    "role": "translation (French)",
+    "url": "https://framagit.org/zeograd",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Christian Aribaud",
+    "role": "translation (French)",
+    "url": "https://framagit.org/Bhoren",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Olivier Jolly",
+    "role": "translation (French)",
+    "url": "https://framagit.org/zeo",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Bubble",
+    "role": "translation (French)",
+    "url": "https://bubblesoapsinger.carrd.co/",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Sissile",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Cfdev",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "sitelen",
+    "role": "proofreading (French)",
+    "url": "https://librefan.eu.org/",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Antonio Parisi",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "eingousef",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "CalimeroTeknik",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/calimeroteknik",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Guillaume Lestringant",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Aurélien Gâteau",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "ElTun",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Clemovski",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/Clemovski",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Stefan Carpentier",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/Grival",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Cyrille Largillier",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Luke Bertot",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Xavier Dolques",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jo",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "frémo",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Bruno Bord",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Rémi Rampin",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/remram44",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Lionel Salabartan",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Sophie Lecocq",
+    "role": "proofreading (French)",
+    "url": "Sophie.LECOCQ@cfwb.be",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Nicolas Artance",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/Nartance",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Valvin",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/valvin",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alex Gryson",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/agryson",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "David Revoy",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/Deevad",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Arlo James Barnes",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/ArloJamesBarnes",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Christian Aribaud",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/Bhoren",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Bobby Hiltz",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/bbbhltz",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Craig Maloney",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/craigmaloney",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Estefania de Vasconcellos Guimaraes",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/estefania",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Karl Ove Hufthammer",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/huftis",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Pierre-Antoine Angelini",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/paa20a",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Arkane",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Benjamin Loubet",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/bsl",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Chloé",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/valvin",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Olivier Jolly",
+    "role": "proofreading (French)",
+    "url": "https://framagit.org/zeo",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Rhombihexahedron",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Yvan Pellegrini",
+    "role": "proofreading (French)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alex Gryson",
+    "role": "contribution (French)",
+    "url": "https://framagit.org/agryson",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "contribution (French)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "contribution (French)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Antonio Parisi",
+    "role": "translation (Italian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Carlo Gandolfi",
+    "role": "translation (Italian)",
+    "url": "https://framagit.org/cgand",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Matteo Bertini",
+    "role": "translation (Italian)",
+    "url": "https://framagit.org/naufraghi",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Antonio Parisi",
+    "role": "proofreading (Italian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Matteo Bertini",
+    "role": "proofreading (Italian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Elisa Moretti",
+    "role": "proofreading (Italian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "contribution (Italian)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Helmar Suschka",
+    "role": "translation (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Name",
+    "role": "translation (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Philipp (hapit) Hemmer",
+    "role": "translation (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Leonie Ain",
+    "role": "translation (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Carlo Gandolfi",
+    "role": "translation (German)",
+    "url": "https://framagit.org/cgand",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "colognella",
+    "role": "translation (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Ret Samys",
+    "role": "translation (German)",
+    "url": "https://framagit.org/RetSamys",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Martin Disch",
+    "role": "translation (German)",
+    "url": "https://framagit.org/martindisch",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alina The Hedgehog",
+    "role": "translation (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Ulrich Greve",
+    "role": "translation (German)",
+    "url": "https://framagit.org/UliG",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Kate",
+    "role": "translation (German)",
+    "url": "https://framagit.org/kate",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "proofreading (German)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "colognella",
+    "role": "proofreading (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Bernhard M. Wiedemann",
+    "role": "proofreading (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Philipp (hapit) Hemmer",
+    "role": "proofreading (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Martin Disch",
+    "role": "proofreading (German)",
+    "url": "https://framagit.org/martindisch",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Andrej Ficko",
+    "role": "proofreading (German)",
+    "url": "https://framagit.org/fici",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "burner",
+    "role": "proofreading (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alina The Hedgehog",
+    "role": "proofreading (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Ret Samys",
+    "role": "proofreading (German)",
+    "url": "https://framagit.org/RetSamys",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Zwei Übersetzungen vereint",
+    "role": "notes (German)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Willem Sonke",
+    "role": "translation (Dutch)",
+    "url": "https://framagit.org/Willem3141",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Marno van der Maas",
+    "role": "translation (Dutch)",
+    "url": "https://framagit.org/MarnovanderMaas",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Peter Moonen",
+    "role": "translation (Dutch)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "translation (Dutch)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Julien Bertholon",
+    "role": "translation (Dutch)",
+    "url": "https://framagit.org/jbertho",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "proofreading (Dutch)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Marno van der Maas",
+    "role": "proofreading (Dutch)",
+    "url": "https://framagit.org/MarnovanderMaas",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Willem Sonke",
+    "role": "proofreading (Dutch)",
+    "url": "https://framagit.org/Willem3141",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "th0rgall",
+    "role": "proofreading (Dutch)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Pipa",
+    "role": "proofreading (Dutch)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Willem Sonke",
+    "role": "contribution (Dutch)",
+    "url": "https://framagit.org/Willem3141",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "guruguru",
+    "role": "translation (Japanese)",
+    "url": "https://framagit.org/gurugurusp",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "guruguru",
+    "role": "translation (Japanese)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hồ Nhựt Châu",
+    "role": "contribution (Japanese)",
+    "url": "https://framagit.org/Navi",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Lynx3d",
+    "role": "contribution (Japanese)",
+    "url": "https://krita-artists.org/u/lynx3d/",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "CalimeroTeknik",
+    "role": "proofreading (Japanese)",
+    "url": "https://framagit.org/calimeroteknik",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "",
+    "role": "proofreading (Japanese)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Shikamaru \"initbar\" Yamamoto",
+    "role": "translation (Korean (Hangul))",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jihoon Kim",
+    "role": "translation (Korean (Hangul))",
+    "url": "https://framagit.org/imsesaok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hongpyo Jang",
+    "role": "translation (Korean (Hangul))",
+    "url": "https://framagit.org/Remerer",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Kim Jihoon",
+    "role": "translation (Korean (Hangul))",
+    "url": "https://framagit.org/imsesaok/",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Sabrina",
+    "role": "translation (Korean (Hangul))",
+    "url": "https://framagit.org/imsesaok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jihoon Kim",
+    "role": "proofreading (Korean (Hangul))",
+    "url": "https://framagit.org/imsesaok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "contribution (Korean (Hangul))",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hồ Châu",
+    "role": "contribution (Korean (Hangul))",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hồ Nhựt Châu",
+    "role": "contribution (Korean (Hangul))",
+    "url": "https://framagit.org/Navi",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jihoon Kim",
+    "role": "contribution (Korean (Hangul))",
+    "url": "https://framagit.org/imsesaok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Ran Zhuang",
+    "role": "translation (Chinese (Simplified))",
+    "url": "https://framagit.org/femalelion",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Yan Jing",
+    "role": "translation (Chinese (Simplified))",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Lou Simons",
+    "role": "translation (Chinese (Simplified))",
+    "url": "https://framagit.org/Sandarmy",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Ran ZHUANG",
+    "role": "translation (Chinese (Simplified))",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "ZHUANG Ran",
+    "role": "translation (Chinese (Simplified))",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Mahwiii",
+    "role": "translation (Arabic)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "original version",
+    "role": "translation (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alex Gryson",
+    "role": "translation (English)",
+    "url": "https://framagit.org/agryson",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "David Revoy",
+    "role": "translation (English)",
+    "url": "https://framagit.org/Deevad",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "CalimeroTeknik",
+    "role": "translation (English)",
+    "url": "https://framagit.org/calimeroteknik",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Craig Maloney",
+    "role": "translation (English)",
+    "url": "https://framagit.org/craigmaloney",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Martin Disch",
+    "role": "translation (English)",
+    "url": "https://framagit.org/martindisch",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "translation (English)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Arlo James Barnes",
+    "role": "translation (English)",
+    "url": "https://framagit.org/ArloJamesBarnes",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Bobby Hiltz",
+    "role": "translation (English)",
+    "url": "https://framagit.org/bbbhltz",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Estefania de Vasconcellos Guimaraes",
+    "role": "translation (English)",
+    "url": "https://framagit.org/estefania",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Frederic Mora",
+    "role": "translation (English)",
+    "url": "https://framagit.org/fredericmora",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "translation (English)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Karl Ove Hufthammer",
+    "role": "translation (English)",
+    "url": "https://framagit.org/huftis",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Pierre-Antoine Angelini",
+    "role": "translation (English)",
+    "url": "https://framagit.org/paa20a",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Zane Waldman",
+    "role": "translation (English)",
+    "url": "https://framagit.org/roamingzjw",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Benjamin Loubet",
+    "role": "translation (English)",
+    "url": "https://framagit.org/bsl",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "CitizenK4te",
+    "role": "translation (English)",
+    "url": "https://framagit.org/kate",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jelfo",
+    "role": "translation (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Marno van der Maas",
+    "role": "translation (English)",
+    "url": "https://framagit.org/MarnovanderMaas",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Amireeti",
+    "role": "proofreading (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alex Gryson",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/agryson",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Willem Sonke",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/Willem3141",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Luke Bertot",
+    "role": "proofreading (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Rémi Rampin",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/remram44",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jihoon Kim",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/imsesaok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Irina",
+    "role": "proofreading (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Craig Maloney",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/craigmaloney",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "sn0wmonster",
+    "role": "proofreading (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "CalimeroTeknik",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/calimeroteknik",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Midgard",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/Midgard",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Jookia",
+    "role": "proofreading (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Martin Disch",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/martindisch",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Karl Ove Hufthammer",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/huftis",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Arlo James Barnes",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/ArloJamesBarnes",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Carotte",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/Carotte",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "H-Games",
+    "role": "proofreading (English)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Menhir",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/menhir",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Bobby Hiltz",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/bbbhltz",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Estefania de Vasconcellos Guimaraes",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/estefania",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Marno van der Maas",
+    "role": "proofreading (English)",
+    "url": "https://framagit.org/MarnovanderMaas",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Christian Aribaud",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/Bhoren",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Emmiline",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/emmilinette",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Nicolas Artance",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/Nartance",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Olivier Jolly",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/zeo",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Rimas Kudelis",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/rimas",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Valvin",
+    "role": "contribution (English)",
+    "url": "https://framagit.org/valvin",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Frederico Batista",
+    "role": "translation (Portuguese (Brazil))",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alexandre E. Almeida",
+    "role": "translation (Portuguese (Brazil))",
+    "url": "https://framagit.org/almeidaxan",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alexandre Almeida",
+    "role": "translation (Portuguese (Brazil))",
+    "url": "https://framagit.org/almeidaxan",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Estefania de Vasconcellos Guimaraes",
+    "role": "translation (Portuguese (Brazil))",
+    "url": "https://framagit.org/estefania",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alexandre E. Almeida",
+    "role": "proofreading (Portuguese (Brazil))",
+    "url": "https://framagit.org/almeidaxan",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Guillaume Lestringant",
+    "role": "translation (Latin)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Benjamin Touati",
+    "role": "translation (Latin)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Valentine Guillocheau",
+    "role": "translation (Latin)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Valentine Guillocheau",
+    "role": "proofreading (Latin)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Andrew \"Akari\" Alexeyew",
+    "role": "translation (Russian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Denis Prisukhin",
+    "role": "translation (Russian)",
+    "url": "https://framagit.org/uncleNight",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "la gleki .arxokuna",
+    "role": "translation (Russian)",
+    "url": "https://framagit.org/lagleki",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Nikitin Stanislav",
+    "role": "translation (Russian)",
+    "url": "https://framagit.org/Zveryok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Mishvanda",
+    "role": "translation (Russian)",
+    "url": "https://framagit.org/Mishvanda",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Konstantin Morenko",
+    "role": "translation (Russian)",
+    "url": "https://framagit.org/konstantin-morenko",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hồ Nhựt Châu",
+    "role": "translation (Russian)",
+    "url": "https://framagit.org/Navi",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Gracheva Marie",
+    "role": "translation (Russian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alexander Chumovitskiy",
+    "role": "translation (Russian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "GunChleoc",
+    "role": "contribution (Russian)",
+    "url": "https://framagit.org/gunchleoc",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Hồ Nhựt Châu",
+    "role": "contribution (Russian)",
+    "url": "https://framagit.org/Navi",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Denis Prisukhin",
+    "role": "contribution (Russian)",
+    "url": "https://framagit.org/uncleNight",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Skybladev2",
+    "role": "proofreading (Russian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Denis Prisukhin",
+    "role": "proofreading (Russian)",
+    "url": "https://framagit.org/uncleNight",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Nikitin Stanislav",
+    "role": "proofreading (Russian)",
+    "url": "https://framagit.org/Zveryok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Konstantin Morenko",
+    "role": "proofreading (Russian)",
+    "url": "https://framagit.org/konstantin-morenko",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Igor Berdiy",
+    "role": "proofreading (Russian)",
+    "url": "https://framagit.org/takenp",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "la gleki .arxokuna",
+    "role": "proofreading (Russian)",
+    "url": "https://framagit.org/lagleki",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "",
+    "role": "proofreading (Russian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Sölve Svartskogen",
+    "role": "translation (Polish)",
+    "url": "https://framagit.org/WorkingWarrior",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Magdalena Janusz",
+    "role": "translation (Polish)",
+    "url": "https://framagit.org/madlen070",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Besamir",
+    "role": "proofreading (Polish)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "First translation by Przemysław „Kev” Kudzia, refactored.",
+    "role": "notes (Polish)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Andrej Ficko",
+    "role": "contribution (Polish)",
+    "url": "https://framagit.org/fici",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Leonid \"Deburger\" Androschuk",
+    "role": "translation (Ukrainian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Denis Prisukhin",
+    "role": "translation (Ukrainian)",
+    "url": "https://framagit.org/uncleNight",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Nikitin Stanislav",
+    "role": "translation (Ukrainian)",
+    "url": "https://framagit.org/Zveryok",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alex Filonenko",
+    "role": "translation (Ukrainian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Alex Filonenko",
+    "role": "proofreading (Ukrainian)",
+    "url": null,
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Ümit Kaya",
+    "role": "translation (Turkish)",
+    "url": "https://framagit.org/kraftwerk",
+    "licence": "CC-BY-4.0"
+   },
+   {
+    "name": "Neha Deogade",
+    "role": "translation (Hindi)",
+    "url": "https://framagit.org/neha",
+    "licence": "CC-BY-4.0"
+   }
+  ],
+  "files": {
+   "comics/scenes.json.gz": 1534227,
+   "comics/pages/E01P00.webp": 262,
+   "comics/pages/E01P01.webp": 28738,
+   "comics/pages/E01P02.webp": 29196,
+   "comics/pages/E02P00.webp": 262,
+   "comics/pages/E02P02.webp": 41476,
+   "comics/pages/E02P06.webp": 12066,
+   "comics/pages/E03P00.webp": 3960,
+   "comics/pages/E03P01.webp": 77030,
+   "comics/pages/E03P02.webp": 60622,
+   "comics/pages/E03P03.webp": 28360,
+   "comics/pages/E03P04.webp": 44040,
+   "comics/pages/E03P05.webp": 67088,
+   "comics/pages/E03P06.webp": 55576,
+   "comics/pages/E03P07.webp": 39082,
+   "comics/pages/E03P08.webp": 9320,
+   "comics/pages/E04P00.webp": 3708,
+   "comics/pages/E04P01.webp": 32270,
+   "comics/pages/E04P02.webp": 44502,
+   "comics/pages/E04P03.webp": 44748,
+   "comics/pages/E04P06.webp": 17498,
+   "comics/pages/E04P07.webp": 53424,
+   "comics/pages/E04P08.webp": 8476,
+   "comics/pages/E05P00.webp": 2132,
+   "comics/pages/E05P05.webp": 5274,
+   "comics/pages/E06P00.webp": 262,
+   "comics/pages/E06P01.webp": 30734,
+   "comics/pages/E06P02.webp": 32782,
+   "comics/pages/E06P03.webp": 33700,
+   "comics/pages/E06P04.webp": 51710,
+   "comics/pages/E06P05.webp": 52646,
+   "comics/pages/E06P06.webp": 58974,
+   "comics/pages/E06P07.webp": 66874,
+   "comics/pages/E06P08.webp": 43652,
+   "comics/pages/E06P09.webp": 49362,
+   "comics/pages/E06P10.webp": 4324,
+   "comics/pages/E07P00.webp": 262,
+   "comics/pages/E07P02.webp": 27888,
+   "comics/pages/E07P04.webp": 30538,
+   "comics/pages/E07P05.webp": 25180,
+   "comics/pages/E07P06.webp": 3562,
+   "comics/pages/E08P00.webp": 262,
+   "comics/pages/E08P01.webp": 20842,
+   "comics/pages/E08P02.webp": 31472,
+   "comics/pages/E08P03.webp": 41600,
+   "comics/pages/E08P04.webp": 44856,
+   "comics/pages/E08P05.webp": 52470,
+   "comics/pages/E08P06.webp": 34460,
+   "comics/pages/E08P07.webp": 3068,
+   "comics/pages/E09P00.webp": 262,
+   "comics/pages/E09P01.webp": 39160,
+   "comics/pages/E09P02.webp": 39172,
+   "comics/pages/E09P03.webp": 25616,
+   "comics/pages/E09P05.webp": 30592,
+   "comics/pages/E09P07.webp": 21470,
+   "comics/pages/E09P08.webp": 15972,
+   "comics/pages/E10P00.webp": 794,
+   "comics/pages/E10P06.webp": 82912,
+   "comics/pages/E11P00.webp": 262,
+   "comics/pages/E11P01.webp": 37618,
+   "comics/pages/E11P02.webp": 38272,
+   "comics/pages/E11P03.webp": 40890,
+   "comics/pages/E11P04.webp": 44402,
+   "comics/pages/E11P05.webp": 39564,
+   "comics/pages/E11P06.webp": 42612,
+   "comics/pages/E11P07.webp": 95274,
+   "comics/pages/E12P00.webp": 262,
+   "comics/pages/E12P01.webp": 53290,
+   "comics/pages/E12P02.webp": 59640,
+   "comics/pages/E12P03.webp": 43426,
+   "comics/pages/E12P04.webp": 41178,
+   "comics/pages/E12P05.webp": 50192,
+   "comics/pages/E12P07.webp": 79652,
+   "comics/pages/E12P08.webp": 103022,
+   "comics/pages/E13P00.webp": 262,
+   "comics/pages/E13P01.webp": 44128,
+   "comics/pages/E13P02.webp": 49234,
+   "comics/pages/E13P03.webp": 43788,
+   "comics/pages/E13P04.webp": 37630,
+   "comics/pages/E13P05.webp": 44636,
+   "comics/pages/E13P06.webp": 30710,
+   "comics/pages/E13P07.webp": 120292,
+   "comics/pages/E14P00.webp": 262,
+   "comics/pages/E14P01.webp": 41350,
+   "comics/pages/E14P02.webp": 28848,
+   "comics/pages/E14P03.webp": 22754,
+   "comics/pages/E14P04.webp": 23910,
+   "comics/pages/E14P05.webp": 18644,
+   "comics/pages/E14P06.webp": 43836,
+   "comics/pages/E14P07.webp": 124910,
+   "comics/pages/E15P00.webp": 1736,
+   "comics/pages/E15P09.webp": 125106,
+   "comics/pages/E16P00.webp": 262,
+   "comics/pages/E16P01.webp": 47706,
+   "comics/pages/E16P02.webp": 41910,
+   "comics/pages/E16P03.webp": 35966,
+   "comics/pages/E16P04.webp": 45368,
+   "comics/pages/E16P05.webp": 55418,
+   "comics/pages/E16P06.webp": 45632,
+   "comics/pages/E16P07.webp": 101348,
+   "comics/pages/E17P00.webp": 262,
+   "comics/pages/E17P01.webp": 49870,
+   "comics/pages/E17P02.webp": 34964,
+   "comics/pages/E17P04.webp": 31612,
+   "comics/pages/E17P05.webp": 26632,
+   "comics/pages/E17P06.webp": 21314,
+   "comics/pages/E17P07.webp": 32812,
+   "comics/pages/E17P08.webp": 111770,
+   "comics/pages/E18P00.webp": 262,
+   "comics/pages/E18P01.webp": 28246,
+   "comics/pages/E18P02.webp": 43172,
+   "comics/pages/E18P03.webp": 25516,
+   "comics/pages/E18P04.webp": 42520,
+   "comics/pages/E18P05.webp": 38414,
+   "comics/pages/E18P06.webp": 39466,
+   "comics/pages/E18P07.webp": 29660,
+   "comics/pages/E18P08.webp": 116970,
+   "comics/pages/E19P00.webp": 262,
+   "comics/pages/E19P01.webp": 39312,
+   "comics/pages/E19P02.webp": 47326,
+   "comics/pages/E19P03.webp": 35832,
+   "comics/pages/E19P04.webp": 39772,
+   "comics/pages/E19P05.webp": 48968,
+   "comics/pages/E19P06.webp": 47442,
+   "comics/pages/E19P07.webp": 51362,
+   "comics/pages/E19P08.webp": 119886,
+   "comics/pages/E20P00.webp": 262,
+   "comics/pages/E20P07.webp": 111932,
+   "comics/pages/E21P00.webp": 262,
+   "comics/pages/E21P01.webp": 49636,
+   "comics/pages/E21P02.webp": 34850,
+   "comics/pages/E21P03.webp": 60658,
+   "comics/pages/E21P04.webp": 40854,
+   "comics/pages/E21P05.webp": 48946,
+   "comics/pages/E21P06.webp": 52912,
+   "comics/pages/E21P07.webp": 50552,
+   "comics/pages/E21P08.webp": 113050,
+   "comics/pages/E22P00.webp": 262,
+   "comics/pages/E22P01.webp": 44796,
+   "comics/pages/E22P02.webp": 58386,
+   "comics/pages/E22P03.webp": 51386,
+   "comics/pages/E22P04.webp": 43212,
+   "comics/pages/E22P05.webp": 61360,
+   "comics/pages/E22P06.webp": 48396,
+   "comics/pages/E22P07.webp": 61954,
+   "comics/pages/E22P08.webp": 70720,
+   "comics/pages/E22P09.webp": 60870,
+   "comics/pages/E22P10.webp": 71148,
+   "comics/pages/E22P11.webp": 120248,
+   "comics/pages/E23P00.webp": 262,
+   "comics/pages/E23P01.webp": 41202,
+   "comics/pages/E23P02.webp": 34062,
+   "comics/pages/E23P03.webp": 40180,
+   "comics/pages/E23P04.webp": 44124,
+   "comics/pages/E23P05.webp": 46698,
+   "comics/pages/E23P06.webp": 33954,
+   "comics/pages/E23P07.webp": 38036,
+   "comics/pages/E23P08.webp": 121354,
+   "comics/pages/E24P00.webp": 262,
+   "comics/pages/E24P01.webp": 47286,
+   "comics/pages/E24P02.webp": 25010,
+   "comics/pages/E24P03.webp": 32970,
+   "comics/pages/E24P04.webp": 39234,
+   "comics/pages/E24P05.webp": 37206,
+   "comics/pages/E24P06.webp": 27338,
+   "comics/pages/E24P07.webp": 55052,
+   "comics/pages/E24P08.webp": 120158,
+   "comics/pages/E25P00.webp": 262,
+   "comics/pages/E25P04.webp": 60460,
+   "comics/pages/E25P10.webp": 128542,
+   "comics/pages/E26P00.webp": 262,
+   "comics/pages/E26P01.webp": 71552,
+   "comics/pages/E26P02.webp": 56022,
+   "comics/pages/E26P03.webp": 69010,
+   "comics/pages/E26P04.webp": 54656,
+   "comics/pages/E26P05.webp": 54128,
+   "comics/pages/E26P06.webp": 64278,
+   "comics/pages/E26P07.webp": 132122,
+   "comics/pages/E27P00.webp": 262,
+   "comics/pages/E27P01.webp": 36328,
+   "comics/pages/E27P02.webp": 36158,
+   "comics/pages/E27P03.webp": 35592,
+   "comics/pages/E27P04.webp": 52148,
+   "comics/pages/E27P05.webp": 42438,
+   "comics/pages/E27P06.webp": 44482,
+   "comics/pages/E27P07.webp": 138536,
+   "comics/pages/E28P00.webp": 3688,
+   "comics/pages/E28P01.webp": 31256,
+   "comics/pages/E28P03.webp": 25430,
+   "comics/pages/E28P04.webp": 35428,
+   "comics/pages/E28P05.webp": 57132,
+   "comics/pages/E28P06.webp": 25588,
+   "comics/pages/E28P07.webp": 31906,
+   "comics/pages/E28P08.webp": 30370,
+   "comics/pages/E28P09.webp": 39720,
+   "comics/pages/E28P10.webp": 149242,
+   "comics/pages/E29P00.webp": 1676,
+   "comics/pages/E29P01.webp": 36878,
+   "comics/pages/E29P02.webp": 39140,
+   "comics/pages/E29P03.webp": 48466,
+   "comics/pages/E29P04.webp": 43516,
+   "comics/pages/E29P06.webp": 51478,
+   "comics/pages/E29P07.webp": 34880,
+   "comics/pages/E29P08.webp": 36334,
+   "comics/pages/E29P09.webp": 150440,
+   "comics/pages/E30P00.webp": 262,
+   "comics/pages/E30P07.webp": 134654,
+   "comics/pages/E31P00.webp": 262,
+   "comics/pages/E31P01.webp": 42838,
+   "comics/pages/E31P02.webp": 53210,
+   "comics/pages/E31P03.webp": 45224,
+   "comics/pages/E31P04.webp": 29064,
+   "comics/pages/E31P05.webp": 38188,
+   "comics/pages/E31P06.webp": 52066,
+   "comics/pages/E31P07.webp": 33356,
+   "comics/pages/E31P08.webp": 114302,
+   "comics/pages/E32P00.webp": 262,
+   "comics/pages/E32P02.webp": 55234,
+   "comics/pages/E32P03.webp": 47674,
+   "comics/pages/E32P04.webp": 38578,
+   "comics/pages/E32P05.webp": 39856,
+   "comics/pages/E32P06.webp": 58048,
+   "comics/pages/E32P07.webp": 54602,
+   "comics/pages/E32P08.webp": 128508,
+   "comics/pages/E33P00.webp": 262,
+   "comics/pages/E33P02.webp": 59650,
+   "comics/pages/E33P03.webp": 41372,
+   "comics/pages/E33P04.webp": 35866,
+   "comics/pages/E33P06.webp": 46848,
+   "comics/pages/E33P07.webp": 27880,
+   "comics/pages/E33P08.webp": 26092,
+   "comics/pages/E33P09.webp": 124540,
+   "comics/pages/E34P00.webp": 262,
+   "comics/pages/E34P01.webp": 40486,
+   "comics/pages/E34P02.webp": 46638,
+   "comics/pages/E34P03.webp": 46696,
+   "comics/pages/E34P04.webp": 46052,
+   "comics/pages/E34P05.webp": 49830,
+   "comics/pages/E34P06.webp": 67542,
+   "comics/pages/E34P07.webp": 68574,
+   "comics/pages/E34P08.webp": 47400,
+   "comics/pages/E34P09.webp": 57620,
+   "comics/pages/E34P10.webp": 48260,
+   "comics/pages/E34P11.webp": 117972,
+   "comics/pages/E35P00.webp": 262,
+   "comics/pages/E35P01.webp": 32952,
+   "comics/pages/E35P02.webp": 32286,
+   "comics/pages/E35P03.webp": 27864,
+   "comics/pages/E35P04.webp": 27342,
+   "comics/pages/E35P05.webp": 31640,
+   "comics/pages/E35P06.webp": 26082,
+   "comics/pages/E35P07.webp": 22082,
+   "comics/pages/E35P08.webp": 19694,
+   "comics/pages/E35P09.webp": 31060,
+   "comics/pages/E35P10.webp": 31586,
+   "comics/pages/E35P11.webp": 39876,
+   "comics/pages/E35P12.webp": 33996,
+   "comics/pages/E35P13.webp": 122180,
+   "comics/pages/E36P00.webp": 262,
+   "comics/pages/E36P01.webp": 25796,
+   "comics/pages/E36P02.webp": 35216,
+   "comics/pages/E36P03.webp": 37872,
+   "comics/pages/E36P04.webp": 29348,
+   "comics/pages/E36P05.webp": 36026,
+   "comics/pages/E36P06.webp": 44652,
+   "comics/pages/E36P07.webp": 31650,
+   "comics/pages/E36P08.webp": 37830,
+   "comics/pages/E36P09.webp": 31008,
+   "comics/pages/E36P10.webp": 41260,
+   "comics/pages/E36P11.webp": 32336,
+   "comics/pages/E36P12.webp": 34592,
+   "comics/pages/E36P13.webp": 55490,
+   "comics/pages/E36P14.webp": 46852,
+   "comics/pages/E36P15.webp": 33148,
+   "comics/pages/E36P16.webp": 133900,
+   "comics/pages/E37P00.webp": 262,
+   "comics/pages/E37P01.webp": 42472,
+   "comics/pages/E37P03.webp": 47602,
+   "comics/pages/E37P04.webp": 42956,
+   "comics/pages/E37P05.webp": 34802,
+   "comics/pages/E37P06.webp": 51268,
+   "comics/pages/E37P07.webp": 42732,
+   "comics/pages/E37P08.webp": 51532,
+   "comics/pages/E37P09.webp": 126080,
+   "comics/pages/E38P00.webp": 908,
+   "comics/pages/E38P01.webp": 33786,
+   "comics/pages/E38P02.webp": 34116,
+   "comics/pages/E38P03.webp": 32326,
+   "comics/pages/E38P04.webp": 29484,
+   "comics/pages/E38P05.webp": 28952,
+   "comics/pages/E38P06.webp": 34494,
+   "comics/pages/E38P07.webp": 41022,
+   "comics/pages/E38P08.webp": 35358,
+   "comics/pages/E38P09.webp": 154554,
+   "comics/pages/E39P00.webp": 262,
+   "comics/pages/E39P01.webp": 46768,
+   "comics/pages/E39P03.webp": 43302,
+   "comics/pages/E39P04.webp": 38924,
+   "comics/pages/E39P05.webp": 45008,
+   "comics/pages/E39P06.webp": 45948,
+   "comics/pages/E39P07.webp": 37924,
+   "comics/pages/E39P08.webp": 32276,
+   "comics/pages/E39P09.webp": 36290,
+   "comics/pages/E39P10.webp": 45900,
+   "comics/pages/E39P11.webp": 45908,
+   "comics/pages/E39P12.webp": 159460,
+   "comics/pages.json": 11923,
+   "languages.json": 46879,
+   "ATTRIBUTION.md": 10835
+  },
+  "stats": {
+   "es": {
+    "scenes": 1442,
+    "pages": 304,
+    "episodes": 39,
+    "credibleRectPct": 93
+   },
+   "fr": {
+    "scenes": 1444,
+    "pages": 304,
+    "episodes": 39,
+    "credibleRectPct": 93
+   },
+   "it": {
+    "scenes": 1358,
+    "pages": 292,
+    "episodes": 38,
+    "credibleRectPct": 93
+   },
+   "de": {
+    "scenes": 1433,
+    "pages": 302,
+    "episodes": 39,
+    "credibleRectPct": 93
+   },
+   "nl": {
+    "scenes": 1411,
+    "pages": 301,
+    "episodes": 39,
+    "credibleRectPct": 93
+   },
+   "ja": {
+    "scenes": 1423,
+    "pages": 299,
+    "episodes": 39,
+    "credibleRectPct": 94
+   },
+   "ko": {
+    "scenes": 470,
+    "pages": 137,
+    "episodes": 33,
+    "credibleRectPct": 84
+   },
+   "zh": {
+    "scenes": 1403,
+    "pages": 298,
+    "episodes": 39,
+    "credibleRectPct": 93
+   },
+   "ar": {
+    "scenes": 177,
+    "pages": 48,
+    "episodes": 8,
+    "credibleRectPct": 81
+   },
+   "en": {
+    "scenes": 1460,
+    "pages": 305,
+    "episodes": 39,
+    "credibleRectPct": 93
+   },
+   "pt": {
+    "scenes": 1299,
+    "pages": 282,
+    "episodes": 37,
+    "credibleRectPct": 92
+   },
+   "la": {
+    "scenes": 389,
+    "pages": 106,
+    "episodes": 17,
+    "credibleRectPct": 86
+   },
+   "ru": {
+    "scenes": 1067,
+    "pages": 250,
+    "episodes": 35,
+    "credibleRectPct": 91
+   },
+   "pl": {
+    "scenes": 1357,
+    "pages": 293,
+    "episodes": 38,
+    "credibleRectPct": 92
+   },
+   "uk": {
+    "scenes": 780,
+    "pages": 185,
+    "episodes": 27,
+    "credibleRectPct": 89
+   },
+   "tr": {
+    "scenes": 223,
+    "pages": 54,
+    "episodes": 8,
+    "credibleRectPct": 87
+   },
+   "hi": {
+    "scenes": 16,
+    "pages": 6,
+    "episodes": 2,
+    "credibleRectPct": 38
+   }
+  }
+ },
+ {
+  "id": "clavis-lexicon",
+  "kind": "LEXICON",
+  "version": "2026.09.02",
+  "title": "Corpus lexicon and frequencies",
+  "languages": [
+   "es",
+   "fr",
+   "it",
+   "de",
+   "nl",
+   "ja",
+   "ko",
+   "zh",
+   "ar",
+   "en",
+   "pt",
+   "la",
+   "ru",
+   "pl",
+   "uk",
+   "tr",
+   "hi"
+  ],
+  "licence": "CC-BY-SA-4.0",
+  "source": "wordfreq 3.1.1 (CC BY-SA 4.0) + Pepper&Carrot corpus counts",
+  "generatedAt": "2026-09-02T05:06:01Z",
+  "attribution": [
+   {
+    "name": "Robyn Speer",
+    "role": "wordfreq word frequencies",
+    "url": "https://github.com/rspeer/wordfreq",
+    "licence": "CC-BY-SA-4.0"
+   },
+   {
+    "name": "Adrien Barbaresi",
+    "role": "simplemma lemmatiser",
+    "url": "https://github.com/adbar/simplemma",
+    "licence": "MIT"
+   },
+   {
+    "name": "NINJAL",
+    "role": "UniDic (unidic-lite) Japanese dictionary",
+    "url": "https://github.com/polm/unidic-lite",
+    "licence": "BSD-3-Clause"
+   },
+   {
+    "name": "Eunjeon project",
+    "role": "mecab-ko-dic Korean dictionary",
+    "url": "https://bitbucket.org/eunjeon/mecab-ko-dic",
+    "licence": "Apache-2.0"
+   },
+   {
+    "name": "Sun Junyi",
+    "role": "jieba Chinese segmenter",
+    "url": "https://github.com/fxsjy/jieba",
+    "licence": "MIT"
+   }
+  ],
+  "files": {
+   "lexicon/lexicon.json.gz": 269248,
+   "lexicon/pseudo.json": 1334
+  },
+  "stats": {
+   "es": {
+    "lemmas": 1627,
+    "tokens": 9901,
+    "pseudo": 10,
+    "hygieneRemoved": 53
+   },
+   "fr": {
+    "lemmas": 1767,
+    "tokens": 10105,
+    "pseudo": 10,
+    "hygieneRemoved": 59
+   },
+   "it": {
+    "lemmas": 1598,
+    "tokens": 9205,
+    "pseudo": 10,
+    "hygieneRemoved": 82
+   },
+   "de": {
+    "lemmas": 1770,
+    "tokens": 9676,
+    "pseudo": 10,
+    "hygieneRemoved": 102
+   },
+   "nl": {
+    "lemmas": 1700,
+    "tokens": 9906,
+    "pseudo": 10,
+    "hygieneRemoved": 119
+   },
+   "ja": {
+    "lemmas": 2062,
+    "tokens": 12798,
+    "pseudo": 0,
+    "hygieneRemoved": 0
+   },
+   "ko": {
+    "lemmas": 1115,
+    "tokens": 4327,
+    "pseudo": 0,
+    "hygieneRemoved": 0
+   },
+   "zh": {
+    "lemmas": 2439,
+    "tokens": 10300,
+    "pseudo": 0,
+    "hygieneRemoved": 0
+   },
+   "ar": {
+    "lemmas": 583,
+    "tokens": 1099,
+    "pseudo": 0,
+    "hygieneRemoved": 22
+   },
+   "en": {
+    "lemmas": 1603,
+    "tokens": 10450,
+    "pseudo": 0,
+    "hygieneRemoved": 48
+   },
+   "pt": {
+    "lemmas": 1557,
+    "tokens": 9244,
+    "pseudo": 10,
+    "hygieneRemoved": 64
+   },
+   "la": {
+    "lemmas": 642,
+    "tokens": 2020,
+    "pseudo": 10,
+    "hygieneRemoved": 124
+   },
+   "ru": {
+    "lemmas": 1757,
+    "tokens": 6541,
+    "pseudo": 10,
+    "hygieneRemoved": 76
+   },
+   "pl": {
+    "lemmas": 1863,
+    "tokens": 7383,
+    "pseudo": 10,
+    "hygieneRemoved": 104
+   },
+   "uk": {
+    "lemmas": 1431,
+    "tokens": 4785,
+    "pseudo": 10,
+    "hygieneRemoved": 128
+   },
+   "tr": {
+    "lemmas": 437,
+    "tokens": 1075,
+    "pseudo": 10,
+    "hygieneRemoved": 38
+   },
+   "hi": {
+    "lemmas": 45,
+    "tokens": 57,
+    "pseudo": 0,
+    "hygieneRemoved": 4
+   }
+  }
+ },
+ {
+  "id": "clavis-etymology",
+  "kind": "ETYMOLOGY",
+  "version": "2026.09.02",
+  "title": "Etymology graph (Wiktionary + EtymDB)",
+  "languages": [
+   "ar",
+   "de",
+   "en",
+   "es",
+   "fr",
+   "hi",
+   "it",
+   "ja",
+   "ko",
+   "la",
+   "nl",
+   "pl",
+   "pt",
+   "ru",
+   "tr",
+   "uk",
+   "zh"
+  ],
+  "licence": "CC BY-SA 4.0",
+  "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://github.com/clefourrier/EtymDB (EtymDB 2.1, CC BY-SA 4.0)",
+  "generatedAt": "2026-09-02T04:58:42Z",
+  "attribution": [
+   {
+    "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
+    "role": "etymology, IPA and audio references",
+    "url": "https://kaikki.org/dictionary/",
+    "licence": "CC BY-SA 4.0"
+   },
+   {
+    "name": "EtymDB 2.1 — Clémentine Fourrier & Benoît Sagot (LREC 2020)",
+    "role": "etymological links",
+    "url": "https://github.com/clefourrier/EtymDB",
+    "licence": "CC BY-SA 4.0"
+   }
+  ],
+  "files": {
+   "etymology/etym.json.gz": 366768
+  },
+  "stats": {
+   "es": {
+    "lemmas": 1627,
+    "origins": 1218,
+    "withEdges": 1062,
+    "edgeEndpoints": 4079
+   },
+   "fr": {
+    "lemmas": 1767,
+    "origins": 1186,
+    "withEdges": 1036,
+    "edgeEndpoints": 3961
+   },
+   "it": {
+    "lemmas": 1598,
+    "origins": 1086,
+    "withEdges": 938,
+    "edgeEndpoints": 3941
+   },
+   "de": {
+    "lemmas": 1770,
+    "origins": 1015,
+    "withEdges": 663,
+    "edgeEndpoints": 1890
+   },
+   "nl": {
+    "lemmas": 1700,
+    "origins": 1158,
+    "withEdges": 774,
+    "edgeEndpoints": 2116
+   },
+   "ja": {
+    "lemmas": 2062,
+    "origins": 462,
+    "withEdges": 356,
+    "edgeEndpoints": 708
+   },
+   "ko": {
+    "lemmas": 1115,
+    "origins": 416,
+    "withEdges": 206,
+    "edgeEndpoints": 446
+   },
+   "zh": {
+    "lemmas": 2439,
+    "origins": 218,
+    "withEdges": 300,
+    "edgeEndpoints": 442
+   },
+   "ar": {
+    "lemmas": 583,
+    "origins": 106,
+    "withEdges": 38,
+    "edgeEndpoints": 64
+   },
+   "en": {
+    "lemmas": 1603,
+    "origins": 1397,
+    "withEdges": 1062,
+    "edgeEndpoints": 3759
+   },
+   "pt": {
+    "lemmas": 1557,
+    "origins": 1120,
+    "withEdges": 968,
+    "edgeEndpoints": 3864
+   },
+   "la": {
+    "lemmas": 642,
+    "origins": 374,
+    "withEdges": 415,
+    "edgeEndpoints": 2087
+   },
+   "ru": {
+    "lemmas": 1757,
+    "origins": 700,
+    "withEdges": 520,
+    "edgeEndpoints": 1120
+   },
+   "pl": {
+    "lemmas": 1863,
+    "origins": 921,
+    "withEdges": 442,
+    "edgeEndpoints": 1227
+   },
+   "uk": {
+    "lemmas": 1431,
+    "origins": 515,
+    "withEdges": 516,
+    "edgeEndpoints": 989
+   },
+   "tr": {
+    "lemmas": 437,
+    "origins": 300,
+    "withEdges": 44,
+    "edgeEndpoints": 111
+   },
+   "hi": {
+    "lemmas": 45,
+    "origins": 38,
+    "withEdges": 6,
+    "edgeEndpoints": 9
+   }
+  }
+ },
+ {
+  "id": "clavis-sentences",
+  "kind": "SENTENCES",
+  "version": "2026.09.02",
+  "title": "Example sentences (Tatoeba)",
+  "languages": [
+   "ar",
+   "de",
+   "es",
+   "fr",
+   "hi",
+   "it",
+   "ja",
+   "ko",
+   "la",
+   "nl",
+   "pl",
+   "pt",
+   "ru",
+   "tr",
+   "uk",
+   "zh"
+  ],
+  "licence": "CC BY 2.0 FR (text); audio per clip CC BY 4.0 / CC BY-SA 4.0 / CC0 1.0",
+  "source": "https://tatoeba.org/ (exports of 2026-08-29)",
+  "generatedAt": "2026-09-02T05:01:40Z",
+  "attribution": [
+   {
+    "name": "Tatoeba contributors",
+    "role": "example sentences",
+    "url": "https://tatoeba.org/",
+    "licence": "CC BY 2.0 FR"
+   },
+   {
+    "name": "Tatoeba audio contributors (per-clip licence, see ATTRIBUTION-tatoeba.json)",
+    "role": "sentence audio",
+    "url": "https://tatoeba.org/en/audio",
+    "licence": "CC BY 4.0 / CC BY-SA 4.0 / CC0 1.0 per clip"
+   }
+  ],
+  "files": {
+   "sentences/es.json.gz": 208109,
+   "sentences/fr.json.gz": 175569,
+   "sentences/it.json.gz": 157046,
+   "sentences/de.json.gz": 136102,
+   "sentences/nl.json.gz": 177121,
+   "sentences/ja.json.gz": 187565,
+   "sentences/ko.json.gz": 131074,
+   "sentences/zh.json.gz": 168460,
+   "sentences/ar.json.gz": 20935,
+   "sentences/pt.json.gz": 190768,
+   "sentences/la.json.gz": 96269,
+   "sentences/ru.json.gz": 184116,
+   "sentences/pl.json.gz": 162662,
+   "sentences/uk.json.gz": 148036,
+   "sentences/tr.json.gz": 139066,
+   "sentences/hi.json.gz": 22,
+   "sentences/ATTRIBUTION-tatoeba.json": 3433084
+  },
+  "stats": {
+   "es": {
+    "sentences": 3000,
+    "withAudio": 3,
+    "withEnglish": 2871,
+    "lemmasCovered": 1478,
+    "candidates": 201882
+   },
+   "fr": {
+    "sentences": 3000,
+    "withAudio": 643,
+    "withEnglish": 2850,
+    "lemmasCovered": 1607,
+    "candidates": 352785
+   },
+   "it": {
+    "sentences": 3000,
+    "withAudio": 649,
+    "withEnglish": 2842,
+    "lemmasCovered": 1437,
+    "candidates": 446155
+   },
+   "de": {
+    "sentences": 3000,
+    "withAudio": 2319,
+    "withEnglish": 2735,
+    "lemmasCovered": 1569,
+    "candidates": 370338
+   },
+   "nl": {
+    "sentences": 3000,
+    "withAudio": 0,
+    "withEnglish": 2896,
+    "lemmasCovered": 1401,
+    "candidates": 99832
+   },
+   "ja": {
+    "sentences": 3000,
+    "withAudio": 3,
+    "withEnglish": 2958,
+    "lemmasCovered": 1657,
+    "candidates": 107837
+   },
+   "ko": {
+    "sentences": 3000,
+    "withAudio": 0,
+    "withEnglish": 2924,
+    "lemmasCovered": 714,
+    "candidates": 5116
+   },
+   "zh": {
+    "sentences": 3000,
+    "withAudio": 0,
+    "withEnglish": 2851,
+    "lemmasCovered": 1959,
+    "candidates": 30028
+   },
+   "ar": {
+    "sentences": 610,
+    "withAudio": 0,
+    "withEnglish": 432,
+    "lemmasCovered": 229,
+    "candidates": 610
+   },
+   "pt": {
+    "sentences": 3000,
+    "withAudio": 3,
+    "withEnglish": 2877,
+    "lemmasCovered": 1354,
+    "candidates": 217053
+   },
+   "la": {
+    "sentences": 3000,
+    "withAudio": 0,
+    "withEnglish": 2960,
+    "lemmasCovered": 481,
+    "candidates": 6512
+   },
+   "ru": {
+    "sentences": 3000,
+    "withAudio": 1998,
+    "withEnglish": 2587,
+    "lemmasCovered": 1494,
+    "candidates": 510280
+   },
+   "pl": {
+    "sentences": 3000,
+    "withAudio": 28,
+    "withEnglish": 2819,
+    "lemmasCovered": 1440,
+    "candidates": 47840
+   },
+   "uk": {
+    "sentences": 3000,
+    "withAudio": 1,
+    "withEnglish": 2984,
+    "lemmasCovered": 1065,
+    "candidates": 69527
+   },
+   "tr": {
+    "sentences": 3000,
+    "withAudio": 0,
+    "withEnglish": 2983,
+    "lemmasCovered": 419,
+    "candidates": 118512
+   },
+   "hi": {
+    "sentences": 0,
+    "withAudio": 0,
+    "withEnglish": 0,
+    "lemmasCovered": 0,
+    "candidates": 0
+   }
+  }
+ },
+ {
+  "id": "clavis-pronunciations",
+  "kind": "PRONUNCIATIONS",
+  "version": "2026.09.02",
+  "title": "Pronunciations (IPA + Commons audio references)",
+  "languages": [
+   "ar",
+   "de",
+   "en",
+   "es",
+   "fr",
+   "hi",
+   "it",
+   "ja",
+   "ko",
+   "la",
+   "nl",
+   "pl",
+   "pt",
+   "ru",
+   "tr",
+   "uk",
+   "zh"
+  ],
+  "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
+  "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
+  "generatedAt": "2026-09-02T05:02:05Z",
+  "attribution": [
+   {
+    "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
+    "role": "etymology, IPA and audio references",
+    "url": "https://kaikki.org/dictionary/",
+    "licence": "CC BY-SA 4.0"
+   },
+   {
+    "name": "Wikimedia Commons contributors (per-file licence and author in the pack)",
+    "role": "word audio",
+    "url": "https://commons.wikimedia.org/",
+    "licence": "CC0 / CC BY / CC BY-SA / public domain per file"
+   }
+  ],
+  "files": {
+   "pronunciations/es.json.gz": 18678,
+   "pronunciations/fr.json.gz": 38349,
+   "pronunciations/it.json.gz": 20464,
+   "pronunciations/de.json.gz": 39481,
+   "pronunciations/nl.json.gz": 33566,
+   "pronunciations/ja.json.gz": 20148,
+   "pronunciations/ko.json.gz": 11423,
+   "pronunciations/zh.json.gz": 26151,
+   "pronunciations/ar.json.gz": 8121,
+   "pronunciations/en.json.gz": 42226,
+   "pronunciations/pt.json.gz": 18318,
+   "pronunciations/la.json.gz": 7155,
+   "pronunciations/ru.json.gz": 22917,
+   "pronunciations/pl.json.gz": 22713,
+   "pronunciations/uk.json.gz": 17163,
+   "pronunciations/tr.json.gz": 4206,
+   "pronunciations/hi.json.gz": 740
+  },
+  "stats": {
+   "es": {
+    "lemmas": 1627,
+    "ipa": 1500,
+    "audio": 3,
+    "audioExcluded": 0
+   },
+   "fr": {
+    "lemmas": 1767,
+    "ipa": 1564,
+    "audio": 879,
+    "audioExcluded": 644
+   },
+   "it": {
+    "lemmas": 1598,
+    "ipa": 1411,
+    "audio": 81,
+    "audioExcluded": 63
+   },
+   "de": {
+    "lemmas": 1770,
+    "ipa": 1418,
+    "audio": 929,
+    "audioExcluded": 619
+   },
+   "nl": {
+    "lemmas": 1700,
+    "ipa": 1302,
+    "audio": 871,
+    "audioExcluded": 612
+   },
+   "ja": {
+    "lemmas": 2062,
+    "ipa": 1556,
+    "audio": 1,
+    "audioExcluded": 0
+   },
+   "ko": {
+    "lemmas": 1115,
+    "ipa": 899,
+    "audio": 4,
+    "audioExcluded": 1
+   },
+   "zh": {
+    "lemmas": 2439,
+    "ipa": 447,
+    "audio": 728,
+    "audioExcluded": 372
+   },
+   "ar": {
+    "lemmas": 583,
+    "ipa": 407,
+    "audio": 121,
+    "audioExcluded": 0
+   },
+   "en": {
+    "lemmas": 1603,
+    "ipa": 1529,
+    "audio": 964,
+    "audioExcluded": 557
+   },
+   "pt": {
+    "lemmas": 1557,
+    "ipa": 1378,
+    "audio": 0,
+    "audioExcluded": 690
+   },
+   "la": {
+    "lemmas": 642,
+    "ipa": 584,
+    "audio": 0,
+    "audioExcluded": 0
+   },
+   "ru": {
+    "lemmas": 1757,
+    "ipa": 1505,
+    "audio": 0,
+    "audioExcluded": 1330
+   },
+   "pl": {
+    "lemmas": 1863,
+    "ipa": 1682,
+    "audio": 0,
+    "audioExcluded": 0
+   },
+   "uk": {
+    "lemmas": 1431,
+    "ipa": 1142,
+    "audio": 0,
+    "audioExcluded": 1032
+   },
+   "tr": {
+    "lemmas": 437,
+    "ipa": 316,
+    "audio": 0,
+    "audioExcluded": 206
+   },
+   "hi": {
+    "lemmas": 45,
+    "ipa": 39,
+    "audio": 0,
+    "audioExcluded": 14
+   }
+  }
+ }
+]

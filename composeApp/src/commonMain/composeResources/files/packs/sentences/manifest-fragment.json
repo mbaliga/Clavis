@@ -1,0 +1,174 @@
+{
+ "id": "clavis-sentences",
+ "kind": "SENTENCES",
+ "version": "2026.09.02",
+ "title": "Example sentences (Tatoeba)",
+ "languages": [
+  "ar",
+  "de",
+  "es",
+  "fr",
+  "hi",
+  "it",
+  "ja",
+  "ko",
+  "la",
+  "nl",
+  "pl",
+  "pt",
+  "ru",
+  "tr",
+  "uk",
+  "zh"
+ ],
+ "licence": "CC BY 2.0 FR (text); audio per clip CC BY 4.0 / CC BY-SA 4.0 / CC0 1.0",
+ "source": "https://tatoeba.org/ (exports of 2026-08-29)",
+ "generatedAt": "2026-09-02T05:01:40Z",
+ "attribution": [
+  {
+   "name": "Tatoeba contributors",
+   "role": "example sentences",
+   "url": "https://tatoeba.org/",
+   "licence": "CC BY 2.0 FR"
+  },
+  {
+   "name": "Tatoeba audio contributors (per-clip licence, see ATTRIBUTION-tatoeba.json)",
+   "role": "sentence audio",
+   "url": "https://tatoeba.org/en/audio",
+   "licence": "CC BY 4.0 / CC BY-SA 4.0 / CC0 1.0 per clip"
+  }
+ ],
+ "files": {
+  "es.json.gz": 208109,
+  "fr.json.gz": 175569,
+  "it.json.gz": 157046,
+  "de.json.gz": 136102,
+  "nl.json.gz": 177121,
+  "ja.json.gz": 187565,
+  "ko.json.gz": 131074,
+  "zh.json.gz": 168460,
+  "ar.json.gz": 20935,
+  "pt.json.gz": 190768,
+  "la.json.gz": 96269,
+  "ru.json.gz": 184116,
+  "pl.json.gz": 162662,
+  "uk.json.gz": 148036,
+  "tr.json.gz": 139066,
+  "hi.json.gz": 22,
+  "ATTRIBUTION-tatoeba.json": 3433084
+ },
+ "stats": {
+  "es": {
+   "sentences": 3000,
+   "withAudio": 3,
+   "withEnglish": 2871,
+   "lemmasCovered": 1478,
+   "candidates": 201882
+  },
+  "fr": {
+   "sentences": 3000,
+   "withAudio": 643,
+   "withEnglish": 2850,
+   "lemmasCovered": 1607,
+   "candidates": 352785
+  },
+  "it": {
+   "sentences": 3000,
+   "withAudio": 649,
+   "withEnglish": 2842,
+   "lemmasCovered": 1437,
+   "candidates": 446155
+  },
+  "de": {
+   "sentences": 3000,
+   "withAudio": 2319,
+   "withEnglish": 2735,
+   "lemmasCovered": 1569,
+   "candidates": 370338
+  },
+  "nl": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2896,
+   "lemmasCovered": 1401,
+   "candidates": 99832
+  },
+  "ja": {
+   "sentences": 3000,
+   "withAudio": 3,
+   "withEnglish": 2958,
+   "lemmasCovered": 1657,
+   "candidates": 107837
+  },
+  "ko": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2924,
+   "lemmasCovered": 714,
+   "candidates": 5116
+  },
+  "zh": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2851,
+   "lemmasCovered": 1959,
+   "candidates": 30028
+  },
+  "ar": {
+   "sentences": 610,
+   "withAudio": 0,
+   "withEnglish": 432,
+   "lemmasCovered": 229,
+   "candidates": 610
+  },
+  "pt": {
+   "sentences": 3000,
+   "withAudio": 3,
+   "withEnglish": 2877,
+   "lemmasCovered": 1354,
+   "candidates": 217053
+  },
+  "la": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2960,
+   "lemmasCovered": 481,
+   "candidates": 6512
+  },
+  "ru": {
+   "sentences": 3000,
+   "withAudio": 1998,
+   "withEnglish": 2587,
+   "lemmasCovered": 1494,
+   "candidates": 510280
+  },
+  "pl": {
+   "sentences": 3000,
+   "withAudio": 28,
+   "withEnglish": 2819,
+   "lemmasCovered": 1440,
+   "candidates": 47840
+  },
+  "uk": {
+   "sentences": 3000,
+   "withAudio": 1,
+   "withEnglish": 2984,
+   "lemmasCovered": 1065,
+   "candidates": 69527
+  },
+  "tr": {
+   "sentences": 3000,
+   "withAudio": 0,
+   "withEnglish": 2983,
+   "lemmasCovered": 419,
+   "candidates": 118512
+  },
+  "hi": {
+   "sentences": 0,
+   "withAudio": 0,
+   "withEnglish": 0,
+   "lemmasCovered": 0,
+   "candidates": 0
+  }
+ }
+}
