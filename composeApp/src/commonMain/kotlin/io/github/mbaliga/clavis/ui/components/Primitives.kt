@@ -27,12 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.mbaliga.clavis.ui.theme.ClavisShapes
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
@@ -143,7 +145,7 @@ fun LinkButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     val p = ClavisTheme.palette
     Box(
         modifier
-            .defaultMinSize(minHeight = 44.dp)
+            .defaultMinSize(minHeight = 48.dp)
             .clip(ClavisShapes.button)
             .clickable(role = Role.Button, onClick = onClick)
             .then(if (testTag != null) Modifier.tagged(testTag) else Modifier)
@@ -163,7 +165,7 @@ fun Chip(text: String, modifier: Modifier = Modifier, selected: Boolean = false,
         modifier
             .clip(ClavisShapes.chip)
             .background(if (selected) p.accentSoft else p.surface2)
-            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick).defaultMinSize(minHeight = 32.dp) else Modifier)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick).defaultMinSize(minHeight = 48.dp) else Modifier)
             .padding(horizontal = 10.dp, vertical = 5.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -242,3 +244,16 @@ fun HairlineDivider(modifier: Modifier = Modifier) {
 
 @Composable
 fun VSpace(h: Dp) = Spacer(Modifier.height(h))
+
+/**
+ * Arrow glyph for a "step back"/"previous" chrome label (e.g. `"${backArrow()} Page"`), resolved
+ * from the ambient layout direction so it keeps pointing toward the start edge — not its original
+ * physical direction — when Compose auto-mirrors the surrounding Row under RTL (rtl audit: a
+ * literal `←`/`→` character baked into a button's text never mirrors on its own).
+ */
+@Composable
+fun backArrow(): String = if (LocalLayoutDirection.current == LayoutDirection.Ltr) "←" else "→"
+
+/** The `→`/`←` counterpart of [backArrow], for a "step forward"/"next" chrome label. */
+@Composable
+fun forwardArrow(): String = if (LocalLayoutDirection.current == LayoutDirection.Ltr) "→" else "←"

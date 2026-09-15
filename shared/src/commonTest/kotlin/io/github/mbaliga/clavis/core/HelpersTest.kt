@@ -150,9 +150,9 @@ class HelpersTest {
         assertEquals("2 words here are probably new; the rest you know (67% of the bubble).", Copy.readCountCopy(2, 2.0 / 3))
         assertEquals("Bring back 1 Spanish word", Copy.dueTitle(1, "Spanish")); assertEquals("Meet 2 new Japanese words", Copy.newTitle(2, "Japanese"))
         assertEquals("Spanish: Clavis now assumes you know the top ~2,000", Copy.testAssumes("Spanish", bandLabel(5.0)))
-        assertEquals("gato — you met it 1 day ago · grew from Latin cattus. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35].",
+        assertEquals("⁨gato⁩ — you met it 1 day ago · grew from Latin cattus. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35].",
             Copy.echoResult("gato", "", 1, "grew from Latin cattus"))
-        assertEquals("猫 (neko) — you met it earlier. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35].",
+        assertEquals("⁨猫⁩ (neko) — you met it earlier. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35].",
             Copy.echoResult("猫", "neko", null, null))
     }
 

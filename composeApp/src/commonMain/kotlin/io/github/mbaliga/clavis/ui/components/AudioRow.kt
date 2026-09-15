@@ -59,14 +59,14 @@ fun AudioRow(
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     QuietButton(
                         when { busy -> CosmosCopy.DOWNLOADING; cached -> CosmosCopy.PLAY; else -> CosmosCopy.DOWNLOAD_RECORDING },
-                        onClick = { if (!busy) store.playClip(url) }, enabled = !busy, minHeight = 40.dp, testTag = "$testTagPrefix-play",
+                        onClick = { if (!busy) store.playClip(url) }, enabled = !busy, testTag = "$testTagPrefix-play",
                     )
                     Text(CosmosCopy.recordingLabel(audioSource, audioLicence, audioBy), style = t.tiny, color = p.ink3, modifier = Modifier.weight(1f).tagged("$testTagPrefix-label"))
                 }
             }
             store.canSpeak(l) -> {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SpeakButton(onClick = { store.speak(l, text) }, size = 40.dp, testTag = "$testTagPrefix-speak")
+                    SpeakButton(onClick = { store.speak(l, text) }, testTag = "$testTagPrefix-speak")
                     Text(CosmosCopy.SYNTHETIC, style = t.tiny, color = p.ink3, modifier = Modifier.tagged("$testTagPrefix-label"))
                 }
             }

@@ -46,7 +46,7 @@ class FsrsTest {
 
     @Test
     fun versionSeedIsPresent() {
-        assertEquals("0.1.0", ClavisVersion.NAME)
+        assertEquals("0.1.0-rc.1", ClavisVersion.NAME)
         // CODE follows gradle/version.gradle.kts: MAJOR·10000 + MINOR·100 + PATCH of NAME (a pre-release shares its final's code).
         val (major, minor, patch) = ClavisVersion.NAME.substringBefore('-').split('.').map { it.toInt() }
         assertEquals(major * 10_000 + minor * 100 + patch, ClavisVersion.CODE)

@@ -4,6 +4,8 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 
 ## [Unreleased]
 
+## [0.1.0-rc.1] - 2026-09-15
+
 ### Domain (`:shared`)
 
 - Added the Kotlin Multiplatform domain layer ported from the v0.10 web build: corpus model and gzip pack decoder, language registry, FSRS-5 scheduler (19-weight vector, `DECAY` −0.5, `FACTOR` 19/81), selection and grading engines (lane hopping, the 6-hour scene rule, one productive language per family), the baseline vocabulary test with pseudoword foils, the Paths engine, and the balloon-geometry and cloze-mask helpers.
@@ -30,6 +32,10 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 - Added Paths (branch fan as a tree and as a force map, the longer view per language, undo), Story (free page-by-page reading with numbered balloons and tap-to-speak), Languages (the catalogue with speak/read/off per language, the cited one-productive-per-family warning, honest per-language coverage from the pack manifests and presets), Letters (Japanese, Korean, Chinese and Arabic primers), Media (import .txt/.srt/.lrc and read them against your vocabulary, with "met this word out here" logging) and Sentences (Tatoeba sentences ranked by how much of them you already know, with CC-licensed recordings on tap).
 - The Android manifest declares `INTERNET` for that single download-on-tap path; nothing is fetched otherwise (D-13). Desktop audio playback supports WAV, MP3 and OGG (LGPL 2.1 decoders; the licence text ships in the app resources, in the colophon and in `THIRD_PARTY_NOTICES.md`).
 - The learner document is encoded on the UI thread once per burst of commits and written (temp file, fsync, rename) by a single writer thread, so a tap no longer waits for the disk; the activity flushes on stop and the desktop window on close. The Learn pool is disabled with an explanation when every language is resting. Keyboard auto-repeat and double presses no longer grade two reads in a row.
+- Android cloud backup now excludes the learner-state document, its atomic-write temp file, and the `corrupt/` directory of unreadable-document backups (`android:dataExtractionRules` on API 31+, `android:fullBackupContent` on API 26–30); device-to-device transfer is left unrestricted (`PRIVACY.md`).
+- System/predictive back now steps back through onboarding, the baseline test, a live session, the colophon overlay, a secondary view and the Cosmos word card instead of exiting the app, mirroring the existing desktop Escape-key behaviour (`PredictiveBackHandler`).
+- RTL fixes: the Story page/Sentences/Media/Colophon/Settings chrome that showed a literal `←`/`→` now resolves the glyph from the ambient layout direction so it still points toward the correct edge when mirrored; the Paths tree's spine/elbow connector and each card's kind-colour accent stripe now mirror under RTL instead of staying pinned to the physical left edge; a target-language surface/lemma form spliced into a larger English sentence (session hints, the echo result line, a Cosmos relation chip) is now wrapped in a Unicode directional isolate so it can no longer flip the whole line's reading order.
+- Accessibility: the compact topbar's Settings button and several secondary controls (`QuietButton`, `SpeakButton`, the interactive `Chip`, the `Cite` reference button, the `LinkButton`) now meet the ~48dp touch-target guidance; the family-constraint dismiss scrim is now announced as a button; the "Your record" table's columns grow instead of wrapping at large font scale.
 
 ### Release engineering
 
@@ -39,6 +45,8 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 - Added the CI workflow (domain and UI tests, lint, debug and R8 release APK with a 16 KB page-size check, Linux uber-jar smoke test, pipeline unit tests) and the tag-triggered release workflow (Android APK and AAB, Linux `.deb` and uber-jar, macOS `.dmg` with optional Developer ID signing and notarization, Windows `.msi`, dependency graphs, `SHA256SUMS.txt`, GitHub Release with pre-release marking).
 - Added `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PRIVACY.md`, `SECURITY.md`, `CONTRIBUTING.md`, `docs/RELEASE.md`, `docs/STORE-LISTING.md`, Dependabot configuration and issue templates.
 - Reviewed the R8 configuration against the merged rules; recorded the named-companion rule for `@Serializable` classes.
+- Removed the now-dead `versionCode = 100` / `versionName = "0.1.0"` / `packageVersion = "1.0.0"` literals from `composeApp/build.gradle.kts`: every build path already overrides them from `gradle/version.gradle.kts`, confirmed by building with `-Pclavis.version` set.
+- `THIRD_PARTY_NOTICES.md`'s Noto font rows were checked against the bundled `.ttf` files' own `name` tables: Noto Sans Hebrew's copyright is 2024, not the 2022 it was merged under with Arabic/Devanagari (now a separate row); Hebrew, Japanese, Korean and Chinese are the Thin static instance, not Regular, per their own name tables and `OS/2.usWeightClass` (the notice now says so; whether the app should actually ship the Regular weight for those scripts is still open, docs/RELEASE.md §9).
 
 ### Documentation
 
@@ -47,7 +55,7 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 ### Known pre-release requirements
 
 - The method is being tested on one person; nothing here is validated pedagogy (D-18).
-- Google Play requires `targetSdk` 36 for new apps and updates since 2026-08-31; the build compiles against and targets API 36 on the pinned toolchain. The API-36 device pass (predictive back, edge-to-edge insets, Arabic line height, TalkBack, RTL, 200 % text) is still to be recorded (docs/RELEASE.md §9).
-- Device and desktop acceptance (TalkBack, RTL, 200% text, machines without CJK/Arabic system fonts, in-place upgrades) is not yet recorded.
+- Google Play requires `targetSdk` 36 for new apps and updates since 2026-08-31; the build compiles against and targets API 36 on the pinned toolchain. The API-36 device pass — predictive back (now wired in code; its swipe-preview animation is unverified on a device), edge-to-edge insets, Arabic line height, TalkBack, RTL, 200% text, machines without CJK/Arabic system fonts, in-place upgrades — is still to be recorded (docs/RELEASE.md §9); this environment has no emulator or KVM available to run it, which is exactly why this tag is `-rc.1` rather than a stable release.
 - macOS and Windows installers are unsigned until certificates exist; the release notes and README carry the Gatekeeper and SmartScreen steps.
-- The learner-state document is not yet excluded from Android cloud backup (PRIVACY.md).
+- Four bundled Noto font files (Hebrew, Japanese, Korean, Chinese) are the Thin static instance, not Regular, so un-weighted text in those scripts renders thinner than intended; `THIRD_PARTY_NOTICES.md` now says so accurately, but whether to ship the Regular weight instead is a product decision still open (docs/RELEASE.md §9).
+- "Clavis" is a working name. Only a preliminary web search has been done to check for obvious conflicts; it is not a cleared trademark, and a proper trademark check is still pending before any store listing (docs/STORE-LISTING.md).

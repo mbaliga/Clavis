@@ -148,11 +148,9 @@ Non-tag builds (`CLAVIS_VERSION` unset) carry `ClavisVersion.NAME`; CI's debug A
 
 ## 9. Open items before the first stable tag
 
-- **API-36 device pass** (`compileSdk`/`targetSdk` are 36 since 2026-09-02, both workflows install `platforms;android-36` and `build-tools;36.0.0`, `docs/build-platform.md` §5 records the green build): test on an API 36 emulator — predictive back through the navigation, edge-to-edge insets, Arabic line height (`elegantTextHeight` is ignored from 36), TalkBack, RTL, 200 % font scale, ≥ 600 dp widths.
-- **Android backup rules**: exclude `clavis-state.json` from cloud backup (`android:dataExtractionRules`), keep device-to-device transfer, and update `PRIVACY.md`.
-- **Font notices**: the OFL header files for the Noto families were not retrievable when the fonts were fetched; the notice table in `THIRD_PARTY_NOTICES.md` uses the upstream copyright lines — confirm against the bundled files' `name` tables.
-- **Name**: "Clavis" is a working name; a trademark check precedes the first store listing.
-- Removing the literal `versionCode = 100` / `versionName = "0.1.0"` / `packageVersion = "1.0.0"` fallbacks from `composeApp/build.gradle.kts` (the versioning block overrides them today).
+- **API-36 device pass** (`compileSdk`/`targetSdk` are 36 since 2026-09-02, both workflows install `platforms;android-36` and `build-tools;36.0.0`, `docs/build-platform.md` §5 records the green build): test on an API 36 emulator — predictive back through the navigation (a `PredictiveBackHandler` now covers modal states in code; the actual swipe-preview animation still needs confirming on-device), edge-to-edge insets, Arabic line height (`elegantTextHeight` is ignored from 36), TalkBack, RTL, 200 % font scale, ≥ 600 dp widths. This is the item the `0.1.0-rc.1` tag is standing in for: no emulator/KVM is available in the environment that prepared this release candidate, so none of the above has actually been exercised on a device yet.
+- **Font content, not just the notice**: `THIRD_PARTY_NOTICES.md` now matches what the bundled `.ttf` files' own `name` tables say (verified by extracting them directly) — but that extraction also surfaced that the Hebrew/Japanese/Korean/Chinese files are the **Thin** (weight 100) static instance, not Regular, so the un-weighted `Font()` calls in `Platform.desktop.kt` render Thin-weight fallback glyphs for those scripts. Decide whether Thin was intentional or re-fetch the Regular-weight statics from upstream and re-verify rendering.
+- **Name**: "Clavis" is a working name; only a preliminary web search has been done, not a cleared trademark check — that precedes the first store listing.
 
 ## 10. Rollback
 

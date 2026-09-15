@@ -168,7 +168,7 @@ class StateStoreTest {
         val st = assertNotNull(s.load())
         assertTrue(s.lastLoadWasCorrupt)
         assertEquals(3, st.v); assertEquals(9, st.lanes.size); assertTrue(st.cards["es"]!!.isEmpty())
-        val copy = "${d.data}/clavis-state.json.corrupt-$now"
+        val copy = "${d.data}/corrupt/clavis-state.json.corrupt-$now"
         assertTrue(FileIo.exists(copy)); assertContentEquals(bad, FileIo.read(copy))
         assertFalse(FileIo.exists("${d.data}/clavis-state.json")) // moved aside, not overwritten
         s.save(st)

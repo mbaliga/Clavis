@@ -7,6 +7,22 @@ package io.github.mbaliga.clavis.core
  * Strings marked `D-14` are additions mandated by DECISIONS.md and have no web-build original.
  */
 object Copy {
+    /**
+     * Wraps [s] in a Unicode directional isolate (rtl audit): a target-language surface/lemma
+     * form (which can be RTL script, e.g. Arabic) concatenated into a larger English sentence can
+     * otherwise set the *whole* string's base paragraph direction — Compose's `Text`, like a
+     * browser, resolves an unset direction from the string's first strong character — scrambling
+     * the English words/digits that follow it. This is the same fix HTML's `<bdi>` element /
+     * `unicode-bidi: isolate` provides, applied as plain characters since `Text` has no per-span
+     * `textDirection`. Pass [rtl] when the caller already knows the script's direction (RLI/LRI);
+     * leave it null to let the isolate resolve its own direction from its own first strong
+     * character (FSI) — enough on its own to stop it from hijacking the *surrounding* string.
+     */
+    fun isolate(s: String, rtl: Boolean? = null): String {
+        val open = when (rtl) { true -> '⁧'; false -> '⁦'; null -> '⁨' }
+        return "$open$s⁩"
+    }
+
     // ---------- lane reasons (`why`), template-spec §3.5 / §8 ----------
     const val PINNED = "pinned by you"
     const val TRYING_NEW = "trying something new"
@@ -78,7 +94,7 @@ object Copy {
         val r = if (reading.isNullOrEmpty()) "" else " ($reading)"
         val met = if (days != null) "$days day${if (days == 1) "" else "s"} ago" else "earlier"
         val o = if (origin.isNullOrEmpty()) "" else " · $origin"
-        return "$surface$r — you met it $met$o. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35]."
+        return "${isolate(surface)}$r — you met it $met$o. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones [14][15][35]."
     }
 
     // ---------- langid, §5.5 ----------

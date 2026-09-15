@@ -158,7 +158,7 @@ internal fun SceneSection(store: ClavisStore, eu: EncounterUi, sc: Scene, l: Lan
         Column(Modifier.fillMaxWidth().background(p.surface2, ClavisShapes.hint).padding(12.dp).tagged("gloss")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(g.line, style = t.body, color = p.ink, modifier = Modifier.weight(1f))
-                if (store.canSpeak(l)) SpeakButton(onClick = { store.speak(l, g.scene.x[l].orEmpty()) }, size = 38.dp)
+                if (store.canSpeak(l)) SpeakButton(onClick = { store.speak(l, g.scene.x[l].orEmpty()) })
             }
             Text(g.english, style = t.small, color = p.ink2)
         }
@@ -172,11 +172,12 @@ internal fun HintContent(store: ClavisStore, l: Lang, tok: Token) {
     val p = ClavisTheme.palette
     val t = ClavisTheme.type
     val card = store.state.cards[l.code]?.get(tok.lemma)
+    val rtl = store.isRtl(l)
     Column {
         val parts = buildList {
-            add(tok.surface)
+            add(Copy.isolate(tok.surface, rtl))
             if (!tok.reading.isNullOrEmpty()) add("· ${tok.reading}")
-            if (tok.lemma != tok.surface.lowercase()) add("→ ${tok.lemma}")
+            if (tok.lemma != tok.surface.lowercase()) add("→ ${Copy.isolate(tok.lemma, rtl)}")
             add("· ${bandLabel(tok.zipf)}")
         }
         Text(parts.joinToString(" "), style = t.small, color = p.ink)

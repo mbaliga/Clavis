@@ -73,9 +73,17 @@ class JsonStateStore(
     var lastLoadWasCorrupt: Boolean = false
         private set
 
-    /** Where an unreadable document is moved: `clavis-state.json.corrupt-<epochMillis>` (`.2`, `.3`… when taken). */
+    /**
+     * Directory holding unreadable-document backups (`corrupt/`, a sibling of the state file), kept
+     * out of Android cloud backup as a single directory-level exclude — see
+     * `composeApp/src/androidMain/res/xml/data_extraction_rules.xml` — since Android's backup rules
+     * have no wildcard support and these files carry a timestamp in their name.
+     */
+    private val corruptDir: String get() = dirs.data.trimEnd('/') + "/corrupt"
+
+    /** Where an unreadable document is moved: `corrupt/clavis-state.json.corrupt-<epochMillis>` (`.2`, `.3`… when taken). */
     fun corruptPath(epochMillis: Long): String {
-        val base = "$path.corrupt-$epochMillis"
+        val base = "$corruptDir/$fileName.corrupt-$epochMillis"
         var p = base
         var n = 2
         while (FileIo.exists(p)) p = "$base.${n++}"
@@ -92,7 +100,7 @@ class JsonStateStore(
             // never replaced by the next save.
             extras = emptyMap()
             lastLoadWasCorrupt = true
-            runCatching { FileIo.rename(path, corruptPath(clock.now())) }
+            runCatching { FileIo.mkdirs(corruptDir); FileIo.rename(path, corruptPath(clock.now())) }
             freshState(registry, clock.now())
         }
         current = state

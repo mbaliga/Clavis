@@ -87,7 +87,7 @@ fun Cite(n: Int, onCite: (Int) -> Unit, modifier: Modifier = Modifier) {
     val p = ClavisTheme.palette
     Box(
         modifier
-            .defaultMinSize(minWidth = 28.dp, minHeight = 28.dp)
+            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
             .clickable(role = Role.Button) { onCite(n) }
             .semantics { contentDescription = "reference $n" }
             .padding(horizontal = 3.dp, vertical = 4.dp),

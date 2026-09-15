@@ -12,9 +12,11 @@ plugins {
 // --- versioning (release) ---
 // Single source of truth for versionName / versionCode / desktop package versions: gradle/version.gradle.kts
 // (-Pclavis.version= > CLAVIS_VERSION env > ClavisVersion.NAME in :shared). `./gradlew :composeApp:clavisVersion`
-// prints the resolved values; the scheme is documented in docs/RELEASE.md. The literal versionCode/versionName
-// and packageVersion further down remain as the documented fallbacks and are overridden from here, so this block
-// and the "release signing (release)" block inside android {} are the only lines a release engineer edits.
+// prints the resolved values; the scheme is documented in docs/RELEASE.md. versionCode/versionName and the
+// desktop packageVersion are set exclusively from here — no literal fallback remains in defaultConfig /
+// nativeDistributions — so a broken clavis.version input fails the build at configuration time (version.gradle.kts's
+// own `error(...)`) instead of silently falling back to a stale literal. This block and the "release signing
+// (release)" block inside android {} are the only lines a release engineer edits.
 apply(from = rootProject.file("gradle/version.gradle.kts"))
 val clavisVersionCode: Int by extra
 val clavisVersionName: String by extra
@@ -70,6 +72,11 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.compose.material.icons.core)
+            // BackHandler/PredictiveBackHandler (androidx.compose.ui.backhandler): navigation-compose already
+            // pulls this in as its own implementation dependency (not exposed transitively), so it must be
+            // declared directly here too. Pinned to the same version as the rest of the Compose Multiplatform
+            // stack via libs.versions.toml's platform constraint (see the androidx-navigation comment there).
+            implementation("org.jetbrains.compose.ui:ui-backhandler:${libs.versions.compose.multiplatform.get()}")
 
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
@@ -116,9 +123,9 @@ android {
         applicationId = "io.github.mbaliga.clavis"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        // Keep in step with io.github.mbaliga.clavis.core.ClavisVersion (CODE = MAJOR·10000 + MINOR·100 + PATCH).
-        versionCode = 100
-        versionName = "0.1.0"
+        // versionCode/versionName are set exclusively by the androidComponents.onVariants block
+        // above, for every variant; no literal fallback is kept here (see the "versioning
+        // (release)" block's comment at the top of this file).
     }
 
     buildTypes {
@@ -205,9 +212,10 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Clavis"
-            // jpackage on macOS rejects a leading 0 in the version (MAJOR must be > 0), so the
-            // desktop package version is decoupled from the app's 0.x versionName for now.
-            packageVersion = "1.0.0"
+            // packageVersion is set exclusively by the afterEvaluate block above (clavisBaseVersion);
+            // no literal fallback is kept here (see the "versioning (release)" block's comment at
+            // the top of this file). jpackage on macOS still rejects a leading 0, which is why
+            // clavisDmgVersion (gradle/version.gradle.kts) substitutes MAJOR=1 for the .dmg only.
             description = "Nine languages, one lexicon: offline-first language learning from parallel comics."
             vendor = "mbaliga"
             copyright = "Copyright 2026 mbaliga. App code licensed separately from the CC BY-SA data pack."

@@ -103,8 +103,9 @@ Clavis/
   `composeApp/build/generated/compose/resourceGenerator/kotlin/`).
 - Android ids: applicationId `io.github.mbaliga.clavis`; debug adds `.debug`. `versionCode` /
   `versionName` and the desktop package versions are derived by `gradle/version.gradle.kts` from
-  `-Pclavis.version` / `CLAVIS_VERSION` / `ClavisVersion.NAME` (0.1.0 → versionCode 100; the literals
-  left in `composeApp/build.gradle.kts` are overridden fallbacks). Scheme and per-OS mapping:
+  `-Pclavis.version` / `CLAVIS_VERSION` / `ClavisVersion.NAME` (0.1.0 → versionCode 100; no literal
+  fallback is left in `composeApp/build.gradle.kts` — a broken version input fails the build at
+  configuration time instead). Scheme and per-OS mapping:
   `docs/RELEASE.md` §5; `./gradlew :composeApp:clavisVersion` prints the resolved values.
 - Desktop: main class `io.github.mbaliga.clavis.MainKt`. jpackage on macOS rejects a leading 0
   (MAJOR must be > 0) and Windows needs numeric `x.y.z` with x,y ≤ 255, z ≤ 65535 — hence the

@@ -24,11 +24,12 @@ import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
 
 /**
- * `.speak`: a 44 dp circular button labelled `Hear it`. Callers render it only when the
- * platform can voice the language (`speaker.canSpeak`, D-8) — never a button that fails silently.
+ * `.speak`: a 48 dp circular button labelled `Hear it` (a11y: the ~48dp touch-target guidance).
+ * Callers render it only when the platform can voice the language (`speaker.canSpeak`, D-8) —
+ * never a button that fails silently.
  */
 @Composable
-fun SpeakButton(onClick: () -> Unit, modifier: Modifier = Modifier, size: Dp = 44.dp, testTag: String? = null) {
+fun SpeakButton(onClick: () -> Unit, modifier: Modifier = Modifier, size: Dp = 48.dp, testTag: String? = null) {
     val p = ClavisTheme.palette
     Box(
         modifier

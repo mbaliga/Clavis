@@ -46,6 +46,7 @@ import io.github.mbaliga.clavis.ui.colophon.GLOSSARY
 import io.github.mbaliga.clavis.ui.colophon.REFERENCES
 import io.github.mbaliga.clavis.ui.components.Cite
 import io.github.mbaliga.clavis.ui.components.Eyebrow
+import io.github.mbaliga.clavis.ui.components.backArrow
 import io.github.mbaliga.clavis.ui.components.H2
 import io.github.mbaliga.clavis.ui.components.LinkButton
 import io.github.mbaliga.clavis.ui.components.QuietButton
@@ -97,7 +98,7 @@ fun ColophonScreen(store: ClavisStore, ui: UiState, overlay: Boolean) {
         if (overlay) {
             // Stays visible while the list scrolls to the reference (D-14: "back to the claim").
             Row(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp)) {
-                QuietButton(BACK_TO_CLAIM, onClick = store::closeColophon, testTag = "back-to-claim")
+                QuietButton("${backArrow()} $BACK_TO_CLAIM", onClick = store::closeColophon, testTag = "back-to-claim")
             }
         }
         LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().weight(1f)) {

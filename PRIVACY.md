@@ -4,7 +4,7 @@ Clavis collects no data. There is no account, no server, no sync, no analytics, 
 
 ## What the app stores
 
-One JSON document per profile, `clavis-state.json`, containing your learning state: enabled languages and their productive/receptive setting, cards and their spaced-repetition schedule, the review log, baseline-test results, Paths history, settings, and the texts you imported. Recordings you tap to play (Wikimedia Commons word audio, Tatoeba sentence audio) are cached as plain files under the app's cache directory, named by a hash of their address; optional content packs and voices, when they ship, will be stored next to the state document. If the state document cannot be read at start-up, it is kept beside a fresh one as `clavis-state.json.corrupt-<timestamp>` and the app says so. Nothing is encrypted at rest beyond what the operating system provides for per-app storage; nothing in the document identifies you unless you type it in.
+One JSON document per profile, `clavis-state.json`, containing your learning state: enabled languages and their productive/receptive setting, cards and their spaced-repetition schedule, the review log, baseline-test results, Paths history, settings, and the texts you imported. Recordings you tap to play (Wikimedia Commons word audio, Tatoeba sentence audio) are cached as plain files under the app's cache directory, named by a hash of their address; optional content packs and voices, when they ship, will be stored next to the state document. If the state document cannot be read at start-up, it is kept (so nothing is silently lost) in a `corrupt/` subdirectory next to the fresh one, as `corrupt/clavis-state.json.corrupt-<timestamp>`, and the app says so. Nothing is encrypted at rest beyond what the operating system provides for per-app storage; nothing in the document identifies you unless you type it in.
 
 ## Where it lives
 
@@ -25,7 +25,7 @@ These are the directories the desktop shell resolves (`DesktopAppDirs`; the dire
 
 ## Android backup
 
-The current build leaves Android's default `allowBackup` behaviour on. If you have Android's device backup enabled, the system — not Clavis — may include the app's files in your device backup according to your Android settings; turning off app backup in Android excludes Clavis. An explicit exclusion of the learner-state document from cloud backup is on the pre-release checklist ([docs/RELEASE.md](docs/RELEASE.md)).
+Android's `allowBackup` stays on, but the learner-state document (`clavis-state.json`, its atomic-write temp file, and the `corrupt/` subdirectory holding a timestamped copy if a document is ever unreadable) is excluded from Android's cloud backup on Android 12 and later (`android:dataExtractionRules`). This exclusion applies to cloud backup only: device-to-device transfer (Android's "Copy your data" migration when you set up a new phone) still carries your learner state across, consistent with keeping your data on the device you chose (docs/DECISIONS.md D-13). On Android 8.0–11 (API 26–30), the OS has no split between cloud backup and device-to-device transfer, so the same exclusion there also withholds the state document from D2D transfer — a platform limitation on those older versions, not a Clavis choice. Recording clips you tap to play are cached under the app's cache directory, which Android excludes from Auto Backup by default on every version.
 
 ## Deleting your data
 

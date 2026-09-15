@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -34,6 +35,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.mbaliga.clavis.core.Lang
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collect
 import io.github.mbaliga.clavis.store.ClavisStore
 import io.github.mbaliga.clavis.store.LocalRev
 import io.github.mbaliga.clavis.store.UiState
@@ -135,7 +138,17 @@ fun CosmosScreen(store: ClavisStore, ui: UiState) {
                     )
                 }
                 val sel = if (explore) exCtl.selectedPoint else ctl.selected
-                if (sel >= 0 && sel < data.points.size) {
+                val wordCardOpen = sel >= 0 && sel < data.points.size
+                // System/predictive back closes the word card instead of leaving Cosmos entirely (textscale audit).
+                PredictiveBackHandler(enabled = wordCardOpen) { progress ->
+                    try {
+                        progress.collect { }
+                        if (explore) exCtl.selected = -1 else { ctl.push(); ctl.selected = -1; ctl.setFocus(-1) }
+                    } catch (e: CancellationException) {
+                        // the gesture was released before completing — leave the card open
+                    }
+                }
+                if (wordCardOpen) {
                     WordCard(
                         store, data, sel,
                         onClose = { if (explore) exCtl.selected = -1 else { ctl.push(); ctl.selected = -1; ctl.setFocus(-1) } },

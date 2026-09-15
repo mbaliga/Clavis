@@ -52,6 +52,7 @@ import io.github.mbaliga.clavis.store.LocalRev
 import io.github.mbaliga.clavis.store.UiState
 import io.github.mbaliga.clavis.ui.components.Chip
 import io.github.mbaliga.clavis.ui.components.CitedText
+import io.github.mbaliga.clavis.ui.components.backArrow
 import io.github.mbaliga.clavis.ui.components.Eyebrow
 import io.github.mbaliga.clavis.ui.components.H2
 import io.github.mbaliga.clavis.ui.components.HairlineDivider
@@ -88,7 +89,7 @@ object MediaCopy {
     const val OPEN = "Open"
     const val DELETE = "Delete"
     const val DELETE_CONFIRM = "Delete this text? It only ever lived on this device."
-    const val BACK = "← Your texts"
+    const val BACK = "Your texts"
     fun lines(n: Int) = "$n line${if (n == 1) "" else "s"}"
     fun readable(p: String) = "$p of these lines readable"
     const val TINGLE = "Met this word out here"
@@ -99,7 +100,7 @@ object MediaCopy {
     const val TINGLE_MISS = "Not in the comic's vocabulary — nothing was logged"
     const val SENTENCES_EYEBROW = "Sentences"
     const val SENTENCES_COPY = "Short sentences from Tatoeba, English on tap — more places to meet words you're already learning [17]. Nothing is scheduled from here."
-    const val SENTENCES_BACK = "← Back"
+    const val SENTENCES_BACK = "Back"
     fun sentencesIn(lang: String) = "Sentences in $lang"
     const val SENTENCES_FOOTER = "Sorted so that sentences you can almost read come first (≥ 90% of their words known). Recordings are one volunteer's voice, named with their licence; the synthetic voice says so. Nothing here grades or schedules."
     const val SHOW_MORE = "Show more"
@@ -202,9 +203,9 @@ fun MediaScreen(store: ClavisStore, ui: UiState) {
                         Text(m.title, style = t.h3, color = p.ink)
                         Text("${store.langName(l)} · ${m.kind.uppercase()} · ${MediaCopy.lines(m.lines.size)} · ${MediaCopy.readable(pct(cov))} · ${dayOf(m.addedAt)}", style = t.small, color = p.ink2)
                     }
-                    QuietButton(MediaCopy.OPEN, onClick = { store.openMedia(m.id) }, minHeight = 40.dp, testTag = "media-open-${m.id}")
+                    QuietButton(MediaCopy.OPEN, onClick = { store.openMedia(m.id) }, testTag = "media-open-${m.id}")
                     Spacer(Modifier.width(6.dp))
-                    QuietButton(MediaCopy.DELETE, onClick = { store.confirm(Confirm(null, MediaCopy.DELETE_CONFIRM, MediaCopy.DELETE, Copy.CANCEL) { store.deleteMedia(m.id) }) }, minHeight = 40.dp, testTag = "media-delete-${m.id}")
+                    QuietButton(MediaCopy.DELETE, onClick = { store.confirm(Confirm(null, MediaCopy.DELETE_CONFIRM, MediaCopy.DELETE, Copy.CANCEL) { store.deleteMedia(m.id) }) }, testTag = "media-delete-${m.id}")
                 }
                 if (i < items.lastIndex) HairlineDivider()
             }
@@ -214,7 +215,7 @@ fun MediaScreen(store: ClavisStore, ui: UiState) {
             Eyebrow(MediaCopy.SENTENCES_EYEBROW)
             CitedText(MediaCopy.SENTENCES_COPY, onCite = store::openColophon, color = p.ink, style = t.small)
             FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (l in lanes) QuietButton(store.langName(l), onClick = { store.openSentences(l) }, minHeight = 40.dp, testTag = "sentences-${l.code}", leading = { LaneDot(laneColour(store, l)) })
+                for (l in lanes) QuietButton(store.langName(l), onClick = { store.openSentences(l) }, testTag = "sentences-${l.code}", leading = { LaneDot(laneColour(store, l)) })
             }
         }
         SoftCard {
@@ -293,7 +294,7 @@ private fun ReadingMode(store: ClavisStore, m: ImportedMedia) {
     var noted by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).tagged("media-reading")) {
         ScreenTopBar(store, VIEW_NAMES["media"]!!)
-        LinkButton(MediaCopy.BACK, onClick = { store.openMedia(null) }, testTag = "media-back")
+        LinkButton("${backArrow()} ${MediaCopy.BACK}", onClick = { store.openMedia(null) }, testTag = "media-back")
         Row(verticalAlignment = Alignment.CenterVertically) {
             LaneDot(laneColour(store, l)); Spacer(Modifier.width(8.dp))
             H2(m.title, Modifier.weight(1f))
@@ -331,8 +332,8 @@ private fun ReadingMode(store: ClavisStore, m: ImportedMedia) {
                     Column(Modifier.fillMaxWidth().clip(ClavisShapes.hint).background(p.surface2).padding(10.dp).tagged("media-hint")) {
                         HintContent(store, l, tok)
                         Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (store.canSpeak(l)) SpeakButton(onClick = { store.speak(l, tok.surface) }, size = 36.dp)
-                            QuietButton(MediaCopy.TINGLE, onClick = { store.logTingle(l, tok.lemma); noted = tok.lemma }, minHeight = 40.dp, testTag = "tingle-${tok.lemma}")
+                            if (store.canSpeak(l)) SpeakButton(onClick = { store.speak(l, tok.surface) })
+                            QuietButton(MediaCopy.TINGLE, onClick = { store.logTingle(l, tok.lemma); noted = tok.lemma }, testTag = "tingle-${tok.lemma}")
                             LinkButton("✕", onClick = { hint = null }, contentDescription = "Close hint")
                         }
                         if (noted == tok.lemma) CitedText(MediaCopy.TINGLE_NOTED, onCite = store::openColophon, color = p.ink2, style = t.tiny, modifier = Modifier.padding(top = 4.dp).tagged("tingle-noted"))

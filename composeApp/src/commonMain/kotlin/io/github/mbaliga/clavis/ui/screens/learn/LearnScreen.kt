@@ -96,7 +96,7 @@ fun LearnScreen(store: ClavisStore, ui: UiState) {
                     Chip(if (store.state.laneMode(l) == LaneMode.PROD) Copy.CHIP_SPEAK else Copy.CHIP_READ)
                     Spacer(Modifier.width(8.dp))
                     Text("$n ready", style = t.small, color = p.ink2, modifier = Modifier.width(64.dp))
-                    QuietButton(if (pinned) Copy.PINNED_BUTTON else Copy.PIN, onClick = { store.setPin(if (pinned) null else l) }, selected = pinned, minHeight = 40.dp, testTag = "pin-${l.code}")
+                    QuietButton(if (pinned) Copy.PINNED_BUTTON else Copy.PIN, onClick = { store.setPin(if (pinned) null else l) }, selected = pinned, testTag = "pin-${l.code}")
                 }
                 HairlineDivider()
             }

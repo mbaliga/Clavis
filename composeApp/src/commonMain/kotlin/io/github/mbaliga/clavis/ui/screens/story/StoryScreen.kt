@@ -46,6 +46,8 @@ import io.github.mbaliga.clavis.store.LocalRev
 import io.github.mbaliga.clavis.store.UiState
 import io.github.mbaliga.clavis.ui.components.BodyText
 import io.github.mbaliga.clavis.ui.components.CaptionTokens
+import io.github.mbaliga.clavis.ui.components.backArrow
+import io.github.mbaliga.clavis.ui.components.forwardArrow
 import io.github.mbaliga.clavis.ui.components.Chip
 import io.github.mbaliga.clavis.ui.components.CitedText
 import io.github.mbaliga.clavis.ui.components.LaneDot
@@ -98,7 +100,7 @@ fun StoryScreen(store: ClavisStore, ui: UiState) {
             for (l in lanes) {
                 val on = l == lane
                 QuietButton(
-                    store.langName(l), onClick = { if (!on) store.setStoryLane(l) }, selected = on, minHeight = 40.dp,
+                    store.langName(l), onClick = { if (!on) store.setStoryLane(l) }, selected = on,
                     testTag = "story-lane-${l.code}", leading = { LaneDot(laneColour(store, l)) },
                 )
             }
@@ -127,12 +129,12 @@ fun StoryScreen(store: ClavisStore, ui: UiState) {
         CitedText(Copy.STORY_FOOTER, onCite = store::openColophon, color = p.ink2, style = t.small, modifier = Modifier.padding(top = 12.dp))
         Spacer(Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            QuietButton("← Page", onClick = { store.setStoryPage(pi - 1) }, enabled = pi > 0, modifier = Modifier.weight(1f), testTag = "story-prev")
+            QuietButton("${backArrow()} Page", onClick = { store.setStoryPage(pi - 1) }, enabled = pi > 0, modifier = Modifier.weight(1f), testTag = "story-prev")
             PrimaryButton(Copy.DONE, onClick = { store.setView("learn") }, modifier = Modifier.weight(1f), testTag = "story-done")
-            QuietButton("Page →", onClick = { store.setStoryPage(pi + 1) }, enabled = pi < pages.lastIndex, modifier = Modifier.weight(1f), testTag = "story-next")
+            QuietButton("Page ${forwardArrow()}", onClick = { store.setStoryPage(pi + 1) }, enabled = pi < pages.lastIndex, modifier = Modifier.weight(1f), testTag = "story-next")
         }
         Text(Copy.pageOfN(pi + 1, pages.size), style = t.small, color = p.ink2, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp).tagged("story-page-of"))
-        QuietButton("Sentences in ${store.langName(lane)}", onClick = { store.openSentences(lane) }, modifier = Modifier.padding(top = 10.dp), minHeight = 40.dp, testTag = "story-sentences")
+        QuietButton("Sentences in ${store.langName(lane)}", onClick = { store.openSentences(lane) }, modifier = Modifier.padding(top = 10.dp), testTag = "story-sentences")
         Spacer(Modifier.height(130.dp))
     }
 }
@@ -201,7 +203,7 @@ private fun StoryPage(store: ClavisStore, lane: Lang, scenes: List<Scene>) {
             )
             if (store.canSpeak(lane)) {
                 Spacer(Modifier.width(6.dp))
-                SpeakButton(onClick = { store.speak(lane, sc.x[lane].orEmpty()) }, size = 38.dp, testTag = "story-speak-${sc.i}")
+                SpeakButton(onClick = { store.speak(lane, sc.x[lane].orEmpty()) }, testTag = "story-speak-${sc.i}")
             }
         }
     }

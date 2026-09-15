@@ -11,6 +11,6 @@ package io.github.mbaliga.clavis.core
  * checks the two agree; `./gradlew :composeApp:clavisVersion` prints what the build will emit.
  */
 object ClavisVersion {
-    const val NAME = "0.1.0"
+    const val NAME = "0.1.0-rc.1"
     const val CODE = 100
 }

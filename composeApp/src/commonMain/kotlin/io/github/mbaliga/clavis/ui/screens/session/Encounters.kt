@@ -164,14 +164,14 @@ internal fun ClozeBody(store: ClavisStore, eu: EncounterUi, e: Encounter.Cloze) 
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
                 for (b in bridges.map { it.lang }.distinct()) {
                     val helped = b.code in eu.routes
-                    QuietButton(if (helped) Copy.routeTicked(store.langName(b)) else store.langName(b), onClick = { if (!helped) store.routeHelped(b) }, selected = helped, minHeight = 40.dp, testTag = "route-${b.code}")
+                    QuietButton(if (helped) Copy.routeTicked(store.langName(b)) else store.langName(b), onClick = { if (!helped) store.routeHelped(b) }, selected = helped, testTag = "route-${b.code}")
                 }
             }
         }
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(if (ok) Copy.clozeHeld(answered.result.dueInDays) else Copy.CLOZE_MISS, style = t.body, color = if (ok) p.moss else p.rust, modifier = Modifier.weight(1f).tagged("cloze-result"))
-            if (store.canSpeak(e.l)) SpeakButton(onClick = { store.speak(e.l, e.sc.x[e.l].orEmpty()) }, size = 38.dp)
+            if (store.canSpeak(e.l)) SpeakButton(onClick = { store.speak(e.l, e.sc.x[e.l].orEmpty()) })
         }
         Spacer(Modifier.height(12.dp))
         PrimaryButton(Copy.NEXT, onClick = store::next, modifier = Modifier.fillMaxWidth(), testTag = "next")
@@ -207,7 +207,7 @@ internal fun ReadBody(store: ClavisStore, eu: EncounterUi, e: Encounter.Read) {
             onHintDismiss = { store.showHint(null) },
             modifier = Modifier.weight(1f).padding(vertical = 6.dp),
         )
-        if (store.canSpeak(e.l)) { Spacer(Modifier.width(8.dp)); SpeakButton(onClick = { store.speak(e.l, e.sc.x[e.l].orEmpty()) }, size = 38.dp, testTag = "speak-line") }
+        if (store.canSpeak(e.l)) { Spacer(Modifier.width(8.dp)); SpeakButton(onClick = { store.speak(e.l, e.sc.x[e.l].orEmpty()) }, testTag = "speak-line") }
     }
     if (eu.showReadCoach) CoachBox(Copy.COACH_READ, onCite = store::openColophon, modifier = Modifier.padding(vertical = 6.dp))
     else CitedText(eu.readCopy, onCite = store::openColophon, color = p.ink2, style = t.small, modifier = Modifier.padding(vertical = 6.dp).tagged("read-copy"))

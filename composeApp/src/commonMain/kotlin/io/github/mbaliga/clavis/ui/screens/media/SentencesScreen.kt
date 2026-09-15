@@ -38,6 +38,7 @@ import io.github.mbaliga.clavis.store.LocalRev
 import io.github.mbaliga.clavis.store.UiState
 import io.github.mbaliga.clavis.ui.components.AudioRow
 import io.github.mbaliga.clavis.ui.components.Chip
+import io.github.mbaliga.clavis.ui.components.backArrow
 import io.github.mbaliga.clavis.ui.components.H2
 import io.github.mbaliga.clavis.ui.components.HairlineDivider
 import io.github.mbaliga.clavis.ui.components.LaneDot
@@ -99,7 +100,7 @@ fun SentencesScreen(store: ClavisStore, ui: UiState, l: Lang) {
     val wide = rtl || store.info(l)?.script == Script.CJK
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).tagged("view-sentences")) {
         ScreenTopBar(store, VIEW_NAMES["media"]!!)
-        LinkButton(MediaCopy.SENTENCES_BACK, onClick = { store.openSentences(null) }, testTag = "sentences-back")
+        LinkButton("${backArrow()} ${MediaCopy.SENTENCES_BACK}", onClick = { store.openSentences(null) }, testTag = "sentences-back")
         Row(verticalAlignment = Alignment.CenterVertically) {
             LaneDot(laneColour(store, l)); Spacer(Modifier.width(8.dp))
             H2(MediaCopy.sentencesIn(store.langName(l)))

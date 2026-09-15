@@ -27,7 +27,7 @@ of study is the relationship between words, not the word.
 
 ## Status
 
-**Pre-release, version 0.1.0; no tagged release yet.** This branch holds the Kotlin Multiplatform
+**Release candidate, version 0.1.0-rc.1; no stable tag yet.** This branch holds the Kotlin Multiplatform
 domain layer (`shared/`: corpus model, FSRS-5, selection and grading engines, baseline test, Paths,
 atomic state store — about 180 JVM tests on every target), the parameterised corpus pipeline
 (`pipeline/`, with the enrichment stages for etymology, sentences and pronunciations), the Compose

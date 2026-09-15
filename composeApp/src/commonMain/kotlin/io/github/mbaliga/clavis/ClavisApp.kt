@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -82,7 +83,9 @@ import io.github.mbaliga.clavis.ui.screens.you.YouScreen
 import io.github.mbaliga.clavis.ui.theme.ClavisMotion
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
 import io.github.mbaliga.clavis.ui.theme.ThemeMode
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 
 /** Compact/expanded breakpoint (Material 3 window size classes; product-spec §3.4). */
 val COMPACT_MAX_WIDTH = 600.dp
@@ -132,12 +135,43 @@ private fun CentredMessage(text: String, tag: String) {
     }
 }
 
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
 private fun Shell(store: ClavisStore, ui: UiState, reduced: Boolean) {
     val st = store.state
     val focus = remember { FocusRequester() }
     val keys = remember { KeyGuard() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    // System/predictive back (a no-op off Android): steps back through the same modal states Escape
+    // does in handleKey below, so a back gesture never just exits the app from mid-onboarding, the
+    // baseline test, a live session, the colophon overlay or a secondary view. Left disabled outside
+    // those states (the first onboarding step, any primary view) so back keeps its normal single-
+    // Activity behaviour there. Confirmation dialogs are dismissed, not confirmed, by back — same as
+    // Escape. Uses PredictiveBackHandler (not the plain BackHandler) so a cancelled swipe is a no-op
+    // and the action fires only once the gesture actually completes, per API 33+'s predictive-back
+    // contract (textscale audit).
+    val enc = ui.enc
+    val backHandlerEnabled = ui.confirm != null ||
+        ui.colophon != null ||
+        (!st.onboarded && st.ob > 0) ||
+        ui.test != null ||
+        (ui.session != null && (ui.session.done || enc != null)) ||
+        (st.onboarded && ui.session == null && st.view !in ClavisStore.PRIMARY_VIEWS)
+    PredictiveBackHandler(enabled = backHandlerEnabled) { progress ->
+        try {
+            progress.collect { }
+            when {
+                ui.confirm != null -> store.dismissConfirm()
+                ui.colophon != null -> store.closeColophon()
+                !st.onboarded -> store.obBack()
+                ui.test != null -> store.cancelTest()
+                ui.session != null -> if (ui.session.done) store.endSession() else confirmStop(store)
+                else -> store.setView("learn")
+            }
+        } catch (e: CancellationException) {
+            // the gesture was released before completing — leave the state untouched
+        }
+    }
     BoxWithConstraints(
         Modifier.fillMaxSize().focusRequester(focus).focusable().onKeyEvent { handleKey(store, ui, it, keys) }.safeDrawingPadding(),
     ) {

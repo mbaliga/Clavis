@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -61,20 +62,20 @@ fun YouScreen(store: ClavisStore, ui: UiState) {
             Column(Modifier.horizontalScroll(rememberScrollState())) {
                 val widths = listOf(118, 132, 56, 60, 84, 68, 68)
                 Row(Modifier.padding(horizontal = 8.dp)) {
-                    Copy.YOU_HEADERS.forEachIndexed { i, h -> Text(h.uppercase(), style = t.th, color = p.ink3, modifier = Modifier.width(widths[i].dp)) }
+                    Copy.YOU_HEADERS.forEachIndexed { i, h -> Text(h.uppercase(), style = t.th, color = p.ink3, modifier = Modifier.widthIn(min = widths[i].dp)) }
                 }
                 HairlineDivider(Modifier.padding(vertical = 6.dp))
                 for (r in m.rows) {
                     Row(Modifier.padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Row(Modifier.width(widths[0].dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.widthIn(min = widths[0].dp), verticalAlignment = Alignment.CenterVertically) {
                             LaneDot(laneColour(store, r.l)); Spacer(Modifier.width(6.dp)); Text(r.name, style = t.small, color = p.ink)
                         }
-                        Text(r.assumes, style = t.small, color = p.ink2, modifier = Modifier.width(widths[1].dp))
-                        Text("${r.held}", style = t.small, color = p.ink, modifier = Modifier.width(widths[2].dp))
-                        Text("${r.ready}", style = t.small, color = p.ink, modifier = Modifier.width(widths[3].dp))
-                        Text(pct(r.readable), style = t.small, color = p.ink, modifier = Modifier.width(widths[4].dp))
-                        Text(r.recall?.let { pct(it) } ?: Copy.DASH, style = t.small, color = p.ink, modifier = Modifier.width(widths[5].dp))
-                        Text("${r.mixUps}", style = t.small, color = p.ink, modifier = Modifier.width(widths[6].dp))
+                        Text(r.assumes, style = t.small, color = p.ink2, modifier = Modifier.widthIn(min = widths[1].dp))
+                        Text("${r.held}", style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[2].dp))
+                        Text("${r.ready}", style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[3].dp))
+                        Text(pct(r.readable), style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[4].dp))
+                        Text(r.recall?.let { pct(it) } ?: Copy.DASH, style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[5].dp))
+                        Text("${r.mixUps}", style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[6].dp))
                     }
                 }
             }
@@ -106,7 +107,7 @@ fun YouScreen(store: ClavisStore, ui: UiState) {
                     Text(r.name, style = t.body, color = p.ink)
                     Spacer(Modifier.width(6.dp))
                     Text(if (r.tested) Copy.knows(r.assumes) else Copy.UNTESTED, style = t.small, color = p.ink2, modifier = Modifier.weight(1f))
-                    QuietButton(if (r.tested) Copy.RETAKE else Copy.TAKE_TEST, onClick = { store.startTest(r.l) }, minHeight = 40.dp, testTag = "test-${r.l.code}")
+                    QuietButton(if (r.tested) Copy.RETAKE else Copy.TAKE_TEST, onClick = { store.startTest(r.l) }, testTag = "test-${r.l.code}")
                 }
             }
         }

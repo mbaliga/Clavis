@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -179,9 +180,9 @@ fun LanguagesScreen(store: ClavisStore, ui: UiState) {
             SoftCard {
                 Eyebrow(LanguagesCopy.PRESETS)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    QuietButton(LanguagesCopy.PRESET_NINE, onClick = { store.setLanes(store.registry.all.filter { it.enabledByDefault }.associate { it.iso.code to it.defaultLane }) }, minHeight = 40.dp, testTag = "preset-nine")
-                    QuietButton(LanguagesCopy.PRESET_ROMANCE, onClick = { store.setLanes(mapOf("es" to LaneMode.PROD, "fr" to LaneMode.REC, "it" to LaneMode.REC)) }, minHeight = 40.dp, testTag = "preset-romance")
-                    QuietButton(LanguagesCopy.PRESET_ES_IT, onClick = { store.setLanes(mapOf("es" to LaneMode.PROD, "it" to LaneMode.REC)) }, minHeight = 40.dp, testTag = "preset-es-it")
+                    QuietButton(LanguagesCopy.PRESET_NINE, onClick = { store.setLanes(store.registry.all.filter { it.enabledByDefault }.associate { it.iso.code to it.defaultLane }) }, testTag = "preset-nine")
+                    QuietButton(LanguagesCopy.PRESET_ROMANCE, onClick = { store.setLanes(mapOf("es" to LaneMode.PROD, "fr" to LaneMode.REC, "it" to LaneMode.REC)) }, testTag = "preset-romance")
+                    QuietButton(LanguagesCopy.PRESET_ES_IT, onClick = { store.setLanes(mapOf("es" to LaneMode.PROD, "it" to LaneMode.REC)) }, testTag = "preset-es-it")
                 }
             }
             for ((family, members) in families) {
@@ -263,7 +264,7 @@ private fun LanguageRow(store: ClavisStore, info: LanguageInfo, onWantSpeak: (La
         val test = store.state.tests[l.code]
         Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(if (test != null) Copy.knows(bandLabel(test.thr)) else Copy.UNTESTED, style = t.small, color = p.ink2, modifier = Modifier.weight(1f))
-            if (test == null) QuietButton(LanguagesCopy.TAKE_CHECK, onClick = { store.startTest(l) }, minHeight = 40.dp, testTag = "lang-test-${l.code}")
+            if (test == null) QuietButton(LanguagesCopy.TAKE_CHECK, onClick = { store.startTest(l) }, testTag = "lang-test-${l.code}")
         }
         if (mode == LaneMode.PROD) {
             val x = prodSibling(store, info)
@@ -275,8 +276,8 @@ private fun LanguageRow(store: ClavisStore, info: LanguageInfo, onWantSpeak: (La
             if (hint != null) CitedText(hint, onCite = store::openColophon, color = p.ink2, style = t.tiny, modifier = Modifier.padding(top = 6.dp).tagged("hint-${l.code}"))
         }
         FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (info.needsScriptPrimer) QuietButton("Letters", onClick = { store.setLetterTab(l); store.setView("letters") }, minHeight = 40.dp, testTag = "lang-letters-${l.code}")
-            QuietButton("Read", onClick = { store.setStoryLane(l); store.setView("story") }, minHeight = 40.dp, testTag = "lang-read-${l.code}")
+            if (info.needsScriptPrimer) QuietButton("Letters", onClick = { store.setLetterTab(l); store.setView("letters") }, testTag = "lang-letters-${l.code}")
+            QuietButton("Read", onClick = { store.setStoryLane(l); store.setView("story") }, testTag = "lang-read-${l.code}")
         }
     }
 }
@@ -288,7 +289,7 @@ private fun FamilySheet(store: ClavisStore, y: LanguageInfo, x: LanguageInfo, on
     val t = ClavisTheme.type
     val yn = store.langName(y.iso)
     val xn = store.langName(x.iso)
-    Box(Modifier.fillMaxSize().background(p.ink.copy(alpha = 0.35f)).clickable(onClick = onDismiss).semantics { contentDescription = "dismiss" })
+    Box(Modifier.fillMaxSize().background(p.ink.copy(alpha = 0.35f)).clickable(role = Role.Button, onClick = onDismiss).semantics { contentDescription = "dismiss" })
     Column(
         modifier.fillMaxWidth().clip(ClavisShapes.card).background(p.surface).border(1.dp, p.line, ClavisShapes.card)
             .clickable(enabled = false) {}

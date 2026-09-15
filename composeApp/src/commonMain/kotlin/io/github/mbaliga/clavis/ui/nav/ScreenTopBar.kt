@@ -39,7 +39,7 @@ fun GearButton(onClick: () -> Unit) {
     val p = ClavisTheme.palette
     Box(
         Modifier
-            .size(44.dp)
+            .size(48.dp)
             .clip(CircleShape)
             .clickable(role = Role.Button, onClick = onClick)
             .semantics { contentDescription = "Settings" }

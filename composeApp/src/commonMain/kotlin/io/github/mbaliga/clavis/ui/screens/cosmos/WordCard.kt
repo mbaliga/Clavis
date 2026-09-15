@@ -109,9 +109,9 @@ fun WordCard(
         }
         val rels = et?.edges.orEmpty()
         Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (rels.isNotEmpty() || o != null) QuietButton(CosmosCopy.SEE_WEB, onClick = onSeeWeb, minHeight = 40.dp, selected = true, testTag = "word-web")
+            if (rels.isNotEmpty() || o != null) QuietButton(CosmosCopy.SEE_WEB, onClick = onSeeWeb, selected = true, testTag = "word-web")
             val scenes = store.corpus.byLemma[l]?.get(w.lm).orEmpty()
-            if (scenes.isNotEmpty()) QuietButton(CosmosCopy.READ_WHERE, onClick = { store.openStoryAt(l, scenes.first()) }, minHeight = 40.dp, testTag = "word-read")
+            if (scenes.isNotEmpty()) QuietButton(CosmosCopy.READ_WHERE, onClick = { store.openStoryAt(l, scenes.first()) }, testTag = "word-read")
         }
         if (rels.isNotEmpty()) {
             FlowRow(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -121,7 +121,7 @@ fun WordCard(
                     val rel = when (ed.type) { EdgeType.BORROWING -> CosmosCopy.REL_BOR; EdgeType.COGNATE -> CosmosCopy.REL_KIN; EdgeType.DERIVATION -> CosmosCopy.REL_DER }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         LaneDot(laneColour(store, ed.lang), size = 8.dp); Spacer(Modifier.width(4.dp))
-                        Chip("$surface ${store.langName(ed.lang)}$rel", onClick = {
+                        Chip("${Copy.isolate(surface, store.isRtl(ed.lang))} ${store.langName(ed.lang)}$rel", onClick = {
                             if (j != null) onJump(j) else store.toast(CosmosCopy.outsideLanes(store.langName(ed.lang), ed.lemma))
                         }, modifier = Modifier.tagged("word-rel-${ed.lang.code}-${ed.lemma}"))
                     }

@@ -26,7 +26,7 @@ const val COLOPHON_H2 = "Why Clavis works the way it does"
 const val COLOPHON_INTRO = "Every design choice below names its evidence. Tap any [n] anywhere in the app to land here; each entry links to the paper."
 const val CREDITS_PLANNED =
     "Planned media, licensing-clean: Mozilla Common Voice (CC0 speech, all nine languages), LibriVox + Wikimedia Commons audio (public-domain readings, anthems, folk songs), and public-domain-composition songs re-recorded simply — melody repeated verbatim, lyrics = target phrases, per the evidence above. Background-music ambience is deliberately absent."
-const val BACK_TO_CLAIM = "← Back to the claim"
+const val BACK_TO_CLAIM = "Back to the claim"
 
 /** Glossary as it must appear (product-spec Appendix A). */
 val GLOSSARY: List<Pair<String, String>> = listOf(

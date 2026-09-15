@@ -42,6 +42,7 @@ import io.github.mbaliga.clavis.store.LocalRev
 import io.github.mbaliga.clavis.store.UiState
 import io.github.mbaliga.clavis.ui.components.Eyebrow
 import io.github.mbaliga.clavis.ui.components.H2
+import io.github.mbaliga.clavis.ui.components.forwardArrow
 import io.github.mbaliga.clavis.ui.components.LaneDot
 import io.github.mbaliga.clavis.ui.components.LaneRow
 import io.github.mbaliga.clavis.ui.components.LinkButton
@@ -85,7 +86,7 @@ fun SettingsScreen(store: ClavisStore, ui: UiState) {
                     testTagPrefix = "lane-${l.code}",
                 )
             }
-            LinkButton("Manage languages →", onClick = { store.setView("languages") })
+            LinkButton("Manage languages ${forwardArrow()}", onClick = { store.setView("languages") })
         }
 
         SoftCard {

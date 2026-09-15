@@ -34,7 +34,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -98,7 +100,7 @@ fun PathsScreen(store: ClavisStore, ui: UiState) {
                 Text(Copy.lastTaken(last.title), style = t.small, color = p.ink3, modifier = Modifier.weight(1f).tagged("paths-last"))
                 if (store.engine.canUndo()) {
                     QuietButton(
-                        Copy.UNDO, onClick = store::undoBranch, minHeight = 40.dp, testTag = "paths-undo",
+                        Copy.UNDO, onClick = store::undoBranch, testTag = "paths-undo",
                         modifier = Modifier.semantics { contentDescription = Copy.UNDO_TITLE },
                     )
                 }
@@ -121,8 +123,12 @@ private fun PathsTree(store: ClavisStore, branches: List<Branch>) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), verticalAlignment = Alignment.Top) {
             Box(
                 Modifier.width(SPINE_W).fillMaxHeight().drawBehind {
-                    val x = SPINE_X.toPx()
-                    drawLine(p.line, Offset(x, 22.dp.toPx()), Offset(x, size.height), strokeWidth = 2.dp.toPx())
+                    // rtl audit: mirror the whole sub-drawing under RTL so the line still sits under
+                    // the "you" avatar, which is itself placed with the auto-mirroring Alignment.TopStart.
+                    mirrored {
+                        val x = SPINE_X.toPx()
+                        drawLine(p.line, Offset(x, 22.dp.toPx()), Offset(x, size.height), strokeWidth = 2.dp.toPx())
+                    }
                 },
             ) {
                 Box(
@@ -160,18 +166,30 @@ private fun PathsTree(store: ClavisStore, branches: List<Branch>) {
 private val SPINE_W = 40.dp
 private val SPINE_X = 22.dp
 
+/**
+ * Runs [block] mirrored horizontally about the DrawScope's own centre when the ambient layout is
+ * RTL, otherwise runs it as-is (rtl audit: the tree's spine/elbow and connector are drawn with raw
+ * DrawScope calls hardcoded to the physical left edge, so the auto-mirrored Row around them needs
+ * the drawing itself mirrored too — there is no text inside these blocks, so flipping is safe).
+ */
+private fun DrawScope.mirrored(block: DrawScope.() -> Unit) {
+    if (layoutDirection == LayoutDirection.Rtl) scale(-1f, 1f, block = block) else block()
+}
+
 /** The vertical spine cell left of a card, with the elbow into it. */
 @Composable
 private fun Spine(colour: Color, last: Boolean = false) {
     Box(
         Modifier.width(SPINE_W).fillMaxHeight().drawBehind {
-            val x = SPINE_X.toPx()
-            val elbowY = 40.dp.toPx()
-            val r = 14.dp.toPx()
-            val sw = 2.dp.toPx()
-            drawLine(colour, Offset(x, 0f), Offset(x, if (last) elbowY - r else size.height), strokeWidth = sw)
-            drawArc(colour, 180f, -90f, false, topLeft = Offset(x, elbowY - 2 * r), size = Size(2 * r, 2 * r), style = Stroke(sw, cap = StrokeCap.Round))
-            drawLine(colour, Offset(x + r, elbowY), Offset(size.width, elbowY), strokeWidth = sw)
+            mirrored {
+                val x = SPINE_X.toPx()
+                val elbowY = 40.dp.toPx()
+                val r = 14.dp.toPx()
+                val sw = 2.dp.toPx()
+                drawLine(colour, Offset(x, 0f), Offset(x, if (last) elbowY - r else size.height), strokeWidth = sw)
+                drawArc(colour, 180f, -90f, false, topLeft = Offset(x, elbowY - 2 * r), size = Size(2 * r, 2 * r), style = Stroke(sw, cap = StrokeCap.Round))
+                drawLine(colour, Offset(x + r, elbowY), Offset(size.width, elbowY), strokeWidth = sw)
+            }
         },
     )
 }
@@ -193,7 +211,13 @@ private fun PathCard(store: ClavisStore, b: Branch, index: Int) {
                 .clip(ClavisShapes.pathcard)
                 .background(p.surface)
                 .border(1.dp, p.line, ClavisShapes.pathcard)
-                .drawBehind { drawRect(kc, size = Size(3.dp.toPx(), size.height)) }
+                .drawBehind {
+                    // rtl audit: the accent stripe must hug the same "start" edge the padding below
+                    // reserves (18.dp start / 16.dp end), not always the physical left.
+                    val sw = 3.dp.toPx()
+                    val left = if (layoutDirection == LayoutDirection.Rtl) size.width - sw else 0f
+                    drawRect(kc, topLeft = Offset(left, 0f), size = Size(sw, size.height))
+                }
                 .padding(start = 18.dp, end = 16.dp, top = 14.dp, bottom = 12.dp)
                 .tagged("pathcard-${b.kind.name.lowercase()}-$index"),
         ) {
@@ -271,7 +295,7 @@ private fun LongerView(store: ClavisStore, now: Long) {
                     Spacer(Modifier.weight(1f))
                     QuietButton(
                         if (o.pinned) Copy.PINNED_BUTTON else Copy.PIN, onClick = { store.setPin(if (o.pinned) null else l) },
-                        selected = o.pinned, minHeight = 40.dp, testTag = "overview-pin-${l.code}",
+                        selected = o.pinned, testTag = "overview-pin-${l.code}",
                     )
                 }
                 Text(o.meta, style = t.small, color = p.ink2, modifier = Modifier.padding(top = 6.dp).tagged("lane-meta-${l.code}"))
