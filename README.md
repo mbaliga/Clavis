@@ -34,10 +34,12 @@ atomic state store — about 180 JVM tests on every target), the parameterised c
 Multiplatform application shell (`composeApp/`, Android + desktop) and the release engineering below.
 The generated content packs (comics, lexicon, etymology, sentences, pronunciations — about 22 MB) are
 committed as app resources under `composeApp/src/commonMain/composeResources/files/packs/` so builds are
-reproducible without the corpus (D-3). Stable release remains
-blocked on recorded device, desktop-font, accessibility and signed-upgrade acceptance
-([docs/RELEASE.md](docs/RELEASE.md) §9); the method itself is one person's experiment and is not a
-validated pedagogy ([docs/01-premise.md](docs/01-premise.md) §6).
+reproducible without the corpus (D-3). What is done, what is still pending and who can do it is
+kept current in [docs/STATUS.md](docs/STATUS.md); the usability review of this candidate is
+[docs/USABILITY.md](docs/USABILITY.md). A stable tag waits on the maintainer's signing keys, the
+on-device acceptance pass and a name check ([docs/RELEASE.md](docs/RELEASE.md) §9); the method
+itself is one person's experiment and is not a validated pedagogy
+([docs/01-premise.md](docs/01-premise.md) §6).
 
 ## Downloads
 
@@ -56,8 +58,10 @@ sha256sum -c SHA256SUMS.txt --ignore-missing
 | macOS 11+ (Apple silicon) | `Clavis-<v>-macos-arm64.dmg` | Drag to Applications. **Unsigned builds** (`-unsigned.dmg`): macOS 15 removed the Control-click bypass — double-click once, choose *Done*, then System Settings → Privacy & Security → *Open Anyway* → *Open*. macOS remembers it. |
 | Windows 10/11 x64 | `Clavis-<v>-windows-x64.msi` | Not code-signed yet: SmartScreen shows "Windows protected your PC" → *More info* → *Run anyway*. Upgrades install over the previous version. |
 
-Release candidates without a tag are uploaded as workflow artifacts by the CI workflow (debug APK,
-unsigned R8 release APK, Linux jar); they are validation outputs, not releases.
+Between tags, CI keeps only the unsigned R8 release APK as a short-lived workflow artifact — a
+validation output, not a release. The full installer set for a commit can be built without
+publishing anything by running the Release workflow by hand with a version (a dry run: it builds
+into a temporary draft that is deleted at the end; [docs/RELEASE.md](docs/RELEASE.md) §0).
 
 ## Build
 

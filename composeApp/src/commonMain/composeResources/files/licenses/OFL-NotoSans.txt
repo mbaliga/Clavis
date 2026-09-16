@@ -1,5 +1,6 @@
-Copyright 2022 The Noto Project Authors (https://github.com/notofonts)
-Applies to: Noto Sans Arabic, Noto Sans Devanagari, Noto Sans Hebrew — bundled in the desktop build only (D-9). Noto Sans JP / KR / SC carry the separate notice in OFL-NotoSansCJK.txt.
+Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic, https://github.com/notofonts/devanagari)
+Copyright 2024 The Noto Project Authors (https://github.com/notofonts/hebrew)
+Applies to: Noto Sans Arabic, Noto Sans Devanagari, Noto Sans Hebrew (Regular) — bundled in the desktop build only (D-9). Noto Sans JP / KR / SC carry the separate notice in OFL-NotoSansCJK.txt.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

@@ -464,3 +464,83 @@ manifest (F-8); and this file's duplicated D-19–D-21 entries, merged above. Re
 the blank P00 title pages (F-1) — they are the upstream header artwork, faithfully rendered.
 
 **Status.** Record.
+
+## D-26 · Release assets go straight to a draft GitHub Release; CI keeps only the small APK
+
+**Decision.** `release.yml` no longer hands artifacts between jobs. `preflight` creates one *draft*
+Release (for a tag, on that tag; for a `workflow_dispatch` dry run, a throw-away draft that is
+deleted at the end and never published); every build job uploads its files into it with
+`gh release upload`; the `release` job downloads them back, writes `SHA256SUMS.txt`, and flips the
+draft to published only when all five build jobs succeeded; a `cleanup` job deletes any draft that
+did not publish. `ci.yml` uploads only the R8 release APK and its mapping, for three days, and an
+upload failure can no longer fail the verification job.
+
+**Reason (measured).** GitHub Actions *artifact* storage is metered per account (500 MB on the
+Free plan, recalculated every 6–12 h) and was exhausted on 2026‑09‑15 by CI itself: every push
+uploaded the debug APK (31 MB), the R8 APK (22 MB) and the Linux uber-jar (83 MB) with 14-day
+retention. The old release handoff needed about 630 MB of intermediates per run (three ~83 MB
+jars, a ~100 MB `.deb`, `.dmg`, `.msi`, APK, AAB, web build), so it could not have succeeded on
+this account even with an empty quota. Files attached to a Release are stored separately and are
+not counted against that quota.
+
+**Cost.** Build jobs need `contents: write`; `gh` (preinstalled on every hosted runner) is the
+transport; a cancelled run can leave a draft that the next run's cleanup or a maintainer deletes.
+Auto-generated release notes were dropped — the curated `CHANGELOG.md` section is the body.
+
+**Status.** Settled; see docs/RELEASE.md §0, §3, §8.
+
+## D-27 · The desktop script fallbacks ship the Regular weight
+
+**Decision.** `notosanshebrew/jp/kr/sc.ttf` are the Regular static instances (weight class 400,
+no `fvar`), fetched from Google Fonts' static set and verified from the files' own `name` and
+`OS/2` tables. The files they replace were the variable fonts whose *default* instance is Thin
+(weight 100), so Hebrew, Japanese, Korean and Chinese fallback text on desktop rendered hairline-
+thin against Hind Regular — and the notice table said "Regular". The bundled desktop font payload
+fell from 37 MB to 23 MB in the process. Arabic and Devanagari were already Regular.
+
+**Status.** Settled; `THIRD_PARTY_NOTICES.md` quotes each file's embedded copyright line verbatim.
+
+## D-28 · Pronunciation audio takes a second source: Lingua Libre and the Commons categories
+
+**Decision.** `enrich_pronunciations.py` matches lexicon lemmas against Lingua Libre records
+(queried through its SPARQL endpoint by transcription, CC BY‑SA 4.0 by that project's policy) and
+against the small per-language Commons pronunciation categories, in addition to the audio files
+English Wiktionary lists. Every new candidate still passes the same per-file licence lookup and is
+written in the same record shape, so the apps and `pack_assets.py` are unchanged.
+
+**Reason (measured).** The kaikki.org extract of English Wiktionary carries audio for 42 of
+809,603 Spanish entries, 6 Japanese, 25 Korean, 6 Polish, 2,047 Italian and 0 Latin — against
+92,620 French and 301,486 German. The shipped 2026‑09‑02 pack therefore had recordings for 3 of
+1,627 Spanish lemmas (Japanese 1, Korean 5, Polish 0, Italian 144) while French had 1,523, and no
+amount of re-running the Wiktionary-only stage could change that. The results of the first
+networked run are in `pipeline/ENRICHMENT.md` §6.4 and in each language's coverage line in the
+app.
+
+**Status.** Settled; opt-in flags (`--lingualibre`, `--commons-categories`) so the Wiktionary-only
+run stays reproducible.
+
+## D-29 · The device pass is partly automated: RTL and 2× screenshots, a semantics audit
+
+**Decision.** The headless desktop UI suite renders every screen under a forced right-to-left
+layout direction and at 2× font scale (in addition to light/dark × phone/desktop), and an
+accessibility audit test walks the semantics tree of every screen asserting that each clickable
+node has a label or role and a ≥ 48 dp target. That is the repeatable, honest part of the
+docs/RELEASE.md §9 device pass; TalkBack traversal, the predictive-back preview animation,
+edge-to-edge insets and Arabic line height on a real API-36 device stay manual and are still
+open (`CHANGELOG.md` → Known pre-release requirements).
+
+**Status.** Settled.
+
+## D-30 · Usability pass 2026‑09‑16 (record)
+
+A screenshot review of every screen (light/dark × phone/desktop, then RTL and 2×) and a
+code-level heuristic walkthrough (Nielsen's ten, first run, empty and error states, feedback,
+navigation, copy, mobile ergonomics, consistency, contrast, performance-as-UX) are recorded in
+`docs/USABILITY.md`, with each finding's severity, evidence and status. The fixes applied in this
+pass and the follow-ups left open are listed there; one finding from the screenshots (content
+"hidden under the floating dock") was withdrawn on reading the code — every screen already ends
+with a dock-height spacer. Open product questions raised by the pass (whether "days you showed
+up" is a streak in disguise, D-15; the 27 minutes of baseline checks before the first honest
+session; whether Cosmos needs a list view for assistive technology) are for the maintainer.
+
+**Status.** Record.

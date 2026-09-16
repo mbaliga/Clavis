@@ -76,6 +76,7 @@ object LanguagesCopy {
     fun noVoice(lang: String) = "no permissively licensed voice exists for $lang yet — it uses your device's voice if it has one"
     const val VOICE_NONE = "none on this device"
     const val TAKE_CHECK = "Take the check"
+    const val READ_STORY = "Read the comic"
     const val PRESETS = "Presets"
     const val PRESET_NINE = "The nine"
     const val PRESET_ROMANCE = "Romance only"
@@ -277,7 +278,7 @@ private fun LanguageRow(store: ClavisStore, info: LanguageInfo, onWantSpeak: (La
         }
         FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (info.needsScriptPrimer) QuietButton("Letters", onClick = { store.setLetterTab(l); store.setView("letters") }, testTag = "lang-letters-${l.code}")
-            QuietButton("Read", onClick = { store.setStoryLane(l); store.setView("story") }, testTag = "lang-read-${l.code}")
+            QuietButton(LanguagesCopy.READ_STORY, onClick = { store.setStoryLane(l); store.setView("story") }, testTag = "lang-read-${l.code}")
         }
     }
 }

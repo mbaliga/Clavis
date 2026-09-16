@@ -4,7 +4,7 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 
 ## [Unreleased]
 
-## [0.1.0-rc.1] - 2026-09-15
+## [0.1.0-rc.1] - 2026-09-16
 
 ### Domain (`:shared`)
 
@@ -46,16 +46,17 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 - Added `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PRIVACY.md`, `SECURITY.md`, `CONTRIBUTING.md`, `docs/RELEASE.md`, `docs/STORE-LISTING.md`, Dependabot configuration and issue templates.
 - Reviewed the R8 configuration against the merged rules; recorded the named-companion rule for `@Serializable` classes.
 - Removed the now-dead `versionCode = 100` / `versionName = "0.1.0"` / `packageVersion = "1.0.0"` literals from `composeApp/build.gradle.kts`: every build path already overrides them from `gradle/version.gradle.kts`, confirmed by building with `-Pclavis.version` set.
-- `THIRD_PARTY_NOTICES.md`'s Noto font rows were checked against the bundled `.ttf` files' own `name` tables: Noto Sans Hebrew's copyright is 2024, not the 2022 it was merged under with Arabic/Devanagari (now a separate row); Hebrew, Japanese, Korean and Chinese are the Thin static instance, not Regular, per their own name tables and `OS/2.usWeightClass` (the notice now says so; whether the app should actually ship the Regular weight for those scripts is still open, docs/RELEASE.md §9).
+- The desktop fallback fonts for Hebrew, Japanese, Korean and Chinese are now the Regular static instances (weight 400) of Noto Sans Hebrew / JP / KR / SC, verified from the files' own `name` and `OS/2` tables; the files they replace were variable fonts whose default instance is Thin (100), so those scripts rendered hairline-thin on desktop. The bundled desktop font payload fell from 37 MB to 23 MB. `THIRD_PARTY_NOTICES.md` and the in-app OFL notice quote each file's embedded copyright line (Hebrew is 2024; Arabic and Devanagari 2022) (D-27).
+- The release workflow uploads every job's files straight into a draft GitHub Release (created by `preflight`, published by the `release` job only when all five build jobs succeeded, deleted by a `cleanup` job otherwise) instead of passing ~630 MB of intermediates through GitHub Actions artifact storage, which is metered per account and was exhausted; a `workflow_dispatch` dry run uses a throw-away draft that is deleted at the end. CI now uploads only the R8 release APK and its mapping (three days) and never fails verification on an upload error; the debug APK and the uber-jar are no longer uploaded on every push (D-26, docs/RELEASE.md §8 "Storage").
 
 ### Documentation
 
-- Added `docs/DECISIONS.md` (D-1 … D-25, D-25 being the record of the 2026-09-02 review pass) and `docs/build-platform.md` (the verified toolchain matrix and build commands).
+- Added `docs/DECISIONS.md` (D-1 … D-30; D-25 is the record of the 2026-09-02 review pass, D-30 of the 2026-09-16 usability pass) and `docs/build-platform.md` (the verified toolchain matrix and build commands).
+- Added `docs/STATUS.md` (what is done, what is pending and who can do it, against the original brief and the pre-tag checklist) and `docs/USABILITY.md` (the screenshot review and heuristic walkthrough: every finding with its severity, evidence and status), with a curated screenshot set under `docs/screenshots/`.
 
 ### Known pre-release requirements
 
 - The method is being tested on one person; nothing here is validated pedagogy (D-18).
-- Google Play requires `targetSdk` 36 for new apps and updates since 2026-08-31; the build compiles against and targets API 36 on the pinned toolchain. The API-36 device pass — predictive back (now wired in code; its swipe-preview animation is unverified on a device), edge-to-edge insets, Arabic line height, TalkBack, RTL, 200% text, machines without CJK/Arabic system fonts, in-place upgrades — is still to be recorded (docs/RELEASE.md §9); this environment has no emulator or KVM available to run it, which is exactly why this tag is `-rc.1` rather than a stable release.
-- macOS and Windows installers are unsigned until certificates exist; the release notes and README carry the Gatekeeper and SmartScreen steps.
-- Four bundled Noto font files (Hebrew, Japanese, Korean, Chinese) are the Thin static instance, not Regular, so un-weighted text in those scripts renders thinner than intended; `THIRD_PARTY_NOTICES.md` now says so accurately, but whether to ship the Regular weight instead is a product decision still open (docs/RELEASE.md §9).
-- "Clavis" is a working name. Only a preliminary web search has been done to check for obvious conflicts; it is not a cleared trademark, and a proper trademark check is still pending before any store listing (docs/STORE-LISTING.md).
+- Google Play requires `targetSdk` 36 for new apps and updates since 2026-08-31; the build compiles against and targets API 36 on the pinned toolchain. Of the API-36 device pass, the repeatable part is automated (every screen rendered under RTL and at 2× font scale, a semantics and touch-target audit — D-29); TalkBack traversal, the predictive-back preview animation, edge-to-edge insets, Arabic line height, a desktop without CJK/Arabic system fonts and an in-place upgrade over a previous build are still to be recorded on real hardware (docs/RELEASE.md §9); this environment has no emulator or KVM, which is why this tag is `-rc.1` rather than a stable release.
+- macOS and Windows installers are unsigned until certificates exist; the release notes and README carry the Gatekeeper and SmartScreen steps. The macOS and Windows packaging jobs were first exercised by the release dry run of 2026-09-16 (docs/STATUS.md §5).
+- "Clavis" is a working name. Only a preliminary web search has been done to check for obvious conflicts; it found an existing registered mark in an adjacent field (Clavis Sinica, Chinese-language learning software). It is not a cleared trademark, and a proper trademark check — or a rename — is still pending before any store listing (docs/STORE-LISTING.md, docs/STATUS.md §4).

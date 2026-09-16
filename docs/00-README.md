@@ -38,6 +38,8 @@ seed to here; where it and `DECISIONS.md` disagree, `DECISIONS.md` wins.
 | **[08-references.md](08-references.md)** | 40 in-app citations + 473 research sources + data licences | You are checking a claim |
 | **[09-handoff.md](09-handoff.md)** | Build commands, tests, gotchas, open work — for the original web/HTML build | You are picking that codebase up |
 | **[10-build-plan.md](10-build-plan.md)** | How to get from this seed to a running prototype in *this* repo, web reference and native Android | You are starting the build from here |
+| **[STATUS.md](STATUS.md)** | What is done, what is pending and who can do it — against the original brief and the pre-tag checklist | You want to know where the release candidate stands |
+| **[USABILITY.md](USABILITY.md)** | The screenshot review and heuristic walkthrough of 0.1.0-rc.1: every finding, its evidence and status | You are about to do the on-device pass or change a screen |
 | **[research/](research/)** | The seven research memos, verbatim, plus an index | You want the primary argument |
 
 ---

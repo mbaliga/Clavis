@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -18,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.pct
@@ -60,22 +60,26 @@ fun YouScreen(store: ClavisStore, ui: UiState) {
 
         SoftCard(padding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp, horizontal = 8.dp)) {
             Column(Modifier.horizontalScroll(rememberScrollState())) {
-                val widths = listOf(118, 132, 56, 60, 84, 68, 68)
+                // Fixed widths scaled by the font size keep the header and every row on the same columns
+                // (a per-row minimum let long names push their own row's columns out of line); the card
+                // scrolls horizontally when the total exceeds the width.
+                val fs = LocalDensity.current.fontScale
+                val widths = listOf(150, 132, 56, 60, 84, 68, 68).map { (it * fs).dp }
                 Row(Modifier.padding(horizontal = 8.dp)) {
-                    Copy.YOU_HEADERS.forEachIndexed { i, h -> Text(h.uppercase(), style = t.th, color = p.ink3, modifier = Modifier.widthIn(min = widths[i].dp)) }
+                    Copy.YOU_HEADERS.forEachIndexed { i, h -> Text(h.uppercase(), style = t.th, color = p.ink3, modifier = Modifier.width(widths[i])) }
                 }
                 HairlineDivider(Modifier.padding(vertical = 6.dp))
                 for (r in m.rows) {
                     Row(Modifier.padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Row(Modifier.widthIn(min = widths[0].dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.width(widths[0]), verticalAlignment = Alignment.CenterVertically) {
                             LaneDot(laneColour(store, r.l)); Spacer(Modifier.width(6.dp)); Text(r.name, style = t.small, color = p.ink)
                         }
-                        Text(r.assumes, style = t.small, color = p.ink2, modifier = Modifier.widthIn(min = widths[1].dp))
-                        Text("${r.held}", style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[2].dp))
-                        Text("${r.ready}", style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[3].dp))
-                        Text(pct(r.readable), style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[4].dp))
-                        Text(r.recall?.let { pct(it) } ?: Copy.DASH, style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[5].dp))
-                        Text("${r.mixUps}", style = t.small, color = p.ink, modifier = Modifier.widthIn(min = widths[6].dp))
+                        Text(r.assumes, style = t.small, color = p.ink2, modifier = Modifier.width(widths[1]))
+                        Text("${r.held}", style = t.small, color = p.ink, modifier = Modifier.width(widths[2]))
+                        Text("${r.ready}", style = t.small, color = p.ink, modifier = Modifier.width(widths[3]))
+                        Text(pct(r.readable), style = t.small, color = p.ink, modifier = Modifier.width(widths[4]))
+                        Text(r.recall?.let { pct(it) } ?: Copy.DASH, style = t.small, color = p.ink, modifier = Modifier.width(widths[5]))
+                        Text("${r.mixUps}", style = t.small, color = p.ink, modifier = Modifier.width(widths[6]))
                     }
                 }
             }
