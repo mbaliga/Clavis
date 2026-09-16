@@ -1,0 +1,13 @@
+# Clavis corpus pipeline — Python 3.11. Versions are the ones the 2026-09 packs were built with.
+wordfreq[cjk]==3.1.1          # Zipf frequencies (data CC BY-SA 4.0); [cjk] pulls jieba, mecab-python3, ipadic
+simplemma==2.0.0              # lemmatiser for Latin/Cyrillic/Devanagari-script languages
+fugashi==1.5.2                # Japanese tokeniser (MeCab binding)
+unidic-lite==1.0.8            # UniDic dictionary for fugashi
+mecab-python3==1.0.12         # Korean segmentation (via wordfreq.tokenize)
+mecab-ko-dic==1.0.0
+jieba==0.42.1                 # Chinese segmentation (via wordfreq.tokenize)
+opencc-python-reimplemented==0.1.7   # Simplified -> Traditional for ja<->zh character bridges
+pypinyin==0.55.0              # pinyin readings (was missing from the reference README)
+indic-transliteration==2.3.82 # Devanagari -> IAST readings for Hindi
+pillow==12.3.0                # page art -> WebP
+# Web smoke test (not pip): node >= 22 with the `playwright` package and a Chromium download — see README.

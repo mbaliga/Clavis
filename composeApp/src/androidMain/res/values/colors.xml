@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors ClavisTokens (commonMain). Used only where the platform needs a colour before
+         Compose is up: launcher icon and window background. -->
+    <color name="clavis_paper_light">#F4F4F2</color>
+    <color name="clavis_paper_dark">#15161A</color>
+    <color name="clavis_accent_light">#4A5578</color>
+    <color name="ic_launcher_background">#F4F4F2</color>
+</resources>

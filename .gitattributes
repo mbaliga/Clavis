@@ -1,0 +1,21 @@
+# Line endings: the release workflow runs ./gradlew under bash on the Windows runner too, so the wrapper
+# script must check out with LF everywhere; the .bat keeps CRLF. Everything else follows git's text detection.
+* text=auto
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.kts text eol=lf
+*.kt text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+
+# Binary content
+*.jar binary
+*.png binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.gz binary
+*.ico binary
+*.icns binary

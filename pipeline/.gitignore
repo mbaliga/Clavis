@@ -1,0 +1,8 @@
+# pipeline outputs and downloaded data are never committed; pack_assets --install copies the packs into the app
+build/
+data/
+corpus/
+*.pyc
+__pycache__/
+web/node_modules/
+.pytest_cache/

@@ -1,0 +1,18 @@
+{
+ "note": "Golden values for the 2017 GitHub snapshot (23 episodes, corpus/epNN/<code>/*.svg) with the frozen ten languages and hygiene OFF. Numbers are the documented v0.10 build figures, reproduced exactly by the reference scripts on 2026-09-01 (scratchpad/pipeline-run/REPORT.md §5). Run: run.py --corpus <old corpus> --languages core --no-hygiene --check pipeline/golden/old-corpus.json",
+ "languages": ["es", "fr", "it", "de", "nl", "ja", "ko", "zh", "ar", "en"],
+ "check": ["raw_scenes", "raw_pages", "raw_per_lang", "raw_src", "kept_scenes", "kept_pages", "kept_per_lang", "lemmas", "tokens", "bridged_tokens", "rect_ok_pct", "pseudo"],
+ "tolerance": {"pct_points": 0.5, "relative": {}},
+ "raw_scenes": 852,
+ "raw_pages": 163,
+ "raw_per_lang": {"en": 852, "es": 832, "fr": 831, "it": 851, "nl": 836, "ja": 851, "ko": 435, "zh": 814, "ar": 235, "de": 841},
+ "raw_src": {"flow": 364, "text": 488},
+ "kept_scenes": 649,
+ "kept_pages": 156,
+ "kept_per_lang": {"es": 634, "fr": 634, "it": 648, "de": 642, "nl": 641, "ja": 648, "ko": 329, "zh": 625, "ar": 177, "en": 649},
+ "lemmas": {"es": 1828, "fr": 1863, "it": 1845, "de": 1923, "nl": 1857, "ja": 2088, "ko": 867, "zh": 1424, "ar": 605, "en": 1832},
+ "tokens": {"es": 7557, "fr": 7491, "it": 7488, "de": 7504, "nl": 7584, "ja": 9140, "ko": 3253, "zh": 4823, "ar": 1141, "en": 7776},
+ "bridged_tokens": {"es": 3711, "fr": 3733, "it": 3748, "ja": 597, "zh": 612, "nl": 3372, "de": 3327},
+ "rect_ok_pct": {"es": 89.9, "fr": 89.7, "it": 89.5, "de": 89.7, "nl": 89.4, "ja": 90.1, "ko": 80.9, "zh": 89.6, "ar": 81.9, "en": 89.4},
+ "pseudo": {"es": 10, "fr": 10, "it": 10, "de": 10, "nl": 10}
+}

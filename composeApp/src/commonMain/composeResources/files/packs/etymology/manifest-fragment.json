@@ -1,0 +1,149 @@
+{
+ "id": "clavis-etymology",
+ "kind": "ETYMOLOGY",
+ "version": "2026.09.02",
+ "title": "Etymology graph (Wiktionary + EtymDB)",
+ "languages": [
+  "ar",
+  "de",
+  "en",
+  "es",
+  "fr",
+  "hi",
+  "it",
+  "ja",
+  "ko",
+  "la",
+  "nl",
+  "pl",
+  "pt",
+  "ru",
+  "tr",
+  "uk",
+  "zh"
+ ],
+ "licence": "CC BY-SA 4.0",
+ "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://github.com/clefourrier/EtymDB (EtymDB 2.1, CC BY-SA 4.0)",
+ "generatedAt": "2026-09-02T04:58:42Z",
+ "attribution": [
+  {
+   "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
+   "role": "etymology, IPA and audio references",
+   "url": "https://kaikki.org/dictionary/",
+   "licence": "CC BY-SA 4.0"
+  },
+  {
+   "name": "EtymDB 2.1 — Clémentine Fourrier & Benoît Sagot (LREC 2020)",
+   "role": "etymological links",
+   "url": "https://github.com/clefourrier/EtymDB",
+   "licence": "CC BY-SA 4.0"
+  }
+ ],
+ "files": {
+  "etym.json.gz": 366768
+ },
+ "stats": {
+  "es": {
+   "lemmas": 1627,
+   "origins": 1218,
+   "withEdges": 1062,
+   "edgeEndpoints": 4079
+  },
+  "fr": {
+   "lemmas": 1767,
+   "origins": 1186,
+   "withEdges": 1036,
+   "edgeEndpoints": 3961
+  },
+  "it": {
+   "lemmas": 1598,
+   "origins": 1086,
+   "withEdges": 938,
+   "edgeEndpoints": 3941
+  },
+  "de": {
+   "lemmas": 1770,
+   "origins": 1015,
+   "withEdges": 663,
+   "edgeEndpoints": 1890
+  },
+  "nl": {
+   "lemmas": 1700,
+   "origins": 1158,
+   "withEdges": 774,
+   "edgeEndpoints": 2116
+  },
+  "ja": {
+   "lemmas": 2062,
+   "origins": 462,
+   "withEdges": 356,
+   "edgeEndpoints": 708
+  },
+  "ko": {
+   "lemmas": 1115,
+   "origins": 416,
+   "withEdges": 206,
+   "edgeEndpoints": 446
+  },
+  "zh": {
+   "lemmas": 2439,
+   "origins": 218,
+   "withEdges": 300,
+   "edgeEndpoints": 442
+  },
+  "ar": {
+   "lemmas": 583,
+   "origins": 106,
+   "withEdges": 38,
+   "edgeEndpoints": 64
+  },
+  "en": {
+   "lemmas": 1603,
+   "origins": 1397,
+   "withEdges": 1062,
+   "edgeEndpoints": 3759
+  },
+  "pt": {
+   "lemmas": 1557,
+   "origins": 1120,
+   "withEdges": 968,
+   "edgeEndpoints": 3864
+  },
+  "la": {
+   "lemmas": 642,
+   "origins": 374,
+   "withEdges": 415,
+   "edgeEndpoints": 2087
+  },
+  "ru": {
+   "lemmas": 1757,
+   "origins": 700,
+   "withEdges": 520,
+   "edgeEndpoints": 1120
+  },
+  "pl": {
+   "lemmas": 1863,
+   "origins": 921,
+   "withEdges": 442,
+   "edgeEndpoints": 1227
+  },
+  "uk": {
+   "lemmas": 1431,
+   "origins": 515,
+   "withEdges": 516,
+   "edgeEndpoints": 989
+  },
+  "tr": {
+   "lemmas": 437,
+   "origins": 300,
+   "withEdges": 44,
+   "edgeEndpoints": 111
+  },
+  "hi": {
+   "lemmas": 45,
+   "origins": 38,
+   "withEdges": 6,
+   "edgeEndpoints": 9
+  }
+ }
+}

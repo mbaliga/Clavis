@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Clavis themed-icon (monochrome) layer: the key alone as a single path,
+         inside the 66dp safe circle. The launcher tints it. Generated from brand/tools/build.py -->
+    <path android:pathData="M41.1,37.66A12.9,12.9 0 1 1 66.9,37.66A12.9,12.9 0 1 1 41.1,37.66ZM49.7,37.66A4.3,4.3 0 1 0 58.3,37.66A4.3,4.3 0 1 0 49.7,37.66ZM54,49.7H54A4.3,4.3 0 0 1 58.3,54V76.36A4.3,4.3 0 0 1 54,80.66H54A4.3,4.3 0 0 1 49.7,76.36V54A4.3,4.3 0 0 1 54,49.7ZM54,67.76H58.73A4.3,4.3 0 0 1 63.03,72.06V72.06A4.3,4.3 0 0 1 58.73,76.36H54A4.3,4.3 0 0 1 49.7,72.06V72.06A4.3,4.3 0 0 1 54,67.76Z" android:fillColor="#2A2C31"/>
+</vector>

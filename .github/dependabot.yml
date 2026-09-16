@@ -1,0 +1,28 @@
+# Dependabot: monthly, so a single maintainer sees one batch per month instead of a drip.
+# Toolchain pins are excluded because they move together and only when the constellation moves
+# (docs/DECISIONS.md D-2, docs/build-platform.md §1): AGP 8.9.1 is a composite-build lockstep, and
+# Kotlin 2.1.20 <-> Compose Multiplatform 1.8.2 <-> org.jetbrains.androidx.* are a validated set.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    ignore:
+      - dependency-name: "com.android.application"
+      - dependency-name: "com.android.library"
+      - dependency-name: "com.android.tools.build:gradle"
+      - dependency-name: "org.jetbrains.kotlin*"
+      - dependency-name: "org.jetbrains.compose*"
+      - dependency-name: "org.jetbrains.androidx.*"
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-datetime"   # 0.7.x changes Instant; bump with Kotlin (build-platform.md §1)

@@ -1,0 +1,142 @@
+# CI: every push to main and every pull request. Tests, lint, debug APK, an R8 release APK (unsigned) and the
+# Linux uber-jar (smoke-tested, not uploaded); a second job lints the Python pipeline. Only the release APK and
+# its mapping are kept, for 3 days — Actions artifact storage is a scarce account-wide quota (docs/RELEASE.md §8,
+# "Storage"). Multi-OS installers and the GitHub Release are the job of release.yml.
+#
+# Action pinning policy (applies to release.yml too): every action is pinned to a MAJOR tag (`@vN`) of a
+# release line that runs on Node 24 — GitHub removes Node 20 from hosted runners on 2026-09-23, so the older
+# majors (checkout@v4, setup-java@v4, upload-artifact@v4, setup-gradle@v4, setup-android@v3) are deliberately
+# not used. Dependabot (.github/dependabot.yml) proposes major bumps monthly. Full-SHA pinning was considered
+# and not adopted for a single-maintainer repo; see docs/RELEASE.md §"Workflows" before changing this.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # Same budget as gradle.properties; passed with -D so it also applies where the file is overridden.
+  GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+
+jobs:
+  build:
+    name: Test · lint · APK · desktop jar smoke (linux-x64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Keep the platform / build-tools numbers in step with gradle/libs.versions.toml (android-compileSdk).
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
+          log-accepted-android-sdk-licenses: false
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          add-job-summary: on-failure
+
+      - name: Build and test
+        run: >
+          ./gradlew
+          :shared:allTests
+          :composeApp:desktopTest
+          :composeApp:lintDebug
+          :composeApp:assembleDebug
+          :composeApp:assembleRelease
+          :composeApp:packageUberJarForCurrentOS
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      - name: Release APK sanity (16 KB page alignment, badging)
+        run: |
+          bt="$ANDROID_HOME/build-tools/36.0.0"
+          apk=$(ls composeApp/build/outputs/apk/release/*.apk)
+          "$bt/zipalign" -c -P 16 -v 4 "$apk" | tail -1
+          "$bt/aapt2" dump badging "$apk" | head -2
+
+      - name: Uber-jar headless smoke test (HeadlessException expected, ClassNotFound is a failure)
+        run: |
+          jar=$(ls composeApp/build/compose/jars/*.jar)
+          set +e
+          out=$(timeout 90 java -Djava.awt.headless=true -jar "$jar" 2>&1)
+          set -e
+          echo "$out" | tail -3
+          if echo "$out" | grep -q 'ClassNotFoundException\|NoClassDefFoundError'; then echo "::error::missing class in uber-jar"; exit 1; fi
+          echo "$out" | grep -q 'HeadlessException'
+
+      # Storage: Actions artifact storage is one quota for the whole account (500 MB on the free plan), and the
+      # 14-day debug APK (~31 MB) + release APK (~22 MB) + uber-jar (~83 MB) of every run filled it in nine runs
+      # ("Failed to CreateArtifact: Artifact storage quota has been hit"). Only the R8 release APK + mapping is kept
+      # now, for 3 days; the debug APK and the jar are still built and checked above — build locally or run the
+      # release dry run when a file is needed. continue-on-error: a quota blip must never turn a green
+      # verification job red; the checks above are the point, the upload is a convenience.
+      - name: Upload release APK (unsigned, R8) and mapping
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: clavis-release-apk-unsigned
+          path: |
+            composeApp/build/outputs/apk/release/*.apk
+            composeApp/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload test and lint reports
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            shared/build/reports/tests/
+            composeApp/build/reports/tests/
+            composeApp/build/reports/lint-results-debug.html
+          if-no-files-found: ignore
+          retention-days: 3
+
+  pipeline-check:
+    name: Pipeline tests and CLI smoke (no data downloads)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+
+      # The pinned set the shipped packs were built with; tests import the tokenisers, so the full file is needed.
+      - name: Install pipeline requirements
+        run: python -m pip install --quiet -r pipeline/requirements.txt pytest
+
+      - name: Unit tests
+        run: python -m pytest pipeline/tests -q
+
+      - name: CLI entry points parse and the registry is valid JSON
+        run: |
+          python pipeline/validate.py --help > /dev/null
+          python pipeline/pack_web.py --help > /dev/null
+          python -c "import json; r = json.load(open('pipeline/languages.json')); print(len(r), 'languages in the registry')"

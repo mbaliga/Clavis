@@ -1,0 +1,2368 @@
+<title>Clavis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Hind:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F4F2; --surface:#FBFBFA; --surface-2:#EEEEEB; --ink:#2A2C31; --ink-2:#6B6E75; --ink-3:#9C9EA5;
+  --line:#E6E6E2; --line-2:#EFEFEC; --accent:#4A5578; --accent-ink:#3D4763; --accent-soft:#E7E9F0;
+  --ochre:#96712F; --ochre-soft:#F0EADC; --moss:#4C7057; --moss-soft:#E4EBE5; --rust:#9A5648; --rust-soft:#F0E2DE;
+  --unk:#F4ECD6; --unk-line:#96712F; --fluid:#2A2C31; --fluid-hi:rgba(255,255,255,.30); --pool:rgba(74,85,120,.07);
+  --cosmos-ground:#EAEAE6; --cosmos-grey:#D2D2CC; --cosmos-label:#54565C; --cosmos-labelbg:rgba(251,251,250,.72);
+  --cosmos-ring:#54565C; --cosmos-crest:#7E8089; --cosmos-dustlite:#CFCFC8;
+  --rel-bor:#B08A3E; --rel-kin:#7C88B5;
+  --hud-bg:rgba(251,251,250,.82); --hud-ink:#54565C; --hud-on-bg:#2A2C31; --hud-on-ink:#F4F4F2;
+  --orb-ink:#2A2C31;
+  --btn-primary:#2A2C31; --btn-primary-ink:#F7F7F5;
+  --shadow:0 1px 2px rgba(38,40,46,.03),0 12px 32px -20px rgba(38,40,46,.16);
+  --dock-bg:rgba(251,251,250,.9);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+  --paper:#15161A; --surface:#1B1C21; --surface-2:#222328; --ink:#DCDDE1; --ink-2:#9B9DA5; --ink-3:#6E7077;
+  --line:#26272D; --line-2:#202126; --accent:#9AA5C8; --accent-ink:#B3BDDA; --accent-soft:#262A38;
+  --ochre:#C3A469; --ochre-soft:#2C2820; --moss:#8FAE97; --moss-soft:#20261F; --rust:#C08A7D; --rust-soft:#2C211E;
+  --unk:#2C2820; --unk-line:#C3A469; --fluid:#0C0D11; --fluid-hi:rgba(190,200,235,.22); --pool:rgba(154,165,200,.07);
+  --cosmos-ground:#1B1C21; --cosmos-grey:#34353C; --cosmos-label:#B6B8BF; --cosmos-labelbg:rgba(21,22,26,.66);
+  --cosmos-ring:#C9CBD2; --cosmos-crest:#EDEEF2; --cosmos-dustlite:#4A4B52;
+  --rel-bor:#C9A96A; --rel-kin:#98A3C6;
+  --hud-bg:rgba(27,28,33,.78); --hud-ink:#B6B8BF; --hud-on-bg:#DCDDE1; --hud-on-ink:#1B1C21;
+  --orb-ink:#DCDDE1;
+  --btn-primary:#D7D8DC; --btn-primary-ink:#1B1C21;
+  --shadow:0 1px 2px rgba(0,0,0,.25),0 12px 32px -20px rgba(0,0,0,.5);
+  --dock-bg:rgba(27,28,33,.9);
+  color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15161A; --surface:#1B1C21; --surface-2:#222328; --ink:#DCDDE1; --ink-2:#9B9DA5; --ink-3:#6E7077;
+  --line:#26272D; --line-2:#202126; --accent:#9AA5C8; --accent-ink:#B3BDDA; --accent-soft:#262A38;
+  --ochre:#C3A469; --ochre-soft:#2C2820; --moss:#8FAE97; --moss-soft:#20261F; --rust:#C08A7D; --rust-soft:#2C211E;
+  --unk:#2C2820; --unk-line:#C3A469; --fluid:#0C0D11; --fluid-hi:rgba(190,200,235,.22); --pool:rgba(154,165,200,.07);
+  --cosmos-ground:#1B1C21; --cosmos-grey:#34353C; --cosmos-label:#B6B8BF; --cosmos-labelbg:rgba(21,22,26,.66);
+  --cosmos-ring:#C9CBD2; --cosmos-crest:#EDEEF2; --cosmos-dustlite:#4A4B52;
+  --rel-bor:#C9A96A; --rel-kin:#98A3C6;
+  --hud-bg:rgba(27,28,33,.78); --hud-ink:#B6B8BF; --hud-on-bg:#DCDDE1; --hud-on-ink:#1B1C21;
+  --orb-ink:#DCDDE1;
+  --btn-primary:#D7D8DC; --btn-primary-ink:#1B1C21;
+  --shadow:0 1px 2px rgba(0,0,0,.25),0 12px 32px -20px rgba(0,0,0,.5);
+  --dock-bg:rgba(27,28,33,.9);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hind',"Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.5;min-height:100vh;-webkit-tap-highlight-color:transparent}
+.app{max-width:600px;margin:0 auto;padding:0 14px 130px}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font-family:'Rozha One',Georgia,serif;font-weight:400;font-size:1.6rem;line-height:1.15}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0 0 .8rem}
+a{color:var(--accent-ink)}
+button{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;box-shadow:var(--shadow);transition:transform .08s ease,border-color .15s ease,background .12s ease;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:active{transform:scale(.97);background:var(--surface-2)}
+input,select,textarea{touch-action:manipulation}
+button:hover{border-color:var(--accent)}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--btn-primary);color:var(--btn-primary-ink);border-color:var(--btn-primary);font-weight:600}
+button.quiet{box-shadow:none;background:transparent;border-color:transparent;color:var(--ink-2);padding:6px 8px}
+button:disabled{opacity:.5;cursor:default}
+.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.small{font-size:.88rem;color:var(--ink-2)}
+.topbar{display:flex;align-items:baseline;justify-content:space-between;padding:16px 0 6px;gap:10px}
+.wordmark{font-family:'Rozha One',Georgia,serif;font-size:1.4rem;line-height:1}
+.viewname{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin:12px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface-2)}
+.chip.prod{background:var(--accent-soft);color:var(--accent-ink);border-color:transparent}
+.chip.rec{background:var(--moss-soft);color:var(--moss);border-color:transparent}
+.chip.warn{background:var(--ochre-soft);color:var(--ochre);border-color:transparent}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;vertical-align:baseline}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:10px 0}
+.stat div{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-family:'Rozha One',Georgia,serif;font-weight:400;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--ink-2)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tablewrap{overflow-x:auto}
+
+/* ---------- the pool + orb (ferrofluid) ---------- */
+.pool{position:relative;display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}
+.orbwrap{position:relative;width:min(72vw,290px);aspect-ratio:1;border-radius:50%;cursor:pointer}
+.orbwrap::before{content:"";position:absolute;inset:-9%;border-radius:50%;background:radial-gradient(circle at 50% 42%, var(--pool), transparent 70%)}
+.orbwrap canvas{position:absolute;inset:0;width:100%;height:100%}
+.orblabel{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;color:var(--orb-ink)}
+.orblabel b{font-family:'Rozha One',Georgia,serif;font-weight:400;font-size:1.35rem;letter-spacing:.02em}
+.orblabel span{font-size:.8rem;opacity:.85}
+.poolcap{margin:10px 0 0;font-size:.88rem;color:var(--ink-2);text-align:center;max-width:34ch}
+
+/* ---------- scene ---------- */
+.scene{position:relative;width:100%;border-radius:14px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);background-repeat:no-repeat}
+.scene.full{aspect-ratio:auto}
+.scene img{display:block;width:100%;height:auto}
+.vignette{position:absolute;inset:0;pointer-events:none}
+.bmark{position:absolute;transform:translate(-50%,-50%);pointer-events:none;z-index:3}
+.bmark i{display:block;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(22,24,30,.6),0 2px 10px rgba(0,0,0,.45)}
+.bmark::after{content:"";position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;border:2px solid rgba(255,255,255,.9);animation:bpulse 2.4s ease-out infinite}
+.bmark.mini i{width:7px;height:7px;box-shadow:0 0 0 2px rgba(22,24,30,.55)}
+.bmark.mini::after{display:none}
+@keyframes bpulse{0%{transform:scale(.45);opacity:.85}70%{opacity:.12}100%{transform:scale(1.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bmark::after{animation:none;opacity:.32;transform:scale(1)}}
+.bmark.num i{width:19px;height:19px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#20242C;font-style:normal}
+.bmark.num::after{display:none}
+.capnum{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:var(--ink-2);margin-top:14px}
+.caprow{border-radius:10px;transition:background .3s ease}
+.caprow.lit{background:var(--accent-soft)}
+.bring{position:absolute;border:2px solid rgba(255,255,255,.92);border-radius:10px;box-shadow:0 0 0 2px rgba(22,24,30,.4);pointer-events:none;z-index:2}
+.btext{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none;color:#20242C;font-weight:600;line-height:1.25;text-shadow:0 0 4px #fff,0 0 8px #fff,0 0 12px #fff;overflow:hidden;padding:1px}
+.btext.page{line-height:1.2;text-shadow:0 0 2px #fff,0 0 5px #fff;font-weight:600}
+/* Some episodes draw their balloons in the text layer, so the art alone has none.
+   A blurred white plate is invisible on a drawn balloon and becomes one where there isn't. */
+.bplate{position:absolute;pointer-events:none;background:rgba(255,255,255,.9);border-radius:44%/50%;filter:blur(5px)}
+.btext.tap{pointer-events:auto;cursor:pointer;border-radius:6px}
+.btext.tap:active{background:rgba(255,255,255,.5)}
+.bhalo{position:absolute;pointer-events:none;z-index:2;border-radius:14px;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 0 4px rgba(24,26,32,.35),0 0 22px 8px rgba(255,255,255,.3);animation:bhalo 2.8s ease-in-out infinite}
+@keyframes bhalo{0%,100%{opacity:.45}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.bhalo{animation:none;opacity:.85}}
+.pagenum{position:absolute;transform:translate(-62%,-62%);z-index:3;width:13px;height:13px;border-radius:50%;background:rgba(22,24,30,.7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;pointer-events:none}
+.pagegloss{background:var(--surface-2);border-radius:10px;padding:9px 12px;margin:8px 0 0;font-size:.95rem;display:flex;gap:10px;align-items:flex-start}
+.pagegloss .tx{flex:1}
+.pagegloss .en{display:block;color:var(--ink-2);font-size:.85rem;margin-top:2px}
+.caption{font-size:1.3rem;line-height:1.9;margin:14px 0 6px}
+.caption[dir="rtl"]{text-align:right;font-size:1.45rem}
+.caption.cjk{font-size:1.45rem}
+.tok{display:inline-block;vertical-align:top;text-align:center;padding:0 2px;border-radius:6px;border-bottom:2px solid transparent;cursor:pointer;margin:0 1px}
+.tok .t-r{display:block;font-size:.62em;line-height:1.1;color:var(--ink-3);font-weight:400;letter-spacing:.02em;margin-top:-2px}
+.tok.unk{background:var(--unk);border-bottom-color:var(--unk-line)}
+.tok.known{border-bottom-color:var(--moss)}
+.tok.gap{background:var(--accent-soft);color:var(--accent-ink);padding:0 8px;font-weight:600}
+.tok.hit{background:var(--moss-soft);border-bottom-color:var(--moss)}
+.tok.miss{background:var(--rust-soft);border-bottom-color:var(--rust)}
+.speak{border:0;box-shadow:none;background:var(--surface-2);border-radius:50%;width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1rem}
+.choices{display:grid;grid-template-columns:1fr;gap:8px;margin:10px 0}
+.choices button{font-size:1.15rem;text-align:left;padding:12px 14px}
+.choices button .t-r{display:block;font-size:.72rem;color:var(--ink-3);font-weight:400}
+.choices button.right{background:var(--moss-soft);border-color:var(--moss)}
+.choices button.wrong{background:var(--rust-soft);border-color:var(--rust)}
+.parallel{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:1rem}
+.parallel .l{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-right:8px}
+.parallel div{margin:4px 0}
+.bridge{font-size:.95rem;color:var(--ink-2);margin:6px 0}
+.bridge b{color:var(--ink)}
+.hint{position:absolute;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.9rem;box-shadow:var(--shadow);max-width:90vw;pointer-events:none}
+.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.actions button{flex:1;min-width:120px}
+.progressbar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin:6px 0}
+.progressbar i{display:block;height:100%;background:var(--accent)}
+.lane{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-2)}
+.lane:last-child{border-bottom:0}
+.lane .name{font-weight:600}
+.lane .meta{font-size:.82rem;color:var(--ink-2);grid-column:1/-1}
+.lane .why{font-size:.82rem;color:var(--accent-ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;box-shadow:none;padding:6px 10px;font-size:.8rem;background:transparent}
+.seg button.on{background:var(--accent-soft);color:var(--accent-ink)}
+.testword{font-size:2.2rem;text-align:center;padding:26px 10px 4px;font-family:'Rozha One',Georgia,serif}
+.testword.plain{font-family:inherit;font-weight:600}
+.testread{text-align:center;color:var(--ink-3);font-size:1rem;min-height:1.4em;margin-bottom:14px}
+textarea{width:100%;min-height:120px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.8rem;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px}
+.toast{position:fixed;left:50%;bottom:116px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:88vw;text-align:center}
+.toast.show{opacity:1}
+.sessionbar{display:flex;gap:4px;margin:6px 0 10px}
+.sessionbar i{flex:1;height:4px;border-radius:2px;background:var(--line-2)}
+.sessionbar i.done{background:var(--accent)}
+.sessionbar i.now{background:var(--ochre)}
+.loading{padding:60px 0;text-align:center;color:var(--ink-2)}
+.coach{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:.92rem;color:var(--accent-ink);margin:10px 0}
+
+/* ---------- onboarding ---------- */
+.ob{min-height:70vh;display:flex;flex-direction:column;justify-content:center;gap:8px;text-align:center;align-items:center;padding:10px 0}
+.ob h2{font-size:clamp(1.7rem,6vw,2.2rem)}
+.ob p{max-width:38ch;color:var(--ink-2)}
+.ob .glyphs{font-size:2rem;line-height:1.3;letter-spacing:.06em;margin-bottom:6px;filter:saturate(.9)}
+.obdots{display:flex;gap:6px;justify-content:center;margin:14px 0 4px}
+.obdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.obdots i.on{background:var(--accent)}
+
+/* ---------- letters ---------- */
+.kana-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
+.kana-grid.k3{grid-template-columns:repeat(3,1fr)}
+.kana{background:var(--surface);border:1px solid var(--line-2);border-radius:10px;text-align:center;padding:9px 2px 6px;cursor:pointer;transition:transform .08s ease}
+.kana:active{transform:scale(.94)}
+.kana b{display:block;font-size:1.45rem;font-weight:500;line-height:1.2}
+.kana span{display:block;font-size:.68rem;color:var(--ink-3);letter-spacing:.03em}
+.kana.wide b{font-size:1.2rem}
+.scripttabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.scripttabs button{padding:7px 12px;font-size:.9rem}
+.scripttabs button.on{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent-ink)}
+
+/* ---------- bottom bar (minimal) ---------- */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;justify-content:center;pointer-events:none}
+.bar-inner{pointer-events:auto;display:flex;gap:2px;margin:0 10px calc(12px + env(safe-area-inset-bottom,0px));padding:6px;background:var(--dock-bg);border:1px solid var(--line-2);border-radius:18px;box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+.bar button{border:0;box-shadow:none;background:transparent;border-radius:11px;padding:8px 12px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink-3);min-width:58px;min-height:48px}
+.bar button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.bar button .g{font-size:1.05rem;line-height:1.2;font-weight:500}
+.bar button span.lbl{font-size:.62rem;letter-spacing:.04em}
+.bar button.on{background:var(--accent-soft);color:var(--accent-ink)}
+.gear{border:0;box-shadow:none;background:transparent;padding:6px;color:var(--ink-3)}
+.gear svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* ---------- citations ---------- */
+sup.cite{font-size:.68em;line-height:0}
+sup.cite a{color:var(--accent-ink);text-decoration:none;padding:0 1px;cursor:pointer}
+.ref{padding:8px 0;border-bottom:1px solid var(--line-2);font-size:.9rem}
+.ref:last-child{border-bottom:0}
+.ref b{font-weight:600}
+.ref .small{display:block}
+.claim{margin:14px 0 4px;font-weight:600}
+
+/* ---------- cosmos ---------- */
+/* the ground is a tone away from the page and dissolves into it — no box, no border */
+.cosmos-wrap{position:relative;margin:10px 0;background:radial-gradient(ellipse 78% 64% at 50% 44%, var(--cosmos-ground) 30%, var(--paper) 100%)}
+.grainy::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.26;-webkit-mask-image:radial-gradient(ellipse 72% 60% at 50% 45%, #000 35%, transparent 95%);mask-image:radial-gradient(ellipse 72% 60% at 50% 45%, #000 35%, transparent 95%);background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMjAnIGhlaWdodD0nMjIwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44NScgbnVtT2N0YXZlcz0nMicgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjxmZUNvbG9yTWF0cml4IHR5cGU9J21hdHJpeCcgdmFsdWVzPScwIDAgMCAwIDAuNSAwIDAgMCAwIDAuNSAwIDAgMCAwIDAuNSAwIDAgMCAwLjU1IDAnLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMjIwJyBoZWlnaHQ9JzIyMCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+");background-size:220px 220px}
+.cosmos-wrap canvas{display:block;width:100%;touch-action:none;cursor:grab}
+.cosmos-wrap canvas:active{cursor:grabbing}
+.cosmos-tools{position:absolute;left:10px;right:10px;bottom:26px;display:flex;gap:7px;justify-content:center;flex-wrap:wrap;pointer-events:none;z-index:2}
+.cosmos-tools button{pointer-events:auto;padding:8px 13px;font-size:.78rem;border-radius:999px;background:var(--hud-bg);color:var(--hud-ink);border-color:transparent;box-shadow:var(--shadow);backdrop-filter:blur(10px);min-height:38px}
+.cosmos-tools button.on{background:var(--hud-on-bg);color:var(--hud-on-ink);border-color:transparent}
+.cosmos-tools button:disabled{opacity:.35}
+.cosmos-tools button:active,.cosmos-tools button.on:active{opacity:.8}
+.wordcard .rels button.accent{background:var(--btn-primary);color:var(--btn-primary-ink);border-color:transparent;font-weight:600}
+.cosmos-hint{position:absolute;z-index:2;left:0;right:0;bottom:6px;text-align:center;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.62rem;letter-spacing:.08em;color:var(--ink-3);pointer-events:none}
+.cosmos-hud{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:6px;justify-content:space-between;pointer-events:none;z-index:2}
+.cosmos-hud .hgroup{display:flex;gap:6px;pointer-events:auto}
+.cosmos-hud button{padding:8px 13px;font-size:.8rem;border-radius:999px;background:var(--hud-bg);color:var(--hud-ink);border-color:transparent;box-shadow:var(--shadow);backdrop-filter:blur(10px);min-height:38px}
+.cosmos-hud button.on{background:var(--hud-on-bg);color:var(--hud-on-ink);border-color:transparent}
+.cosmos-hud button:active,.cosmos-hud button.on:active{opacity:.8}
+.wordcard{position:absolute;z-index:3;left:10px;right:10px;bottom:58px;background:var(--dock-bg);backdrop-filter:blur(12px);border:1px solid var(--line-2);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow)}
+.wordcard .w{font-size:1.3rem;font-weight:600}
+.wordcard .o{font-size:.9rem;color:var(--ink-2);margin-top:2px}
+.wordcard .rels{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.wordcard .rels button{padding:4px 9px;font-size:.85rem;border-radius:999px}
+.cosmos-legend{font-size:.85rem;color:var(--ink-2);margin:10px 2px}
+.fambar{height:8px;border-radius:4px;margin:4px 0 0;background:linear-gradient(90deg,#B3543B,#7A5CC0,#3E8D5C,#4E6B8A,#C08A2D,#B84A6E,#2E8F8A,#8A4EB8,#3E7DA6)}
+
+/* ---------- paths (a decision tree) ---------- */
+.tree{position:relative;margin:14px 0 18px}
+.tree::before{content:"";position:absolute;left:15px;top:34px;bottom:52px;width:2px;background:var(--line);border-radius:1px}
+.rootrow{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.rootdot{width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:'Rozha One',Georgia,serif;font-size:.82rem;flex:0 0 32px}
+.rootrow b{font-size:1rem}
+.branch{position:relative;padding-left:46px;margin:0 0 12px}
+.branch::after{content:"";position:absolute;left:15px;top:-6px;width:24px;height:34px;border-left:2px solid var(--line);border-bottom:2px solid var(--line);border-bottom-left-radius:14px}
+.pathcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px;overflow:hidden}
+.pathcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kc,var(--accent))}
+.pathcard{--kc:var(--accent)}
+.pathcard.k-test{--kc:var(--ochre)}
+.pathcard.k-due{--kc:var(--accent)}
+.pathcard.k-new{--kc:var(--moss)}
+.pathcard.k-read{--kc:var(--ink-3)}
+.pathcard.k-game{--kc:var(--rust)}
+.pathcard .k{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;color:var(--kc)}
+.pathcard h3{font-size:1.06rem;line-height:1.25;margin:0}
+.pathcard .words{display:flex;flex-wrap:wrap;gap:5px}
+.pathcard .words span{background:var(--surface-2);border-radius:7px;padding:2px 8px;font-size:1rem;text-align:center}
+.pathcard .words span i{display:block;font-style:normal;font-size:.62rem;color:var(--ink-3)}
+.pathcard .why{font-size:.82rem;color:var(--ink-2)}
+.pathcard .mini{width:100%;max-width:230px;border-radius:8px;overflow:hidden;border:1px solid var(--line-2)}
+.pathcard button{margin-top:2px;padding:9px 12px;font-size:.9rem;align-self:flex-start}
+.thenrow{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ink-3);border-top:1px dashed var(--line-2);padding-top:8px;margin-top:1px}
+.thendots{display:flex;gap:3px;flex:0 0 auto}
+.thendots i{width:5px;height:5px;border-radius:50%;background:var(--kc,var(--accent))}
+.thendots i:nth-child(2){opacity:.55}
+.thendots i:nth-child(3){opacity:.25}
+.branch.tail::after{border-bottom-style:dashed;border-left-style:dashed;opacity:.6}
+.tailcard{position:relative;border:1px dashed var(--line);border-radius:12px;padding:14px 16px;min-height:74px;overflow:hidden;color:var(--ink-3);font-size:.85rem;display:flex;align-items:center}
+.tailcard .fuzz{position:absolute;inset:0;opacity:.75;
+  background:
+   radial-gradient(circle at 18% 34%, var(--line) 3px, transparent 4px),
+   radial-gradient(circle at 44% 66%, var(--line) 2.4px, transparent 4px),
+   radial-gradient(circle at 63% 26%, var(--line) 2px, transparent 4px),
+   radial-gradient(circle at 82% 58%, var(--line) 1.6px, transparent 3px),
+   radial-gradient(circle at 92% 30%, var(--line) 1.2px, transparent 3px);
+  -webkit-mask-image:linear-gradient(90deg,#000 8%,transparent 96%);mask-image:linear-gradient(90deg,#000 8%,transparent 96%);filter:blur(.4px)}
+.tailcard span{position:relative;max-width:26ch}
+.echoq .choices button{font-size:1rem}
+.tree.hidden{display:none}
+kbd{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.8em;background:var(--surface-2);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+
+/* ---------- explore (G6) ---------- */
+.explore-box{position:relative;width:100%;touch-action:none}
+.explore-box canvas{display:block}
+.wordcard .close{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0}
+.wordcard{padding-right:44px}
+
+/* ---------- the veil (one substance, three states) ---------- */
+.morphveil{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0;will-change:opacity}
+
+/* ---------- touch ---------- */
+@media (pointer:coarse){
+  .speak{width:44px;height:44px;font-size:1.05rem}
+  .seg button{padding:10px 13px;font-size:.85rem}
+  .scripttabs button{padding:10px 14px}
+  .cosmos-tools button,.cosmos-hud button{min-height:44px;min-width:44px;padding:10px 15px}
+  .wordcard .rels button{min-height:40px;padding:8px 13px}
+  .pathcard button{min-height:44px}
+  /* a balloon is as big as the artist drew it; the finger needs more than that */
+  .btext.tap::after{content:"";position:absolute;left:-7px;right:-7px;top:50%;height:100%;min-height:44px;transform:translateY(-50%)}
+  .tok{padding:3px 4px;margin:1px 2px}
+  .tok.gap{min-width:46px;text-align:center}
+  .caption{line-height:2.05}
+  .choices button{min-height:52px}
+  .bar button{min-width:62px}
+  .gear{padding:10px;margin:-4px}
+  .kana{min-height:60px}
+  .hint{font-size:1rem;padding:10px 12px}
+  input[type=range]{height:34px;accent-color:var(--accent)}
+  .actions button{min-height:48px}
+  .capnum{width:24px;height:24px}
+  .wordcard{bottom:64px;padding:14px 44px 14px 16px;border-radius:14px}
+  .wordcard .w{font-size:1.4rem}
+}
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <div class="wordmark">Clavis</div>
+    <div class="row" style="gap:6px">
+      <div class="viewname" id="viewname"></div>
+      <button class="gear" id="gearbtn" aria-label="Settings" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg></button>
+    </div>
+  </div>
+  <div id="view" class="loading">Filling the pool…</div>
+</div>
+<nav class="bar" id="bar" hidden><div class="bar-inner" id="barinner"></div></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const IMAGES = __IMAGES__;
+const SIZES = __SIZES__;
+const DATA_B64 = "__DATA_B64__";
+</script>
+<script>/* AntV G6 v5 (MIT) — https://github.com/antvis/G6 */
+__G6_JS__
+</script>
+<script>
+// ============================================================ constants
+const LANGS = {
+  es:{n:'Spanish', c:'romance', sib:['fr','it'], t:'latin', col:'#B3543B'},
+  fr:{n:'French',  c:'romance', sib:['es','it'], t:'latin', col:'#7A5CC0'},
+  it:{n:'Italian', c:'romance', sib:['es','fr'], t:'latin', col:'#3E8D5C'},
+  de:{n:'German',  c:'germanic', sib:['nl'], t:'latin', col:'#4E6B8A'},
+  nl:{n:'Dutch',   c:'germanic', sib:['de'], t:'latin', col:'#C08A2D'},
+  ja:{n:'Japanese',c:'cjk', sib:['zh','ko'], t:'cjk', col:'#B84A6E'},
+  ko:{n:'Korean',  c:'cjk', sib:['ja','zh'], t:'cjk', col:'#2E8F8A'},
+  zh:{n:'Chinese', c:'cjk', sib:['ja','ko'], t:'cjk', col:'#8A4EB8'},
+  ar:{n:'Arabic',  c:'semitic', sib:[], t:'rtl', col:'#3E7DA6'},
+};
+const LANE_ORDER = ['es','fr','it','de','nl','ja','ko','zh','ar'];
+const DEFAULT_MODE = {es:'prod', nl:'prod', zh:'prod', ar:'prod', fr:'rec', it:'rec', de:'rec', ja:'rec', ko:'rec'};
+const BANDS = [[6,9,'the ~500 commonest words'],[5,6,'the top ~2,000'],[4,5,'the top ~10,000'],[3,4,'the top ~50,000'],[2,3,'rare words']];
+const STORE_KEY = 'clavis.v1';
+const DAY = 86400000;
+const READ_LANGS = {ja:'rōmaji', ko:'romanised', zh:'pīnyīn', ar:'romanised'};
+
+// ============================================================ FSRS-5 (default parameters)
+const W = [0.40255,1.18385,3.173,15.69105,7.1949,0.5345,1.4604,0.0046,1.54575,0.1192,1.01925,1.9395,0.11,0.29605,2.2698,0.2315,2.9898,0.51655,0.6621];
+const DECAY = -0.5, FACTOR = 19/81;
+const clamp = (x,a,b)=>Math.min(b,Math.max(a,x));
+const retr = (days,S)=> Math.pow(1 + FACTOR*days/S, DECAY);
+const ivlDays = (S,r)=> Math.max(1, Math.round(S/FACTOR*(Math.pow(r,1/DECAY)-1)));
+const initD = g=> clamp(W[4]-Math.exp(W[5]*(g-1))+1, 1, 10);
+const initS = g=> Math.max(0.1, W[g-1]);
+function nextD(d,g){ const dp = d + (-W[6]*(g-3))*(10-d)/9; return clamp(W[7]*initD(4)+(1-W[7])*dp, 1, 10); }
+function recallS(d,s,r,g){ const hard = g===2?W[15]:1, easy = g===4?W[16]:1; return s*(Math.exp(W[8])*(11-d)*Math.pow(s,-W[9])*(Math.exp(W[10]*(1-r))-1)*hard*easy+1); }
+function forgetS(d,s,r){ return Math.min(W[11]*Math.pow(d,-W[12])*(Math.pow(s+1,W[13])-1)*Math.exp(W[14]*(1-r)), s); }
+function shortS(s,g){ return s*Math.exp(W[17]*(g-3+W[18])); }
+function rate(card, g, now){
+  if(!card.s){ card.s = initS(g); card.d = initD(g); }
+  else {
+    const days = (now - card.last)/DAY;
+    if(days < 1) card.s = shortS(card.s, g);
+    else { const r = retr(days, card.s); card.s = g===1 ? forgetS(card.d, card.s, r) : recallS(card.d, card.s, r, g); }
+    card.d = nextD(card.d, g);
+  }
+  card.reps = (card.reps||0)+1; if(g===1) card.lapses = (card.lapses||0)+1;
+  if(!card.first) card.first = now;
+  card.last = now; card.prov = false; card.intro = false; card.g = g;
+  card.due = g===1 ? now + 10*60000 : now + ivlDays(card.s, S.settings.retention)*DAY;
+}
+function cardR(card, now){ return card.s ? retr(Math.max(0,(now-card.last)/DAY), card.s) : 0; }
+
+// ============================================================ state
+let D=null, S=null, session=null, T=null;
+let byLang={}, byLemma={}, lexArr={}, byPage={};
+function freshState(){
+  const s = {v:2, created:Date.now(), lanes:{}, cards:{}, tests:{}, seen:{}, bandit:{}, log:[], inter:{}, routes:{}, newDay:'', newToday:{}, pin:null,
+    settings:{retention:0.9, newPerDay:10, sessionSize:5, readings:true, monoSession:false, motion:true}, coach:{}, ob:0, onboarded:false, view:'learn'};
+  for(const l of LANE_ORDER){ s.lanes[l] = DEFAULT_MODE[l]; s.cards[l] = {}; s.bandit[l] = {w:0.2, hist:[]}; s.inter[l] = {}; s.routes[l] = {}; s.newToday[l]=0; }
+  return s;
+}
+function load(){
+  const d = freshState();
+  try{ const raw = localStorage.getItem(STORE_KEY); if(raw){ const s = JSON.parse(raw); const merged = Object.assign(d, s); merged.settings = Object.assign(freshState().settings, s.settings||{}); merged.coach = s.coach||{}; return merged; } }catch(e){}
+  return d;
+}
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){} }
+function todayKey(){ const d = new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function rollDay(){ const k = todayKey(); if(S.newDay!==k){ S.newDay=k; for(const l of LANE_ORDER) S.newToday[l]=0; } }
+const thr = l => (S.tests[l] && S.tests[l].thr!=null) ? S.tests[l].thr : 9;
+const activeLanes = ()=> LANE_ORDER.filter(l=>S.lanes[l]!=='off');
+const lemmaOf = t => t[1]===0 ? t[0].toLowerCase() : t[1];
+const brOf = t => Array.isArray(t[3]) ? t[3] : null;
+const romOf = t => (typeof t[4]==='string' && t[4]) ? t[4] : null;
+
+// ============================================================ corpus indexing
+function indexCorpus(){
+  for(const l of LANE_ORDER){ byLang[l]=[]; byLemma[l]={}; }
+  for(const sc of D.scenes){
+    for(const l of LANE_ORDER){
+      if(!sc.k[l] || sc.k[l].length===0) continue;
+      byLang[l].push(sc.i);
+      for(const t of sc.k[l]){ const lm = lemmaOf(t); (byLemma[l][lm] = byLemma[l][lm]||[]).push(sc.i); }
+    }
+  }
+  for(const l of LANE_ORDER){ lexArr[l] = Object.entries(D.lex[l]||{}).map(([w,v])=>[w,v[0],v[1],v[2],v[3]||'']); }
+  byPage = {};
+  for(const sc of D.scenes) (byPage[sc.m] = byPage[sc.m]||[]).push(sc.i);
+  for(const m of Object.keys(byPage)) byPage[m].sort((a,b)=> (Math.round(D.scenes[a].r[1]*12)-Math.round(D.scenes[b].r[1]*12)) || (D.scenes[a].r[0]-D.scenes[b].r[0]));
+}
+
+// ============================================================ knowledge model
+function isKnown(l, t, now){
+  const lm = lemmaOf(t); const c = S.cards[l][lm];
+  if(c){ if(c.prov) return true; return cardR(c, now) >= 0.75 && c.g!==1; }
+  return t[2] >= thr(l);
+}
+function sceneStats(l, sc, now){
+  let known=0, total=0; const unk = new Map();
+  for(const t of sc.k[l]){ total++; if(isKnown(l,t,now)) known++; else { const lm=lemmaOf(t); if(!unk.has(lm)) unk.set(lm, t); } }
+  return {cov: total? known/total : 1, unk:[...unk.values()], total};
+}
+function corpusCoverage(l, now){
+  const ids = byLang[l]; if(!ids.length) return 0;
+  let ok=0; for(const id of ids){ if(sceneStats(l, D.scenes[id], now).cov >= 0.95) ok++; }
+  return ok/ids.length;
+}
+function dueCards(l, now){ return Object.entries(S.cards[l]).filter(([lm,c])=>c.due<=now && !c.prov && !c.intro).sort((a,b)=>a[1].due-b[1].due); }
+function knownCount(l, now){ return Object.values(S.cards[l]).filter(c=>c.prov || (cardR(c,now)>=0.9 && c.g!==1)).length; }
+
+// ============================================================ selection
+function seenRecently(id, now){ const t = S.seen[id]; return t && (now - t) < 6*3600000; }
+function pickForLane(l, now){
+  const due = dueCards(l, now);
+  if(due.length){
+    const lm = due[0][0];
+    const ids = byLemma[l][lm] || [];
+    const cands = ids.map(id=>({sc:D.scenes[id], st:sceneStats(l, D.scenes[id], now)}))
+      .sort((a,b)=> (b.st.cov - a.st.cov) || (a.st.unk.length - b.st.unk.length) || ((seenRecently(a.sc.i,now)?1:0)-(seenRecently(b.sc.i,now)?1:0)) || (Math.random()-0.5));
+    if(cands.length) return {type:'cloze', l, sc:cands[0].sc, lemma:lm, st:cands[0].st, lowCov: cands[0].st.cov < 0.7};
+  }
+  if(S.newToday[l] < S.settings.newPerDay){
+    const last = S.lastScene && S.lastScene[l];
+    let best=null, bestScore=-1e9;
+    for(const id of byLang[l]){
+      if(seenRecently(id, now)) continue;
+      const sc = D.scenes[id]; const st = sceneStats(l, sc, now);
+      if(st.unk.length===0) continue;
+      const nUnk = st.unk.length;
+      let score = st.cov*6 - Math.max(0,nUnk-3)*2 + (nUnk<=3?1:0);
+      score += (st.unk.reduce((a,t)=>a+t[2],0)/nUnk)*0.6;
+      if(last!=null && id===last+1) score += 1.5;
+      score += Math.random()*0.8;
+      if(score>bestScore){ bestScore=score; best={sc,st}; }
+    }
+    if(best) return {type:'read', l, sc:best.sc, st:best.st};
+  }
+  const knownScenes = byLang[l].filter(id=>!seenRecently(id,now) && sceneStats(l, D.scenes[id], now).unk.length===0);
+  if(knownScenes.length){ const id = knownScenes[Math.floor(Math.random()*knownScenes.length)]; return {type:'read', l, sc:D.scenes[id], st:sceneStats(l, D.scenes[id], now), fluency:true}; }
+  return null;
+}
+
+// ============================================================ bandit (ZPDES-lite over lanes)
+function lp(l){ const h = S.bandit[l].hist; if(h.length<8) return null; const n=Math.min(8, Math.floor(h.length/2)); const rec=h.slice(-n), old=h.slice(-2*n,-n); const m=a=>a.reduce((x,y)=>x+y,0)/a.length; return Math.abs(m(rec)-m(old)); }
+function laneScore(l, now){
+  const b = S.bandit[l]; const due = dueCards(l, now).length; const pressure = Math.min(1, due/5);
+  const mult = S.lanes[l]==='prod' ? 1.5 : 1.0;
+  return {w:b.w, pressure, due, score:(b.w + 0.08 + 0.6*pressure)*mult, lp:lp(l)};
+}
+function whyText(x){ return x.due ? `${x.due} word${x.due===1?'':'s'} ready to return` : (x.lp!=null && x.lp>0.1 ? 'you\'re improving quickly here' : 'getting to know you'); }
+function chooseLane(now, avoid){
+  if(S.pin && S.lanes[S.pin]!=='off') return {l:S.pin, why:'pinned by you'};
+  let lanes = activeLanes().filter(l=>byLang[l].length);
+  if(lanes.length>1 && avoid) lanes = lanes.filter(l=>l!==avoid);
+  const scored = lanes.map(l=>({l, ...laneScore(l, now)}));
+  if(Math.random()<0.25){ const p = scored[Math.floor(Math.random()*scored.length)]; return {l:p.l, why:'trying something new'}; }
+  const tot = scored.reduce((a,x)=>a+x.score,0); let r = Math.random()*tot;
+  for(const x of scored){ r -= x.score; if(r<=0) return {l:x.l, why:whyText(x)}; }
+  const x = scored[scored.length-1]; return {l:x.l, why:whyText(x)};
+}
+function reward(l, r){ const b = S.bandit[l]; b.hist.push(r); if(b.hist.length>40) b.hist.shift(); const v = lp(l); if(v!=null) b.w = clamp(0.85*b.w + 0.15*v, 0.02, 1); }
+
+// ============================================================ helpers
+const $ = sel => document.querySelector(sel);
+const el = (tag, attrs={}, ...kids)=>{ const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs)){ if(k==='class') e.className=v; else if(k==='html') e.innerHTML=v; else if(k.startsWith('on')) e.addEventListener(k.slice(2), v); else if(v!=null) e.setAttribute(k,v);} for(const k of kids){ if(k==null) continue; e.append(k.nodeType? k : document.createTextNode(String(k))); } return e; };
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
+function bandLabel(z){ for(const [lo,hi,lab] of BANDS){ if(z>=lo && z<hi) return lab; } return 'nothing yet'; }
+function pct(x){ return Math.round(x*100)+'%'; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function dirOf(l){ return l==='ar'?'rtl':'ltr'; }
+const CJK_SP = /([\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF])\s+(?=[\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF])/g;
+function lineOf(l, str){ return (l==='ja'||l==='zh') ? String(str||'').replace(CJK_SP,'$1') : str; }
+function laneDot(l){ const col = LANGS[l] ? LANGS[l].col : '#8B8F9C'; return el('span',{class:'dot', style:'background:'+col, 'aria-hidden':'true'}); }
+function langName(l){ return l==='en' ? 'English' : (LANGS[l] ? LANGS[l].n : l); }
+function surfaceOf(l, lm){ const v = D.lex[l] && D.lex[l][lm]; return v ? v[2] : lm; }
+function readingOf(l, lm){ const v = D.lex[l] && D.lex[l][lm]; return (v && v[3]) ? v[3] : ''; }
+
+// ============================================================ speech
+let VOICES = [];
+function refreshVoices(){ try{ VOICES = speechSynthesis.getVoices()||[]; }catch(e){ VOICES=[]; } }
+if('speechSynthesis' in window){ refreshVoices(); speechSynthesis.onvoiceschanged = refreshVoices; }
+const LOCALE = {es:'es-ES',fr:'fr-FR',it:'it-IT',de:'de-DE',nl:'nl-NL',ja:'ja-JP',ko:'ko-KR',zh:'zh-CN',ar:'ar-SA',en:'en-GB'};
+function voiceFor(l){ const loc=LOCALE[l]; return VOICES.find(v=>v.lang===loc||v.lang===loc.replace('-','_')) || VOICES.find(v=>v.lang && v.lang.slice(0,2)===l) || null; }
+function canSpeak(l){ return ('speechSynthesis' in window) && !!voiceFor(l); }
+function speak(text, l){
+  try{
+    if(!('speechSynthesis' in window)) return false;
+    const u = new SpeechSynthesisUtterance(lineOf(l, text));
+    const v = voiceFor(l); if(v) u.voice = v;
+    u.lang = (v && v.lang) || LOCALE[l]; u.rate = 0.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    return true;
+  }catch(e){ return false; }
+}
+function speakBtn(text, l, big){
+  const b = el('button',{class:'speak', 'aria-label':'Hear it', title:'Hear it', onclick:(ev)=>{ ev.stopPropagation(); if(!speak(text,l)) toast('No '+LANGS[l].n+' voice on this device — install one in your system TTS settings'); }}, '🔊');
+  if(big) b.style.cssText='width:44px;height:44px;font-size:1.1rem';
+  return b;
+}
+
+// ============================================================ the pool
+// A soft-focus pool of the languages in play — colour with no hard edge anywhere.
+// When words are due it breathes deeper and glows a little warmer.
+function orb(container, opts){
+  const canvas = el('canvas'); container.append(canvas);
+  const ctx = canvas.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let raf=null, t=0, dead=false;
+  const lanes = (typeof activeLanes==='function' && S) ? (activeLanes().length? activeLanes() : LANE_ORDER) : LANE_ORDER;
+  const drops = lanes.slice(0, 5).map((l,i)=>({
+    c: rgbOf(COSMOS_COL[l]),
+    a: i*2.39996 + 0.8,                 // golden-angle spacing so they never line up
+    sp: 0.10 + 0.035*i,
+    rr: 0.30 + 0.13*hash01('drop'+l),
+  }));
+  function draw(){
+    if(dead) return;
+    const w = canvas.clientWidth||280, h = canvas.clientHeight||280, dpr = Math.min(devicePixelRatio||1, 2);
+    if(canvas.width!==w*dpr){ canvas.width=w*dpr; canvas.height=h*dpr; }
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    const cx=w/2, cy=h/2, R0=Math.min(w,h)*0.34;
+    const due = opts.due();
+    const breath = 1 + (due? 0.06 : 0.025)*Math.sin(t*(due? 1.5 : 0.8));
+    const al = due? 0.5 : 0.36;
+    for(const d of drops){
+      const ang = d.a + t*d.sp;
+      const px = cx + Math.cos(ang)*R0*0.42, py = cy + Math.sin(ang*0.93 + d.a)*R0*0.38;
+      const rad = R0*d.rr*1.7*breath;
+      const g = ctx.createRadialGradient(px,py,0, px,py,rad);
+      g.addColorStop(0, `rgba(${d.c[0]},${d.c[1]},${d.c[2]},${al})`);
+      g.addColorStop(0.55, `rgba(${d.c[0]},${d.c[1]},${d.c[2]},${al*0.4})`);
+      g.addColorStop(1, `rgba(${d.c[0]},${d.c[1]},${d.c[2]},0)`);
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(px,py,rad,0,7); ctx.fill();
+    }
+    t += 0.016;
+    if(!reduced) raf = requestAnimationFrame(draw);
+  }
+  draw();
+  return ()=>{ dead=true; if(raf) cancelAnimationFrame(raf); };
+}
+let orbStop=null;
+
+// ============================================================ bottom bar (minimal)
+const NAV = [
+  {id:'learn',  label:'Learn',  icon:'<svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4 4v-4H6.5A2.5 2.5 0 0 1 4 13.5z"/></svg>'},
+  {id:'cosmos', label:'Cosmos', icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><circle cx="5" cy="7" r="1.2"/><circle cx="18.5" cy="5.5" r="1.4"/><circle cx="20" cy="15" r="1.1"/><circle cx="7" cy="18.5" r="1.3"/><circle cx="13.5" cy="4" r=".9"/><circle cx="4" cy="13" r=".9"/><circle cx="16" cy="19.5" r=".9"/></svg>'},
+  {id:'paths',  label:'Paths',  icon:'<svg viewBox="0 0 24 24"><path d="M12 20v-7"/><path d="M12 13c0-4-5-3.5-6.5-8"/><path d="M12 13c0-4 5-3.5 6.5-8"/><circle cx="5.5" cy="4" r="1.6"/><circle cx="18.5" cy="4" r="1.6"/><circle cx="12" cy="20" r="1.6"/></svg>'},
+  {id:'letters',label:'Letters',glyph:'あ'},
+  {id:'you',    label:'You',    icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 19.5c1.6-3.4 4-5 7-5s5.4 1.6 7 5"/></svg>'},
+];
+function renderBar(){
+  const bar = $('#bar'); const gear = $('#gearbtn');
+  const show = S && S.onboarded && !T && !(session && !session.done);
+  bar.hidden = !show; gear.hidden = !show;
+  if(!show) return;
+  gear.onclick = ()=>{ S.view='set'; save(); render(); };
+  const inner = $('#barinner'); inner.innerHTML='';
+  for(const d of NAV){
+    const on = (S.view||'learn')===d.id || (d.id==='learn' && !NAV.find(x=>x.id===S.view));
+    const b = el('button',{class:on?'on':'', 'aria-label':d.label, onclick:()=>{ S.view=d.id; save(); render(); }});
+    if(d.icon) b.innerHTML = d.icon; if(d.glyph) b.append(el('span',{class:'g'}, d.glyph));
+    b.append(el('span',{class:'lbl'}, d.label));
+    inner.append(b);
+  }
+}
+
+// ============================================================ citations
+const REFS = [
+ {id:1, s:'Nation 2006', t:'How large a vocabulary is needed for reading and listening?', u:'https://www.scienceguide.nl/wp-content/uploads/2017/11/nation-2006-vocabulary.pdf', n:'2,000 word families cover ~89% of conversation; 98% coverage needs 6,000–9,000.'},
+ {id:2, s:'Cepeda et al. 2008', t:'Spacing effects in learning: a temporal ridgeline of optimal retention', u:'https://files.eric.ed.gov/fulltext/ED505660.pdf', n:'1,354 people; recall 64% higher at the optimal gap; the gap grows with how long you want to remember.'},
+ {id:3, s:'Karpicke & Roediger 2008', t:'The critical importance of retrieval for learning', u:'https://web.mit.edu/jbelcher/www/learner/retrieval.pdf', n:'Tested learners recalled ~80% a week later; re-studiers 33–36%.'},
+ {id:4, s:'Webb 2007', t:'The effects of repetition on vocabulary knowledge', u:'https://academic.oup.com/applij/article-abstract/28/1/46/174744', n:'~10 encounters is the working dose for incidental word learning.'},
+ {id:5, s:'Schmidt 1990', t:'The role of consciousness in second language learning', u:'https://academic.oup.com/applij/article-abstract/11/2/129/163482', n:'"Subliminal language learning is impossible" — attention is required; Clavis never claims sleep-learning.'},
+ {id:6, s:'Gooskens et al. 2017', t:'Mutual intelligibility between closely related languages in Europe', u:'https://www.let.rug.nl/gooskens/pdf/publ_ijm_2017.pdf', n:'Untrained listeners: Portuguese→Spanish 77%, Spanish→Portuguese 37%; reception is cheap, and asymmetric.'},
+ {id:7, s:'Lotto & de Groot 1998', t:'Effects of learning method and word type on acquiring vocabulary', u:'https://www.academia.edu/12744827/', n:'Cognates recalled 86.5% vs 72% for non-cognates.'},
+ {id:8, s:'Rothman 2011', t:'The Typological Primacy Model', u:'https://journals.sagepub.com/doi/10.1177/0267658310386439', n:'Transfer comes from the language you perceive as closest, not your first.'},
+ {id:9, s:'Carvalho & da Silva 2006', t:'Cross-linguistic influence in third language acquisition', u:'https://eric.ed.gov/?id=EJ741850', n:'Producing two sibling languages early breeds blends (portuñol); Clavis widens reading, narrows speaking.'},
+ {id:10, s:'Clement, Roy, Oudeyer & Lopes 2015', t:'Multi-armed bandits for intelligent tutoring systems', u:'https://arxiv.org/abs/1310.3174', n:'ZPDES: pick the next activity by learning progress, per learner, no population data — the engine behind Paths.'},
+ {id:11, s:'Doignon & Falmagne 1985–2012', t:'Knowledge space theory', u:'https://link.springer.com/book/10.1007/978-3-642-58625-5', n:'What you know is a state in a prerequisite structure; the "fringe" is what you are ready to learn next.'},
+ {id:12, s:'Open Spaced Repetition 2023–26', t:'FSRS benchmark (~350M reviews)', u:'https://github.com/open-spaced-repetition/srs-benchmark', n:'FSRS beats SM-2 in ~99.6% of collections; Clavis schedules every word with FSRS-5.'},
+ {id:13, s:'Nakata & Suzuki 2019', t:'Mixing semantically related words hurts', u:'https://www.cambridge.org/core/journals/studies-in-second-language-acquisition/article/effects-of-massing-and-spacing-on-the-learning-of-semantically-related-and-unrelated-words/F58BA8D70385603B9C42E408BFCB8A10', n:'Days-of-the-week-style sets interfere ~3× more; Clavis never introduces them together.'},
+ {id:14, s:'Yonelinas 2002', t:'The nature of recollection and familiarity', u:'https://doi.org/10.1006/jmla.2002.2864', n:'Familiarity without recollection is real memory signal — the "tingle."'},
+ {id:15, s:'Nelson 1978', t:'Savings in relearning', u:'https://psycnet.apa.org/doi/10.1037/0278-7393.4.5.453', n:'Words you can neither recall nor recognise are still relearned faster than new ones.'},
+ {id:16, s:'Bowers, Mattys & Gage 2009', t:'Preserved implicit knowledge of a forgotten childhood language', u:'https://journals.sagepub.com/doi/10.1111/j.1467-9280.2009.02407.x', n:'Adults relearned "lost" Hindi/Zulu phonemes better than controls, with no explicit memory.'},
+ {id:17, s:'Frances, Martín & Duñabeitia 2020', t:'The effects of contextual diversity on word learning', u:'https://www.nature.com/articles/s41598-020-70922-1', n:'Same 8 exposures across more texts → better recall, recognition and meaning — including in a foreign language.'},
+ {id:18, s:'Rosa, Tapia & Perea 2017', t:'Contextual diversity in children\'s word learning', u:'https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0179004', n:'Words met across genres beat words met in one, on every measure.'},
+ {id:19, s:'Adelman, Brown & Quesada 2006', t:'Contextual diversity, not word frequency, determines word-naming and lexical decision times', u:'https://journals.sagepub.com/doi/10.1111/j.1467-9280.2006.01787.x', n:'The count that matters is distinct contexts, not raw repetitions.'},
+ {id:20, s:'Ludke, Ferreira & Overy 2014', t:'Singing can facilitate foreign language learning', u:'https://link.springer.com/article/10.3758/s13421-013-0342-5', n:'Singing beat speaking for verbatim phrase production (d ≈ 0.75).'},
+ {id:21, s:'Wallace 1994', t:'Memory for music: effect of melody on recall of text', u:'https://www.semanticscholar.org/paper/bbd36596cf39f88c1f3066526a96561b4768f484', n:'Melody helps only when simple and repeated; a per-verse melody makes recall worse than speech.'},
+ {id:22, s:'Pavia, Webb & Faez 2019', t:'Incidental vocabulary learning through listening to songs', u:'https://www.cambridge.org/core/journals/studies-in-second-language-acquisition/article/abs/incidental-vocabulary-learning-through-listening-to-songs/24418DF071558AE40C2D429B6868F8B9', n:'Song listening teaches word forms; gains scale with repetitions.'},
+ {id:23, s:'Souza & Barbosa 2023', t:'Should we turn off the music?', u:'https://journalofcognition.org/articles/10.5334/joc.273', n:'Background music with lyrics impairs verbal memory and reading (d ≈ −0.3); Clavis plays nothing behind exercises.'},
+ {id:24, s:'Sundararajan & Adesope 2020', t:'Keep it coherent: seductive details meta-analysis', u:'https://link.springer.com/article/10.1007/s10648-020-09522-4', n:'Interesting-but-irrelevant media reliably hurts learning; every picture here depicts the phrase.'},
+ {id:25, s:'Barcroft 2002', t:'Semantic and structural elaboration in L2 lexical acquisition', u:'https://eric.ed.gov/?id=EJ647300', n:'Deep meaning-work at first exposure suppresses learning the word form — so origins unlock on the second meeting.'},
+ {id:26, s:'Boers, Eyckmans & Stengers 2007', t:'Presenting figurative idioms with etymology', u:'https://journals.sagepub.com/doi/10.1177/1362168806072460', n:'Knowing where an expression comes from aids inference and retention.'},
+ {id:27, s:'Bahrick, Bahrick, Bahrick & Bahrick 1993', t:'Maintenance of foreign language vocabulary and the spacing effect', u:'https://journals.sagepub.com/doi/10.1111/j.1467-9280.1993.tb00571.x', n:'13 sessions 56 days apart preserved vocabulary like 26 sessions 14 days apart — maintenance is cheap.'},
+ {id:28, s:'Deci, Koestner & Ryan 1999', t:'Meta-analysis of extrinsic rewards and intrinsic motivation', u:'https://psycnet.apa.org/doi/10.1037/0033-2909.125.6.627', n:'Expected tangible rewards undermine intrinsic motivation; informational feedback strengthens it. No XP here.'},
+ {id:29, s:'Lally et al. 2010', t:'How are habits formed', u:'https://onlinelibrary.wiley.com/doi/10.1002/ejsp.674', n:'Median 66 days to automaticity; missing one day doesn\'t dent the curve — streak guilt is not evidence-based.'},
+ {id:30, s:'Kang, McDermott & Roediger 2007', t:'Test format and corrective feedback', u:'https://doi.org/10.1080/09541440601056620', n:'Short-answer practice beats multiple choice for later retention — recall before recognition.'},
+ {id:31, s:'Sarma 2025', t:'Heritage, multilingualism and education in India (IIT Bombay, n = 1,375)', u:'https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1538482/full', n:'English-medium graduates keep spoken heritage languages but cede reading and formal register — why the baseline tests exist.'},
+ {id:32, s:'Fourrier & Sagot 2020', t:'EtymDB 2.0: a large etymological database from Wiktionary', u:'https://aclanthology.org/2020.lrec-1.397/', n:'Source of the real inheritance/borrowing/cognacy links in the Cosmos (CC BY-SA 4.0).'},
+ {id:33, s:'Skirgård, Roberts & Yencken 2017', t:'Why are some languages confused for others? Investigating data from the Great Language Game', u:'https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0165934', n:'Nearly 15 million guesses across 78 languages: a language is confused with its geographic neighbours more often than with its genealogical relatives.'},
+ {id:34, s:'Girgin 2017', t:'Cues used by teacher candidates to locate places in GeoGuessr', u:'https://files.eric.ed.gov/fulltext/ED581261.pdf', n:'Among 103 participants, written signs were the single largest cue category (~30%) for placing an unfamiliar scene — script is a geographic signal.'},
+ {id:35, s:'Brady, Konkle, Alvarez & Oliva 2008', t:'Visual long-term memory has a massive storage capacity for object details', u:'https://www.pnas.org/doi/abs/10.1073/pnas.0803390105', n:'After seeing 2,500 objects once, people recognised them at 87–92% — a glimpse leaves far more trace than it feels like.'},
+ {id:36, s:'Furnas 1986', t:'Generalized fisheye views', u:'https://dl.acm.org/doi/10.1145/22627.22342', n:'Degree-of-interest views: magnify what is in focus while keeping the surroundings in sight — the idea behind the Cosmos fisheye.'},
+ {id:37, s:'Sarkar & Brown 1992', t:'Graphical fisheye views of graphs', u:'https://dl.acm.org/doi/10.1145/142750.142763', n:'The distortion behind the Explore fisheye: points near the lens centre spread apart, distant ones compress — and the space gained is spent on labels. Full report: bitsavers.org/pdf/dec/tech_reports/SRC-RR-84A.pdf'},
+ {id:38, s:'Tominski, Gladisch, Kister, Dachselt & Schumann 2017', t:'Interactive lenses for visualization: an extended survey', u:'https://onlinelibrary.wiley.com/doi/10.1111/cgf.12871', n:'Survey of lens techniques including the local edge filters the Relations lens implements.'},
+ {id:39, s:'Collins, Penn & Carpendale 2009', t:'Bubble Sets: revealing set relations with isocontours over existing visualizations', u:'https://ieeexplore.ieee.org/document/5290706/', n:'Set membership drawn as smooth isocontours over a point cloud — the Families outline and the Paths groupings, drawn by the BubbleSets algorithm itself (via AntV G6).'},
+ {id:40, s:'Fruchterman & Reingold 1991', t:'Graph drawing by force-directed placement', u:'https://onlinelibrary.wiley.com/doi/10.1002/spe.4380211102', n:'Springs pull related nodes together, repulsion pushes all apart — the layout used for a word\'s web, and (as d3-force) for the Paths map.'},
+];
+function cite(...ids){
+  const sup = el('sup',{class:'cite'});
+  ids.forEach((n,i)=>{ sup.append(el('a',{role:'link', tabindex:'0', onclick:(e)=>{ e.stopPropagation(); S.view='colophon'; S.refTarget=n; save(); render(); }}, '['+n+']')); if(i<ids.length-1) sup.append(' '); });
+  return sup;
+}
+
+// ============================================================ the veil — one substance, three states
+// Learn, Cosmos and Paths are three arrangements of the same words, so moving between
+// them carries the same soft pool of colour — the drops from the Learn pool drift and
+// re-settle into the Cosmos horizon or the Paths rail. All soft focus, no hard edges.
+const MORPH = {view:null, raf:null, canvas:null, ctx:null, pending:null, running:false, cur:null};
+const MORPH_MS = 520;
+function morphRect(sel, fb){
+  const e = document.querySelector(sel); if(!e) return fb;
+  const r = e.getBoundingClientRect();
+  return (r.width>40 && r.height>40 && r.top < innerHeight && r.bottom > 0) ? r : fb;
+}
+// Each view is the same body under a different pull: a held drop, a long horizon, a spine.
+// Those three map to what is actually on each screen — the pool, the field, the tree's rail.
+function morphShape(view){
+  const vw = innerWidth, vh = innerHeight;
+  if(view==='learn'){
+    const r = morphRect('.orbwrap', {left:vw/2-130, top:vh*0.20, width:260, height:260});
+    const R = Math.min(r.width, r.height)*0.335;
+    return {cx:r.left+r.width/2, cy:r.top+r.height/2, rx:R, ry:R};
+  }
+  if(view==='cosmos'){
+    const r = morphRect('.cosmos-wrap', {left:14, top:vh*0.18, width:vw-28, height:vh*0.5});
+    return {cx:r.left+r.width/2, cy:r.top+r.height*0.60, rx:r.width*0.46, ry:r.height*0.055};
+  }
+  if(view==='paths'){
+    const r = morphRect('.tree', morphRect('.cosmos-wrap', {left:14, top:vh*0.22, width:vw-28, height:vh*0.46}));
+    const h = Math.min(r.height, vh*0.56);
+    return {cx:r.left + 16, cy:r.top + h/2, rx:19, ry:h*0.44};   // the rail the branches hang off
+  }
+  return null;
+}
+function morphCanvas(){
+  if(!MORPH.canvas){
+    MORPH.canvas = el('canvas',{class:'morphveil', 'aria-hidden':'true'});
+    document.body.append(MORPH.canvas);
+    MORPH.ctx = MORPH.canvas.getContext('2d');
+  }
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  const w = Math.round(innerWidth*dpr), h = Math.round(innerHeight*dpr);
+  if(MORPH.canvas.width !== w || MORPH.canvas.height !== h){ MORPH.canvas.width = w; MORPH.canvas.height = h; }
+  MORPH.ctx.setTransform(dpr,0,0,dpr,0,0);
+  return MORPH.ctx;
+}
+function morphClear(){
+  MORPH.pending = null; MORPH.cur = null;
+  if(MORPH.raf){ cancelAnimationFrame(MORPH.raf); MORPH.raf = null; }
+  MORPH.running = false;
+  if(MORPH.canvas){ MORPH.canvas.style.opacity = '0'; if(MORPH.ctx) MORPH.ctx.clearRect(0,0,innerWidth,innerHeight); }
+}
+function morphBegin(nextKey){
+  const prev = MORPH.view; MORPH.view = nextKey;
+  const ok = ['learn','cosmos','paths'];
+  if(!prev || !nextKey || prev===nextKey || !ok.includes(prev) || !ok.includes(nextKey)){ morphClear(); return; }
+  if(!S || !S.settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches){ morphClear(); return; }
+  const from = MORPH.running && MORPH.cur ? MORPH.cur : morphShape(prev);   // interrupting mid-flight picks up where it is
+  MORPH.pending = from ? {from} : null;
+  if(MORPH.raf){ cancelAnimationFrame(MORPH.raf); MORPH.raf = null; }
+}
+function morphEnd(){
+  if(!MORPH.pending) return;
+  const from = MORPH.pending.from; MORPH.pending = null;
+  const view = MORPH.view;
+  requestAnimationFrame(()=>{
+    if(MORPH.view!==view) return;
+    const to = morphShape(view); if(!to) return;
+    const ctx = morphCanvas(), cv = MORPH.canvas;
+    const lanes = activeLanes().length? activeLanes() : LANE_ORDER;
+    const drops = lanes.slice(0, 6).map((l,i)=>({
+      c: rgbOf(COSMOS_COL[l]), a: i*2.39996 + 0.6, jr: hash01('v'+l), sp: 0.5 + 0.2*(i%3) }));
+    const ease = u => u<0.5 ? 4*u*u*u : 1-Math.pow(-2*u+2,3)/2;
+    const lerp = (a,b,u)=> a + (b-a)*u;
+    const t0 = performance.now();
+    MORPH.running = true;
+    function frame(now){
+      const t = clamp((now-t0)/MORPH_MS, 0, 1);   // never extrapolate: a clock that jumps backwards would invert the body
+      const q = ease(t);
+      // the drops gather to travel, then settle into the new arrangement
+      const gather = 1 - 0.45*Math.sin(q*Math.PI);
+      const sh = {cx:lerp(from.cx,to.cx,q), cy:lerp(from.cy,to.cy,q),
+                  rx:lerp(from.rx,to.rx,q)*gather, ry:lerp(from.ry,to.ry,q)*gather};
+      MORPH.cur = sh;
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      const base = Math.min(innerWidth, innerHeight);
+      for(const d of drops){
+        const ang = d.a + t*d.sp;
+        const px = sh.cx + Math.cos(ang)*sh.rx*0.7, py = sh.cy + Math.sin(ang*0.95 + d.a)*sh.ry*0.7;
+        const rad = clamp((Math.max(sh.rx,sh.ry)*0.5 + d.jr*base*0.04) , base*0.09, base*0.26);
+        const g = ctx.createRadialGradient(px,py,0, px,py,rad);
+        g.addColorStop(0, `rgba(${d.c[0]},${d.c[1]},${d.c[2]},0.5)`);
+        g.addColorStop(0.55, `rgba(${d.c[0]},${d.c[1]},${d.c[2]},0.2)`);
+        g.addColorStop(1, `rgba(${d.c[0]},${d.c[1]},${d.c[2]},0)`);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,rad,0,6.2832); ctx.fill();
+      }
+      cv.style.opacity = String((t > 0.6 ? Math.max(0, (1-t)/0.4) : Math.min(1, t/0.08)));
+      if(t<1){ MORPH.raf = requestAnimationFrame(frame); }
+      else { MORPH.running=false; MORPH.raf=null; MORPH.cur=null; cv.style.opacity='0'; ctx.clearRect(0,0,innerWidth,innerHeight); }
+    }
+    MORPH.raf = requestAnimationFrame(frame);
+  });
+}
+
+// ============================================================ render root
+const VIEWNAMES = {learn:'', cosmos:'every word you\'ve touched', paths:'what could come next', letters:'letters & sounds', you:'your record', set:'settings', colophon:'evidence & credits', story:'just reading'};
+function render(){
+  rollDay();
+  if(orbStop){ orbStop(); orbStop=null; }
+  if(cosmosStop){ cosmosStop(); cosmosStop=null; }
+  const morphKey = (!S.onboarded || T || session) ? null : ((S.view||'learn'));
+  morphBegin(morphKey);
+  const v = $('#view'); v.className=''; v.innerHTML='';
+  document.onkeydown = null;
+  $('#viewname').textContent = S.onboarded ? (VIEWNAMES[S.view]||'') : 'welcome';
+  renderBar();
+  if(!S.onboarded){ renderOnboard(v); return; }
+  else if(T){ renderTest(v); }
+  else if(session){ if(session.done) renderSummary(v); else renderEncounter(v); }
+  else switch(S.view){
+    case 'cosmos': renderCosmos(v); break;
+    case 'letters': renderLetters(v); break;
+    case 'paths': renderPaths(v); break;
+    case 'you': renderYou(v); break;
+    case 'set': renderSettings(v); break;
+    case 'colophon': renderColophon(v); break;
+    case 'story': renderStory(v); break;
+    default: renderLearn(v);
+  }
+  morphEnd();
+}
+</script>
+<script>
+// ============================================================ cosmos
+let cosmosStop = null;
+const FAM_ANGLE = {romance: Math.PI*0.25, germanic: Math.PI*0.75, cjk: Math.PI*1.25, semitic: Math.PI*1.75};
+const FAM_LABEL = {romance:'ROMANCE', germanic:'GERMANIC', cjk:'CHINA · JAPAN · KOREA', semitic:'SEMITIC'};
+const LANG_OFF = {es:-0.24, fr:0, it:0.24, de:-0.14, nl:0.14, ja:-0.24, ko:0, zh:0.24, ar:0};
+const ORIGIN_FAM = [[/latin|old french|middle french|old spanish|portuguese|vulgar|anglo-norman|italian|spanish|french/i,'romance'],[/english|old norse|german|dutch|frankish|gothic|proto-germanic|proto-west/i,'germanic'],[/chinese|japanese|korean/i,'cjk'],[/arabic|hebrew|aramaic|proto-semitic|persian|sanskrit|ottoman|turkish|egyptian/i,'semitic']];
+const COSMOS_COL = {es:'#FF7043', fr:'#B388FF', it:'#5FD97F', de:'#64B0FF', nl:'#FFC642', ja:'#FF5F9E', ko:'#2FDFCE', zh:'#CE7BFF', ar:'#4FC3F7'};
+const FAM_COL = {romance:'#FF8A5C', germanic:'#7FB6FF', cjk:'#FF6FB0', semitic:'#4FC3F7'};
+const DUSTCOL = ['#F2EFE4','#FFFBEF','#FF7043','#B388FF','#5FD97F','#64B0FF','#FFC642','#FF5F9E','#2FDFCE','#CE7BFF','#4FC3F7','#E8D45A'];
+function rgbOf(hex){ return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)]; }
+function hash01(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return ((h>>>0)%1000)/1000; }
+function famOf(l){ return LANGS[l].c; }
+function familiarity(l, lm, z, now){
+  const c = S.cards[l] && S.cards[l][lm];
+  if(c){ if(c.prov) return 0.72; if(c.intro) return 0; if(c.g===1) return 0.18; return clamp(cardR(c,now),0.05,1); }
+  return z >= thr(l) ? 0.55 : 0;
+}
+function buildCosmos(now){
+  const pts = [], index = new Map();
+  for(const l of LANE_ORDER){
+    if(S.lanes[l]==='off') continue;
+    const rgb = rgbOf(COSMOS_COL[l]);
+    for(const [lm, v] of Object.entries(D.lex[l]||{})){
+      const z = v[1]||0;
+      const et = D.etym && D.etym[l] && D.etym[l][lm];
+      let ang = FAM_ANGLE[famOf(l)] + LANG_OFF[l] + (hash01(l+lm)-0.5)*0.58;
+      let rad = 0.62 + (hash01(lm+l)-0.5)*0.55;
+      if(et && et.ot==='inh') rad -= 0.16;
+      if(et && et.ot==='bor' && et.o){
+        const m = ORIGIN_FAM.find(([re])=>re.test(et.o));
+        if(m && m[1]!==famOf(l)){ const da = FAM_ANGLE[m[1]];
+          let diff = da - ang; while(diff>Math.PI) diff-=2*Math.PI; while(diff<-Math.PI) diff+=2*Math.PI;
+          ang += diff*0.42; rad = 0.85 + (hash01(lm)-0.5)*0.12; }
+        else rad += 0.1;
+      }
+      const h = familiarity(l, lm, z, now);
+      const x = rad*Math.cos(ang), zz = rad*Math.sin(ang);
+      const p = {l, lm, x, z: zz, d: Math.hypot(x,zz), h, zf: z, yj: (hash01(lm+'y')-0.5)*0.05,
+        sz: clamp(0.85 + (z-2)*0.5, 0.7, 3.2), rgb, fam: famOf(l),
+        ell: 0.55+hash01(lm)*0.45, rot: hash01(l+lm+'r')*Math.PI, seed: hash01(lm+l+'s')*6.28};
+      pts.push(p); index.set(l+'|'+lm, p);
+    }
+  }
+  const dust = [];
+  const lite = cssVar('--cosmos-dustlite') || '#F2EFE4';
+  const dustCols = [lite, lite, ...DUSTCOL.slice(2)].map(rgbOf);
+  for(let i=0;i<7200;i++){
+    const a = Math.random()*Math.PI*2;
+    const r = 3.8*Math.sqrt(Math.random());
+    const x = r*Math.cos(a), zz = r*Math.sin(a);
+    dust.push({x, z: zz, d: r, rgb: dustCols[Math.floor(Math.random()*dustCols.length)],
+      al: 0.22 + Math.random()*0.4, sz: 0.5 + Math.pow(Math.random(),2.2)*1.7,
+      ell: 0.5+Math.random()*0.5, rot: Math.random()*Math.PI, seed: Math.random()*6.28});
+  }
+  // relation edges among corpus words (etymology: kin / borrowed)
+  const edges = [];
+  for(const p of pts){
+    const et = D.etym && D.etym[p.l] && D.etym[p.l][p.lm];
+    if(!et || !et.e) continue;
+    for(const [ol, olm, ty] of et.e){
+      const q = index.get(ol+'|'+olm); if(!q) continue;
+      if(p.l < ol || (p.l===ol && p.lm<olm)) edges.push({a:p, b:q, t:ty});
+    }
+  }
+  return {pts, dust, edges, index};
+}
+function terrainY(x, z, t){
+  return 0.07*Math.sin(1.5*x + 0.85*z + t*0.17) + 0.05*Math.sin(2.3*z - 1.1*x + t*0.12) + 0.028*Math.sin(3.7*x + 2.9*z - t*0.09);
+}
+const easeOut = u=>1-Math.pow(1-u,3);
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function mixToward(rgb, grey, e){
+  const r = grey[0]+(rgb[0]-grey[0])*e, g = grey[1]+(rgb[1]-grey[1])*e, b = grey[2]+(rgb[2]-grey[2])*e;
+  return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+function renderCosmos(v){
+  const now = Date.now();
+  S.cosmos = S.cosmos || {};
+  if(!S.cosmos.v3){ S.cosmos.mode = S.cosmos.mode==='top' ? 'explore' : 'depth'; S.cosmos.exlens='off'; S.cosmos.exsets=false; S.cosmos.v3=true; }
+  save();
+  const data = buildCosmos(now);
+  if(S.cosmos.mode==='explore') renderExploreView(v, data, now);
+  else renderFieldView(v, data, now);
+}
+function cosmosModeGroup(mode){
+  const g1 = el('div',{class:'hgroup'});
+  g1.append(el('button',{class:mode!=='explore'?'on':'', onclick:()=>{ if(S.cosmos.mode!=='depth'){ S.cosmos.mode='depth'; save(); render(); } }}, 'Field'));
+  g1.append(el('button',{class:mode==='explore'?'on':'', onclick:()=>{ if(S.cosmos.mode!=='explore'){ S.cosmos.mode='explore'; save(); render(); } }}, 'Explore'));
+  return g1;
+}
+function wordSearchRow(placeholder, go){
+  const search = el('div',{class:'row'});
+  const inp = el('input',{type:'search', placeholder, 'aria-label':placeholder, style:'flex:1;font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)'});
+  const fire = ()=>{ const q=inp.value.trim().toLowerCase(); if(q) go(q); };
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') fire(); });
+  search.append(inp, el('button',{onclick:fire}, 'Find'));
+  return search;
+}
+function renderFieldView(v, data, now){
+  const wrap = el('div',{class:'cosmos-wrap grainy'});
+  const canvas = el('canvas'); wrap.append(canvas);
+  const hud = el('div',{class:'cosmos-hud'});
+  const g1 = cosmosModeGroup('depth');
+  const g2 = el('div',{class:'hgroup'});
+  const resetBtn = el('button',{onclick:()=>{ pushHist(); theta=HOME.theta; camH=HOME.camH; camR=HOME.camR; resetBtn.hidden=true; draw(); }}, 'Reset');
+  resetBtn.hidden = true;
+  g2.append(resetBtn);
+  g2.append(el('button',{class:S.settings.motion?'':'on', onclick:()=>{ S.settings.motion=!S.settings.motion; save(); render(); }}, S.settings.motion?'Calm':'Wake'));
+  hud.append(g1,g2); wrap.append(hud);
+
+  const tools = el('div',{class:'cosmos-tools'});
+  const bUndo = el('button',{title:'Undo', onclick:()=>undo()}, '↶');
+  const bRedo = el('button',{title:'Redo', onclick:()=>redo()}, '↷');
+  tools.append(bUndo,bRedo);
+  wrap.append(tools);
+  function refreshTools(){
+    bUndo.disabled = !hist.length; bRedo.disabled = !future.length;
+    hint.textContent = 'drag to look · pinch or scroll to zoom · tap a speck';
+  }
+  const card = el('div',{class:'wordcard'}); card.hidden = true; wrap.append(card);
+  const hint = el('div',{class:'cosmos-hint'}, ''); wrap.append(hint);
+  v.append(wrap);
+
+  const legend = el('div',{class:'cosmos-legend'});
+  legend.append(el('div',{}, 'Every speck is a word; the field runs past the horizon because the world holds more dialects than any course will list — a language is a dialect with an army and a navy. Direction is the family, pull toward the centre is kinship', cite(32), ', height and brightness are how well you hold a word, size is how often the world uses it', cite(1), '. Grey specks are words the light has not reached yet.'));
+  legend.append(el('div',{class:'fambar'}));
+  legend.append(el('div',{class:'small', style:'margin-top:4px'}, 'This is the field at dusk — for reading it up close, ', el('b',{},'Explore'), ' lays the same words flat and hands you real instruments: a fisheye that spreads the crowd until names surface', cite(36,37), ', a relations lens', cite(38), ', and family contours', cite(39), '. Tap a word here for its own force-drawn web', cite(40), '.'));
+  v.append(legend);
+  v.append(wordSearchRow('find a word…', q=>{
+    const p = data.pts.find(p=>p.lm.toLowerCase().startsWith(q) || (D.lex[p.l][p.lm][2]||'').toLowerCase().startsWith(q));
+    if(p){ wave=1; select(p); } else toast('Not in your corpus yet');
+  }));
+
+  const ctx = canvas.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const GROUND = cssVar('--cosmos-ground') || '#6E6D63';
+  const PAPER = cssVar('--paper') || '#F4F4F2';
+  const GREY = rgbOf(cssVar('--cosmos-grey') || '#96958B');
+  const CREST = rgbOf(cssVar('--cosmos-crest') || '#FFFFFF');
+  const LBL = cssVar('--cosmos-label') || '#F7F4EA';
+  const RING = cssVar('--cosmos-ring') || '#FFFDF6';
+  const REL_BOR = cssVar('--rel-bor') || '#FFD98A';
+  const REL_KIN = cssVar('--rel-kin') || '#DDE3FF';
+  let theta = -Math.PI*0.35, camH = 0.85, camR = 2.4, t = 0, raf=null, dead=false, drag=null, selected=null, hover=null;
+  let focus = null;
+  const HOME = {theta:-Math.PI*0.35, camH:0.85, camR:2.4};
+  const moved = ()=> Math.abs(theta-HOME.theta)>0.02 || Math.abs(camH-HOME.camH)>0.02 || Math.abs(camR-HOME.camR)>0.02;
+  const animating = ()=> (S.settings.motion && !reduced) || wave < 1 || (focus && focus.alpha < 1);
+  let wave = (S.settings.motion && !reduced) ? 0 : 1;
+  const WAVE_R = 4.6, H = 0.5;
+
+  // ---- history
+  let hist = [], future = [];
+  const snap = ()=>({theta, camH, camR, sel: selected? selected.l+'|'+selected.lm : null, focus: focus? focus.root.l+'|'+focus.root.lm : null});
+  function pushHist(){ hist.push(snap()); if(hist.length>40) hist.shift(); future.length=0; if(typeof refreshTools==='function') refreshTools(); }
+  function applySnap(s){
+    theta=s.theta; camH=s.camH; camR=s.camR;
+    selected = s.sel? data.index.get(s.sel) : null;
+    focus = s.focus? makeFocus(data.index.get(s.focus)) : null;
+    if(selected) select(selected, true); else { card.hidden=true; }
+    resetBtn.hidden = !moved(); refreshTools(); save(); draw();
+  }
+  function undo(){ if(!hist.length) return; future.push(snap()); applySnap(hist.pop()); }
+  function redo(){ if(!future.length) return; hist.push(snap()); applySnap(future.pop()); }
+
+  function camera(w, hh){
+    const eye = {x: camR*Math.cos(theta), y: camH, z: camR*Math.sin(theta)};
+    const tgt = {x:0, y:0.1, z:0};
+    let f = {x:tgt.x-eye.x, y:tgt.y-eye.y, z:tgt.z-eye.z};
+    const fl = Math.hypot(f.x,f.y,f.z); f={x:f.x/fl,y:f.y/fl,z:f.z/fl};
+    let r = {x:-f.z, y:0, z:f.x}; const rl=Math.hypot(r.x,r.z)||1; r={x:r.x/rl,y:0,z:r.z/rl};
+    const u = {x: r.y*f.z-r.z*f.y, y: r.z*f.x-r.x*f.z, z: r.x*f.y-r.y*f.x};
+    return {eye, f, r, u, focal: hh*1.05};
+  }
+  function proj(cam, x, y, z, w, hh){
+    const dx=x-cam.eye.x, dy=y-cam.eye.y, dz=z-cam.eye.z;
+    const zc = dx*cam.f.x+dy*cam.f.y+dz*cam.f.z;
+    if(zc < 0.12) return null;
+    const xc = dx*cam.r.x+dy*cam.r.y+dz*cam.r.z;
+    const yc = dx*cam.u.x+dy*cam.u.y+dz*cam.u.z;
+    return {x: w/2 + xc/zc*cam.focal, y: hh/2 - yc/zc*cam.focal, zc};
+  }
+  const front = ()=> Math.pow(wave, 2.6)*WAVE_R*1.12;
+  function litness(d){ return wave>=1 ? 1 : easeOut(clamp((front() - d)/0.7, 0, 1)); }
+  function crestOf(d){ if(wave>=1) return 0; const q=(front()-d)/0.34; return Math.exp(-q*q); }
+  function paint(rgb, e, crest){
+    const r = GREY[0] + (rgb[0]-GREY[0])*e, g = GREY[1] + (rgb[1]-GREY[1])*e, b = GREY[2] + (rgb[2]-GREY[2])*e;
+    const k = crest*0.8;
+    return `rgb(${Math.round(r+(CREST[0]-r)*k)},${Math.round(g+(CREST[1]-g)*k)},${Math.round(b+(CREST[2]-b)*k)})`;
+  }
+  function drawDot(x, y, s, ell, rot){
+    if(s < 1.3){ ctx.fillRect(x-s/2, y-s*ell/2, Math.max(s,0.8), Math.max(s*ell,0.8)); return; }
+    ctx.beginPath(); ctx.ellipse(x, y, s, s*ell, rot, 0, 7); ctx.fill();
+  }
+  // ---- force-directed focus graph (Fruchterman–Reingold)
+  function makeFocus(root){
+    if(!root) return null;
+    const nodes = [{k:'root', l:root.l, lm:root.lm, label: surfaceOf(root.l,root.lm), read: readingOf(root.l,root.lm), col: COSMOS_COL[root.l], r:22}];
+    const links = [];
+    const et = D.etym && D.etym[root.l] && D.etym[root.l][root.lm];
+    if(et && et.o){
+      nodes.push({k:'anc', label: et.o, col: cssVar('--cosmos-grey')||'#EDE8DA', r:17});
+      links.push({s:0, t:nodes.length-1, ty: et.ot==='bor'?'bor':'inh'});
+    }
+    if(et && et.e){
+      for(const [ol, olm, ty] of et.e.slice(0,8)){
+        const lab = (D.lex[ol] && D.lex[ol][olm] ? (D.lex[ol][olm][2]||olm) : olm);
+        nodes.push({k:'kin', l:ol, lm:olm, label:lab, read:(D.lex[ol]&&D.lex[ol][olm]?D.lex[ol][olm][3]:'')||'', col: COSMOS_COL[ol]||'#BDBAB0', r:16, lang: langName(ol)});
+        links.push({s:0, t:nodes.length-1, ty});
+      }
+    }
+    const N = nodes.length;
+    nodes.forEach((n,i)=>{ const a = i===0?0:(i/Math.max(1,N-1))*Math.PI*2; n.x = i===0?0:Math.cos(a)*90; n.y = i===0?0:Math.sin(a)*90; });
+    const k = 78;
+    for(let it=0; it<420; it++){
+      const cool = 1 - it/420;
+      for(let i=0;i<N;i++){ nodes[i].dx=0; nodes[i].dy=0; }
+      for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){
+        let ddx=nodes[i].x-nodes[j].x, ddy=nodes[i].y-nodes[j].y; let d=Math.hypot(ddx,ddy)||0.01;
+        const rep = (k*k)/d;
+        ddx/=d; ddy/=d;
+        nodes[i].dx+=ddx*rep; nodes[i].dy+=ddy*rep; nodes[j].dx-=ddx*rep; nodes[j].dy-=ddy*rep;
+      }
+      for(const ln of links){
+        const a=nodes[ln.s], b=nodes[ln.t];
+        let ddx=a.x-b.x, ddy=a.y-b.y; let d=Math.hypot(ddx,ddy)||0.01;
+        const att = (d*d)/k; ddx/=d; ddy/=d;
+        a.dx-=ddx*att; a.dy-=ddy*att; b.dx+=ddx*att; b.dy+=ddy*att;
+      }
+      for(let i=0;i<N;i++){
+        const n=nodes[i]; if(i===0){ n.x=0; n.y=0; continue; }
+        const d=Math.hypot(n.dx,n.dy)||0.01; const step=Math.min(d, 14*cool);
+        n.x += n.dx/d*step; n.y += n.dy/d*step;
+        n.x -= n.x*0.006; n.y -= n.y*0.006;
+      }
+    }
+    return {root, nodes, links, alpha:0};
+  }
+  function drawFocus(w, hh){
+    const f = focus;
+    f.alpha = Math.min(1, f.alpha + 0.08);
+    ctx.globalAlpha = 0.82*f.alpha; ctx.fillStyle = GROUND; ctx.fillRect(0,0,w,hh);
+    const cx = w/2, cy = hh*0.52;
+    const sc = Math.min(1, (Math.min(w,hh)*0.42)/110) * (0.86 + 0.14*f.alpha);
+    ctx.globalAlpha = f.alpha;
+    for(const ln of f.links){
+      const a=f.nodes[ln.s], b=f.nodes[ln.t];
+      ctx.strokeStyle = ln.ty==='bor' ? REL_BOR : REL_KIN;
+      ctx.lineWidth = 1.4; ctx.setLineDash(ln.ty==='bor'?[4,3]:[]);
+      ctx.beginPath(); ctx.moveTo(cx+a.x*sc, cy+a.y*sc); ctx.lineTo(cx+b.x*sc, cy+b.y*sc); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.textAlign='center';
+    ctx.globalAlpha=f.alpha; ctx.fillStyle=LBL; ctx.font='600 13px "Hind",system-ui,sans-serif';
+    ctx.fillText('the web of ' + surfaceOf(f.root.l, f.root.lm), w/2, 62);
+    ctx.font='10px "IBM Plex Mono",monospace'; ctx.globalAlpha=0.7*f.alpha;
+    ctx.fillText('tap a word to travel · tap the ground to close', w/2, 78);
+    ctx.globalAlpha=f.alpha;
+    for(const n of f.nodes){
+      const x=cx+n.x*sc, y=cy+n.y*sc, r=n.r*sc;
+      n._x=x; n._y=y; n._r=r;
+      ctx.fillStyle = n.col; ctx.globalAlpha=f.alpha*0.92;
+      ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+      ctx.globalAlpha=f.alpha;
+      ctx.fillStyle='#15161A'; ctx.font = `600 ${Math.max(9, Math.round((n.k==='anc'?9:11)*sc))}px 'Hind',system-ui,sans-serif`;
+      const lim = n.k==='anc' ? 20 : 13;
+      const lab = n.label.length>lim ? n.label.slice(0,lim-1)+'…' : n.label;
+      ctx.fillText(lab, x, y+4*sc);
+      if(n.k!=='root'){ ctx.fillStyle=LBL; ctx.font=`${Math.max(8,Math.round(9*sc))}px 'IBM Plex Mono',monospace`; ctx.fillText(n.lang||'origin', x, y+r+11*sc); }
+    }
+  }
+  function draw(){
+    if(dead) return;
+    const w = canvas.clientWidth, hh = canvas.clientHeight || Math.round(w*1.05);
+    const dpr = Math.min(devicePixelRatio||1, 1.6);
+    if(canvas.width !== Math.round(w*dpr)){ canvas.width = Math.round(w*dpr); canvas.height = Math.round(hh*dpr); }
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    // the ground dissolves into the page rather than sitting in a box on it
+    ctx.fillStyle = PAPER; ctx.fillRect(0,0,w,hh);
+    const bg = ctx.createRadialGradient(w/2, hh*0.46, Math.min(w,hh)*0.12, w/2, hh*0.5, Math.max(w,hh)*0.72);
+    bg.addColorStop(0, GROUND); bg.addColorStop(1, PAPER);
+    ctx.fillStyle = bg; ctx.fillRect(0,0,w,hh);
+    const cam = camera(w, hh);
+    const ripT = (S.settings.motion && !reduced) ? t : 0;
+    for(const dd of data.dust){
+      const e = litness(dd.d), crest = crestOf(dd.d);
+      const y = terrainY(dd.x, dd.z, ripT) * e;
+      const p0 = proj(cam, dd.x, y, dd.z, w, hh); if(!p0) continue;
+      const fog = clamp((p0.zc-0.5)/4.6, 0, 0.72);
+      ctx.globalAlpha = (0.3 + (dd.al-0.3)*e + crest*0.55) * (1-fog);
+      ctx.fillStyle = paint(dd.rgb, e, crest);
+      drawDot(p0.x, p0.y, clamp(dd.sz*cam.focal*0.0017/p0.zc*3.2, 0.5, 3.6) * (0.45+0.55*e), dd.ell, dd.rot);
+    }
+    for(const pt of data.pts){
+      const e = litness(pt.d), crest = crestOf(pt.d);
+      const y = (terrainY(pt.x, pt.z, ripT)*0.6 + pt.yj + pt.h*H + 0.035*Math.sin(ripT*0.5 + pt.seed)) * e;
+      const p0 = proj(cam, pt.x, y, pt.z, w, hh); if(!p0){ pt._x=-9e3; continue; }
+      pt._x = p0.x; pt._y = p0.y; pt._zc = p0.zc;
+      const fog = clamp((p0.zc-0.5)/4.6, 0, 0.72);
+      const hcurve = Math.pow(pt.h, 1.15);
+      ctx.globalAlpha = clamp((0.38 + 0.62*hcurve*e + crest*0.55) * (1-fog), 0.12, 1);
+      ctx.fillStyle = paint(pt.rgb, e, crest);
+      const s = clamp(pt.sz*cam.focal*0.0017/p0.zc*3.4*(0.8+0.5*pt.h*e), 0.6, 5.5) * (0.45+0.55*e);
+      drawDot(p0.x, p0.y, s, pt.ell, pt.rot);
+    }
+    if(wave>=1){
+      ctx.font = '600 10px "IBM Plex Mono", monospace'; ctx.textAlign='center';
+      for(const fam of Object.keys(FAM_ANGLE)){
+        const a = FAM_ANGLE[fam];
+        const p = proj(cam, 0.62*Math.cos(a), 0.46, 0.62*Math.sin(a), w, hh); if(!p) continue;
+        ctx.globalAlpha = 0.62*(1-clamp((p.zc-0.5)/4.6,0,0.72));
+        ctx.fillStyle = LBL; ctx.fillText(FAM_LABEL[fam], p.x, p.y);
+      }
+    }
+    if(hover && hover!==selected && wave>=1 && hover._x>-8e3){
+      ctx.globalAlpha=0.7; ctx.strokeStyle=RING; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(hover._x,hover._y,6,0,7); ctx.stroke();
+    }
+    if(selected && wave>=1 && selected._x>-8e3){
+      ctx.globalAlpha = 0.95; ctx.lineWidth = 1.2;
+      for(const r of relsOf(selected)){
+        const q = data.index.get(r[0]+'|'+r[1]); if(!q || q._x<-8e3) continue;
+        ctx.strokeStyle = r[2]==='bor' ? REL_BOR : REL_KIN;
+        ctx.beginPath(); ctx.moveTo(selected._x,selected._y); ctx.lineTo(q._x,q._y); ctx.stroke();
+        ctx.fillStyle = `rgb(${q.rgb[0]},${q.rgb[1]},${q.rgb[2]})`; ctx.beginPath(); ctx.arc(q._x,q._y, 4.5, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1; ctx.strokeStyle = RING; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(selected._x, selected._y, 8, 0, 7); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    if(focus) drawFocus(w, hh);
+    ctx.globalAlpha = 1;
+    if(animating()){ t += 0.016; if(wave<1) wave = Math.min(1, wave + 0.0062); raf = requestAnimationFrame(draw); }
+  }
+  function relsOf(pt){
+    const et = D.etym && D.etym[pt.l] && D.etym[pt.l][pt.lm];
+    return (et && et.e) ? et.e : [];
+  }
+  function select(pt, quiet){
+    if(!pt) return;
+    if(!quiet) pushHist();
+    selected = pt; card.hidden = false; card.innerHTML='';
+    const v2 = D.lex[pt.l][pt.lm]||[]; const surf = v2[2]||pt.lm; const read = v2[3]||'';
+    const et = D.etym && D.etym[pt.l] && D.etym[pt.l][pt.lm];
+    const top = el('div',{class:'row'});
+    top.append(el('span',{class:'w', dir:dirOf(pt.l), lang:pt.l}, surf));
+    if(read) top.append(el('span',{class:'small'}, read));
+    top.append(el('span',{class:'small grow'}, laneDot(pt.l), ' '+LANGS[pt.l].n));
+    if(canSpeak(pt.l)) top.append(speakBtn(surf, pt.l));
+    top.append(el('button',{class:'quiet', onclick:()=>{ selected=null; focus=null; card.hidden=true; if(!animating()) draw(); }}, '✕'));
+    card.append(top);
+    const oline = et && et.o ? `${et.ot==='bor'?'borrowed from':'grew from'} ${et.o}` : 'origin not yet in the graph';
+    card.append(el('div',{class:'o'}, oline, ' · you hold it at '+pct(pt.h)+' · '+bandLabel(pt.zf)));
+    const rels = relsOf(pt);
+    const rr = el('div',{class:'rels'});
+    if(rels.length || (et && et.o)){
+      rr.append(el('button',{class:'accent', onclick:()=>{ pushHist(); focus = makeFocus(pt); card.hidden = true; if(!animating()) draw(); refreshTools(); }}, 'See its web'));
+    }
+    for(const r of rels.slice(0,6)){
+      const q = data.index.get(r[0]+'|'+r[1]);
+      const lab = (D.lex[r[0]] && D.lex[r[0]][r[1]] ? (D.lex[r[0]][r[1]][2]||r[1]) : r[1]);
+      rr.append(el('button',{onclick:()=>{ if(q) select(q); else toast(langName(r[0])+' · '+lab+' — outside your nine lanes'); }}, laneDot(r[0]), ' '+lab, el('span',{class:'small'}, ' '+langName(r[0])+(r[2]==='bor'?' · borrowed':' · kin'))));
+    }
+    if(rr.children.length) card.append(rr);
+    if(!animating()) draw();
+  }
+  function nearest(mx, my, radius){
+    let best=null, bestScore=1e9;
+    for(const pt of data.pts){
+      if(pt._x < -8e3) continue;
+      const dx=pt._x-mx, dy=pt._y-my; const d=Math.hypot(dx,dy);
+      if(d > radius) continue;
+      const score = d - pt.h*9 - Math.min(pt.zf,6)*1.2;
+      if(score < bestScore){ bestScore=score; best=pt; }
+    }
+    return best;
+  }
+  const pointers = new Map(); let pinch0 = null;
+  function refreshHud(){ resetBtn.hidden = !moved(); }
+  const local = e => { const r = canvas.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; };
+  canvas.addEventListener('pointerdown', e=>{
+    if(wave<1) wave=1;
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pointers.size===2){ const [a1,b1]=[...pointers.values()]; pinch0 = {d:Math.hypot(a1.x-b1.x,a1.y-b1.y), r:camR}; drag=null; return; }
+    drag={x:e.clientX,y:e.clientY,moved:false};
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', e=>{
+    if(pointers.has(e.pointerId)) pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pinch0 && pointers.size===2){
+      const [a1,b1]=[...pointers.values()]; const d=Math.hypot(a1.x-b1.x,a1.y-b1.y);
+      camR = clamp(pinch0.r * (pinch0.d/Math.max(d,1)), 1.15, 4.6); refreshHud();
+      if(!animating()) draw();
+      return;
+    }
+    if(!drag){
+      if(e.pointerType==='mouse'){
+        if(wave>=1 && !focus){
+          const q = local(e); const h = nearest(q.x, q.y, 22);
+          if(h!==hover){ hover=h; canvas.style.cursor = h? 'pointer':'grab'; if(!animating()) draw(); }
+        }
+      }
+      return;
+    }
+    const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+    if(Math.abs(dx)+Math.abs(dy)>4) drag.moved=true;
+    theta += dx*0.005;
+    camH = clamp(camH + dy*0.006, 0.4, 2.2);
+    refreshHud();
+    drag.x=e.clientX; drag.y=e.clientY;
+    if(!animating()) draw();
+  });
+  const endPointer = e=>{ pointers.delete(e.pointerId); if(pointers.size<2) pinch0=null; };
+  canvas.addEventListener('pointercancel', e=>{ endPointer(e); drag=null; });
+  canvas.addEventListener('pointerup', e=>{
+    endPointer(e);
+    const wasDrag = drag && drag.moved; drag=null;
+    if(wasDrag || pinch0) return;
+    const q = local(e);
+    if(focus){
+      const hit = focus.nodes.find(n=> n._x!=null && Math.hypot(n._x-q.x, n._y-q.y) < n._r+8);
+      if(hit && hit.k==='kin'){ const p = data.index.get(hit.l+'|'+hit.lm); if(p){ pushHist(); select(p, true); card.hidden=true; focus = makeFocus(p); if(!animating()) draw(); return; } }
+      pushHist(); focus=null; if(selected) select(selected, true); if(!animating()) draw(); return;
+    }
+    const best = nearest(q.x, q.y, 30);
+    if(best) select(best); else { pushHist(); selected=null; card.hidden=true; if(!animating()) draw(); }
+  });
+  canvas.addEventListener('wheel', e=>{ e.preventDefault(); camR = clamp(camR * (1 + Math.sign(e.deltaY)*0.12), 1.15, 4.6); refreshHud(); if(!animating()) draw(); }, {passive:false});
+  canvas.style.height = Math.round(Math.min((canvas.clientWidth||360)*1.12, innerHeight*0.66))+'px';
+  refreshTools();
+  if(S.cosmos.webFor){ const p = data.index.get(S.cosmos.webFor); S.cosmos.webFor=null; save(); if(p){ wave=1; selected=p; focus=makeFocus(p); } }
+  draw();
+  cosmosStop = ()=>{ dead=true; if(raf) cancelAnimationFrame(raf); };
+}
+
+// ---- Explore: the same field laid flat, with real instruments (AntV G6, MIT)
+function renderExploreView(v, data, now){
+  const wrap = el('div',{class:'cosmos-wrap grainy'});
+  const box = el('div',{class:'explore-box'}); wrap.append(box);
+  const hud = el('div',{class:'cosmos-hud'});
+  hud.append(cosmosModeGroup('explore'));
+  const g2 = el('div',{class:'hgroup'});
+  const fitBtn = el('button',{title:'Fit everything back in view', onclick:()=>{ if(graph) graph.fitView().catch(()=>{}); }}, 'Fit');
+  g2.append(fitBtn);
+  hud.append(g2); wrap.append(hud);
+  const tools = el('div',{class:'cosmos-tools'});
+  const card = el('div',{class:'wordcard'}); card.hidden = true;
+  const hint = el('div',{class:'cosmos-hint'}, 'pinch to zoom · drag to pan · tap a word');
+  wrap.append(card, hint, tools);
+  v.append(wrap);
+
+  const legend = el('div',{class:'cosmos-legend'});
+  legend.append(el('div',{}, 'The field from straight above — the words nearest your path, kept legible. The ', el('b',{},'fisheye'), ' spreads the crowd under your finger apart until the words are readable, without losing the surroundings', cite(36,37), '. ', el('b',{},'Relations'), ' shows only the kinship and borrowing edges inside its lens, labelled', cite(38), '. ', el('b',{},'Families'), ' wraps each family\'s lit words in a smooth contour', cite(39), '. With a lens on, dragging moves the lens; otherwise drag pans, and any speck can be picked up and moved.'));
+  legend.append(el('div',{class:'fambar'}));
+  v.append(legend);
+  v.append(wordSearchRow('find a word…', q=>{
+    const p = pts.find(p=>p.lm.toLowerCase().startsWith(q) || (D.lex[p.l][p.lm][2]||'').toLowerCase().startsWith(q));
+    if(p && graph){ const id = p.l+'|'+p.lm; graph.focusElement(id).then(()=>showCard(id)).catch(()=>showCard(id)); }
+    else toast('Not among the words drawn here — the Field holds the rest');
+  }));
+
+  const W2 = Math.min(innerWidth-28, 572);
+  const H2 = Math.round(Math.min(W2*1.05, innerHeight*0.62));
+  box.style.height = H2+'px';
+  const GREY = rgbOf(cssVar('--cosmos-grey') || '#96958B');
+  const LBL = cssVar('--cosmos-label') || '#F2EFE4';
+  const LBLBG = cssVar('--cosmos-labelbg') || 'rgba(18,18,15,.62)';
+  const RING = cssVar('--cosmos-ring') || '#FFFDF6';
+  const REL_BOR = cssVar('--rel-bor') || '#FFD98A';
+  const REL_KIN = cssVar('--rel-kin') || '#DDE3FF';
+
+  // subsample: every word you've touched, plus everything with etymology, plus the commonest — capped
+  const CAP = 1250, SCALE = 300;
+  const scored = data.pts.map(p=>{
+    const c = S.cards[p.l] && S.cards[p.l][p.lm];
+    const et = D.etym && D.etym[p.l] && D.etym[p.l][p.lm];
+    return [p.zf + (c?8:0) + ((et && (et.e||et.o))?3:0) + (p.h>0?2:0), p];
+  }).sort((a,b)=>b[0]-a[0]);
+  const pts = scored.slice(0, CAP).map(x=>x[1]);
+  const inSet = new Set(pts.map(p=>p.l+'|'+p.lm));
+  const nodes = pts.map(p=>{
+    const e = Math.max(p.h, 0.24);
+    const size = clamp(5 + (p.zf-1.5)*1.6 + p.h*9, 5, 19);
+    return {id: p.l+'|'+p.lm, data:{l:p.l, lm:p.lm, h:p.h, fam:p.fam, size},
+      style:{ x: Math.round(p.x*SCALE), y: Math.round(p.z*SCALE), size,
+        fill: mixToward(p.rgb, GREY, e), fillOpacity: 0.5+0.5*e,
+        label: true, labelText: surfaceOf(p.l, p.lm), labelFill: LBL, labelFontSize: 11, labelFontFamily: 'Hind',
+        labelBackground: true, labelBackgroundFill: LBLBG, labelBackgroundRadius: 4, labelBackgroundPadding: [1,4],
+        stroke: RING, lineWidth: p.h>0.5? 0.8 : 0, zIndex: Math.round(e*10) }};
+  });
+  const edges = [];
+  for(const e2 of data.edges){
+    const ia = e2.a.l+'|'+e2.a.lm, ib = e2.b.l+'|'+e2.b.lm;
+    if(!inSet.has(ia) || !inSet.has(ib)) continue;
+    edges.push({id:'rel'+edges.length, source:ia, target:ib, data:{t:e2.t},
+      style:{ stroke: e2.t==='bor' ? REL_BOR : REL_KIN, lineWidth: 1, strokeOpacity: 0.2,
+        lineDash: e2.t==='bor' ? [4,3] : [], zIndex: -1 }});
+  }
+  const famMembers = {};
+  for(const fam of Object.keys(FAM_ANGLE)){
+    famMembers[fam] = pts.filter(p=>p.fam===fam && p.h>0.03).sort((a,b)=>b.h-a.h).slice(0,60).map(p=>p.l+'|'+p.lm);
+  }
+
+  let graph = null, dead = false;
+  const basePlugins = ()=>{
+    const P = [{type:'history', key:'hist'}];
+    const lensR = Math.round(Math.min(W2,H2)*0.24);
+    if(S.cosmos.exlens==='fisheye') P.push({type:'fisheye', key:'fe', trigger:'drag', r: lensR*1.12, d: 3.4, maxD: 5, scaleDBy:'wheel', showDPercent: false,
+      style:{stroke: RING, strokeOpacity:0.5, fill:'rgba(128,128,134,.08)', lineWidth:1},
+      nodeStyle: d=>({label:true, labelFontSize:12, labelFill: LBL, labelBackground:true, labelBackgroundFill: LBLBG,
+        size: Math.min((d.data && d.data.size || 10)*1.15, 26), zIndex: 200})});
+    if(S.cosmos.exlens==='relations') P.push({type:'edge-filter-lens', key:'efl', trigger:'drag', r: lensR, nodeType:'both',
+      style:{stroke: RING, strokeOpacity:0.5, fill:'rgba(128,128,134,.07)', lineWidth:1},
+      nodeStyle:{label:true, labelFontSize:10.5, labelFill: LBL},
+      edgeStyle: d=>({label:true, labelText: (d.data && d.data.t==='bor') ? 'borrowed' : 'kin', labelFontSize:9,
+        labelFill: LBL, labelBackground:true, labelBackgroundFill: LBLBG,
+        stroke: (d.data && d.data.t==='bor') ? REL_BOR : REL_KIN, strokeOpacity:0.95, lineWidth:1.6})});
+    if(S.cosmos.exsets){
+      for(const fam of Object.keys(famMembers)){
+        if(famMembers[fam].length>=3) P.push({type:'bubble-sets', key:'bs-'+fam, members: famMembers[fam],
+          fill: FAM_COL[fam], fillOpacity: 0.07, stroke: FAM_COL[fam], strokeOpacity: 0.6, lineWidth: 1.2});
+      }
+    }
+    return P;
+  };
+  const mkTool = (id, label, title)=> el('button',{class:(S.cosmos.exlens===id?'on':''), title, onclick:()=>{
+    S.cosmos.exlens = (S.cosmos.exlens===id ? 'off' : id); save(); applyTools(); }}, label);
+  const bFish = mkTool('fisheye','Fisheye','Spread the crowd under your finger until the words are readable');
+  const bRel  = mkTool('relations','Relations','Show only the kinship and borrowing edges inside the lens');
+  const bSets = el('button',{class:(S.cosmos.exsets?'on':''), title:'Wrap each family\'s lit words in a contour', onclick:()=>{
+    S.cosmos.exsets = !S.cosmos.exsets; save(); applyTools(); }}, 'Families');
+  const bUndo = el('button',{title:'Undo', onclick:()=>{ try{ const h=histOf(); if(h && h.canUndo && h.canUndo()) h.undo(); }catch(e){} }}, '↶');
+  const bRedo = el('button',{title:'Redo', onclick:()=>{ try{ const h=histOf(); if(h && h.canRedo && h.canRedo()) h.redo(); }catch(e){} }}, '↷');
+  tools.append(bFish, bRel, bSets, bUndo, bRedo);
+  const histOf = ()=>{ try{ return graph && graph.getPluginInstance ? graph.getPluginInstance('hist') : null; }catch(e){ return null; } };
+  function applyTools(){
+    bFish.className = S.cosmos.exlens==='fisheye' ? 'on' : '';
+    bRel.className  = S.cosmos.exlens==='relations' ? 'on' : '';
+    bSets.className = S.cosmos.exsets ? 'on' : '';
+    hint.textContent = S.cosmos.exlens==='off' ? 'pinch to zoom · drag to pan · tap a word'
+      : 'tap places the lens · drag moves it · pinch still zooms';
+    if(!graph) return;
+    try{
+      graph.setPlugins(basePlugins());
+      graph.updateBehavior({key:'pan', enable: S.cosmos.exlens==='off'});
+      graph.updateBehavior({key:'dragel', enable: S.cosmos.exlens==='off'});
+      // while a lens is on, resting labels yield to the lens: adaptive labels off, base labels off
+      graph.updateBehavior({key:'adapt', enable: S.cosmos.exlens==='off'});
+      graph.draw().then(()=>{
+        // bubble-sets added after render draw on the next AFTER_RENDER — nudge one
+        if(S.cosmos.exsets && G6.GraphEvent) graph.emit(G6.GraphEvent.AFTER_RENDER, {});
+      }).catch(()=>{});
+    }catch(e){}
+  }
+  function showCard(id){
+    const p = data.index.get(id); if(!p) return;
+    card.hidden = false; card.innerHTML = '';
+    const v2 = D.lex[p.l][p.lm]||[]; const surf = v2[2]||p.lm; const read = v2[3]||'';
+    const et = D.etym && D.etym[p.l] && D.etym[p.l][p.lm];
+    const top = el('div',{class:'row'});
+    top.append(el('span',{class:'w', dir:dirOf(p.l), lang:p.l}, surf));
+    if(read) top.append(el('span',{class:'small'}, read));
+    top.append(el('span',{class:'small grow'}, laneDot(p.l), ' '+LANGS[p.l].n));
+    if(canSpeak(p.l)) top.append(speakBtn(surf, p.l));
+    card.append(top);
+    card.append(el('button',{class:'quiet close', 'aria-label':'Close', onclick:()=>{ card.hidden=true; }}, '✕'));
+    const oline = et && et.o ? `${et.ot==='bor'?'borrowed from':'grew from'} ${et.o}` : 'origin not yet in the graph';
+    card.append(el('div',{class:'o'}, oline, ' · you hold it at '+pct(p.h)+' · '+bandLabel(p.zf)));
+    const rels = (et && et.e) ? et.e : [];
+    const rr = el('div',{class:'rels'});
+    if(rels.length || (et && et.o)){
+      rr.append(el('button',{class:'accent', onclick:()=>{ S.cosmos.mode='depth'; S.cosmos.webFor = id; save(); render(); }}, 'See its web'));
+    }
+    for(const r of rels.slice(0,6)){
+      const oid = r[0]+'|'+r[1];
+      const lab = (D.lex[r[0]] && D.lex[r[0]][r[1]] ? (D.lex[r[0]][r[1]][2]||r[1]) : r[1]);
+      rr.append(el('button',{onclick:()=>{
+        if(inSet.has(oid) && graph){ graph.focusElement(oid).then(()=>showCard(oid)).catch(()=>showCard(oid)); }
+        else if(data.index.get(oid)) { showCard(oid); }
+        else toast(langName(r[0])+' · '+lab+' — outside your nine lanes');
+      }}, laneDot(r[0]), ' '+lab, el('span',{class:'small'}, ' '+langName(r[0])+(r[2]==='bor'?' · borrowed':' · kin'))));
+    }
+    if(rr.children.length) card.append(rr);
+  }
+  (async ()=>{
+    try{
+      graph = new G6.Graph({
+        container: box, width: box.clientWidth || W2, height: H2, animation: false, padding: 18,
+        data: {nodes, edges},
+        autoFit: 'view',
+        behaviors: [
+          {type:'zoom-canvas', key:'zoom'},
+          {type:'drag-canvas', key:'pan'},
+          {type:'drag-element', key:'dragel'},
+          {type:'auto-adapt-label', key:'adapt', throttle: 150},
+        ],
+        plugins: basePlugins(),
+      });
+      await graph.render();
+      if(dead){ graph.destroy(); return; }
+      box._graph = graph;
+      graph.on('node:click', ev=>{ if(S.cosmos.exlens!=='off') return; const id = ev.target && ev.target.id; if(id) showCard(id); });
+      graph.on('canvas:click', ()=>{ if(S.cosmos.exlens==='off') card.hidden = true; });
+      applyTools();
+    }catch(err){ box.append(el('div',{class:'loading'}, 'The Explore view could not start here: '+esc(err.message))); }
+  })();
+  cosmosStop = ()=>{ dead = true; try{ if(graph) graph.destroy(); }catch(e){} graph = null; };
+}
+
+// ============================================================ story mode (just reading)
+function renderStory(v){
+  S.story = S.story || {lane:'es', ep:null, pi:0};
+  const st = S.story;
+  const lanes = activeLanes();
+  const laneSel = el('div',{class:'row'});
+  for(const l of lanes){ laneSel.append(el('button',{class:st.lane===l?'primary':'', style:'padding:6px 10px;font-size:.85rem', onclick:()=>{ st.lane=l; st.ep=null; st.pi=0; save(); render(); }}, laneDot(l), ' '+LANGS[l].n)); }
+  v.append(laneSel);
+  // a few episodes only align in one or two languages; they'd open on a title card
+  const epCount = {};
+  for(const s of D.scenes) if(s.x[st.lane]) epCount[s.e] = (epCount[s.e]||0)+1;
+  let eps = Object.keys(epCount).map(Number).filter(e=>epCount[e]>=6).sort((a,b)=>a-b);
+  if(!eps.length) eps = Object.keys(epCount).map(Number).sort((a,b)=>a-b);
+  if(st.ep==null || !eps.includes(st.ep)) st.ep = eps[0];
+  const epSel = el('div',{class:'row', style:'margin-top:8px'});
+  epSel.append(el('span',{class:'small'},'Episode'));
+  const sel = el('select',{style:'font:inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)', onchange:e=>{ st.ep=parseInt(e.target.value); st.pi=0; save(); render(); }});
+  for(const e of eps) sel.append(el('option',{value:String(e), selected: e===st.ep? '':null}, 'Episode '+e));
+  epSel.append(sel);
+  v.append(epSel);
+  const pages = [...new Set(D.scenes.filter(s=>s.e===st.ep && s.x[st.lane]).map(s=>s.m))];
+  st.pi = clamp(st.pi, 0, pages.length-1);
+  const m = pages[st.pi];
+  const pageScenes = D.scenes.filter(s=>s.e===st.ep && s.m===m && s.x[st.lane])
+    .sort((a,b)=> (Math.round(a.r[1]*12)-Math.round(b.r[1]*12)) || (a.r[0]-b.r[0]));
+  const box = el('div',{class:'scene full', style:'margin-top:10px'});
+  box.append(el('img',{src:IMAGES[m], alt:'comic page'}));
+  const rows = [];
+  const nLettered = pageScenes.length ? letterPage(box, pageScenes[0], st.lane, {numbers:true, noHalo:true,
+    onTap:(s2, i)=>{ speak(s2.x[st.lane], st.lane); const row = rows[i];
+      if(row){ row.scrollIntoView({block:'center', behavior:'smooth'}); row.classList.add('lit'); setTimeout(()=>row.classList.remove('lit'), 1600); } }}) : 0;
+  v.append(box);
+  v.append(el('p',{class:'scenehint'}, nLettered
+    ? 'The page is lettered in ' + LANGS[st.lane].n + ' — tap a balloon to hear it and jump to its line.'
+    : 'The numbers mark where each line is spoken.'));
+  pageScenes.forEach((sc,i)=>{
+    const cap = tokenSpans(st.lane, sc.k[st.lane], {markUnknown:false, onTap:(idx,t,sp)=>{ speak(t[0], st.lane); showHint(sp, st.lane, t); }});
+    const row = el('div',{class:'row caprow'}, el('span',{class:'capnum'}, String(i+1)), el('div',{class:'grow'}, cap));
+    if(canSpeak(st.lane)) row.append(speakBtn(sc.x[st.lane], st.lane));
+    rows.push(row); v.append(row);
+  });
+  v.append(el('p',{class:'small'}, 'Just reading — nothing is graded here. Words you meet leave a trace that makes later study faster', cite(15,17,35), '. Tap a word to hear it.'));
+  v.append(el('div',{class:'actions'},
+    el('button',{onclick:()=>{ st.pi=Math.max(0,st.pi-1); save(); render(); }, disabled: st.pi===0? '':null}, '← Page'),
+    el('button',{onclick:()=>{ S.view='learn'; save(); render(); }}, 'Done'),
+    el('button',{onclick:()=>{ st.pi=Math.min(pages.length-1,st.pi+1); save(); render(); }, disabled: st.pi>=pages.length-1? '':null}, 'Page →')));
+  v.append(el('p',{class:'small', style:'text-align:center'}, `page ${st.pi+1} of ${pages.length}`));
+}
+
+// ============================================================ colophon (evidence & credits)
+function renderColophon(v){
+  v.append(el('h2',{}, 'Why Clavis works the way it does'));
+  v.append(el('p',{class:'small'}, 'Every design choice below names its evidence. Tap any [n] anywhere in the app to land here; each entry links to the paper.'));
+  const claims = [
+    ['Bubbles arrive with one to three new words, the rest known', [1,4]],
+    ['Words return spaced, right before you\'d forget, as retrieval rather than re-reading', [2,3,12]],
+    ['Sessions hop languages on purpose, and never introduce look-alike sets together', [13,2]],
+    ['Reading and listening are opened across whole families; speaking stays narrow', [6,7,8,9]],
+    ['The next step is chosen by your learning progress, visibly, and you can always override', [10,11]],
+    ['Word origins unlock on the second meeting, not the first', [25,26]],
+    ['Echoes: media you merely glimpsed still leaves usable memory — the familiar tingle is real', [14,15,16,22,35]],
+    ['"Which language is this?" trains the map as much as the family tree, because script and sound are geographic signals', [33,34]],
+    ['The Cosmos borrows established graph-interaction techniques rather than inventing them: focus-plus-context fisheye, a local edge-filter lens, set isocontours, and force-directed layout for a word\'s web', [36,37,38,39,40]],
+    ['The same word returns in different contexts and media, because varied contexts beat bare repetition', [17,18,19]],
+    ['Songs will use simple repeated melodies carrying the target phrase — and nothing plays behind exercises', [20,21,22,23,24]],
+    ['No XP, no leagues; a missed day is not a moral event', [28,29]],
+    ['Recall before recognition, always showing the answer', [30,3]],
+    ['Maintenance of a resting language costs one retrieval per word every ~8 weeks', [27]],
+    ['Baseline tests exist because heritage speakers are not beginners', [31]],
+  ];
+  const c = el('div',{class:'card'});
+  for(const [txt, ids] of claims){ c.append(el('div',{class:'claim'}, txt, cite(...ids))); }
+  v.append(c);
+  v.append(el('h3',{}, 'References'));
+  const rc = el('div',{class:'card'});
+  for(const r of REFS){
+    const d = el('div',{class:'ref', id:'ref-'+r.id});
+    d.append(el('b',{}, `[${r.id}] ${r.s}. `), el('a',{href:r.u, target:'_blank', rel:'noopener'}, r.t), el('span',{class:'small'}, r.n));
+    rc.append(d);
+  }
+  v.append(rc);
+  v.append(el('h3',{}, 'Materials & credits'));
+  const mc = el('div',{class:'card'});
+  mc.append(el('p',{class:'small', html:'Comic: <b>Pepper&amp;Carrot</b> by David Revoy and its volunteer translators, <a href="https://www.peppercarrot.com" target="_blank" rel="noopener">peppercarrot.com</a>, CC BY 4.0 (episodes 1–23, 2017 translation snapshot). Etymology: <b>EtymDB 2.1</b> (Fourrier &amp; Sagot), CC BY-SA 4.0, derived from Wiktionary. Frequencies: <b>wordfreq</b> (Speer), CC BY-SA. Lemmas &amp; readings: simplemma, UniDic, jieba, mecab-ko, pypinyin, OpenCC. Scheduling: FSRS-5. Graph interactions (fisheye, edge-filter lens, BubbleSets, d3-force): <a href="https://github.com/antvis/G6" target="_blank" rel="noopener">AntV G6</a>, MIT. Voices: your device. This prototype and its data pipeline are open source; the word-graph data pack is CC BY-SA 4.0.'}));
+  mc.append(el('p',{class:'small', html:'Planned media, licensing-clean: Mozilla Common Voice (CC0 speech, all nine languages), LibriVox + Wikimedia Commons audio (public-domain readings, anthems, folk songs), and public-domain-composition songs re-recorded simply — melody repeated verbatim, lyrics = target phrases, per the evidence above. Background-music ambience is deliberately absent.'}));
+  v.append(mc);
+  v.append(el('h3',{}, 'Glossary'));
+  const gc = el('div',{class:'card'});
+  for(const [term, def] of [
+    ['Bubble','One speech balloon from the comic — the unit you read.'],
+    ['Echo','A word you\'ve met resurfacing in a place you haven\'t — recognition, not testing.'],
+    ['Held','A word whose memory strength predicts ≥90% recall right now.'],
+    ['Ready','Due for return: recall probability has decayed to the review point.'],
+    ['Readable','A bubble is readable when ≥95% of its words are held or presumed known.'],
+    ['Presumed known','Above your tested frequency line; treated as known until evidence says otherwise.'],
+    ['Kin / borrowed','Kin grew from a shared ancestor; borrowed words were taken across families — both are shortcuts your memory can use.'],
+    ['The surface','In the Cosmos: the average height of your knowledge across each region of the word-space.'],
+  ]){ gc.append(el('div',{class:'ref'}, el('b',{}, term+' — '), def)); }
+  v.append(gc);
+  if(S.refTarget){ const target = S.refTarget; S.refTarget=null; requestAnimationFrame(()=>{ const elx = document.getElementById('ref-'+target); if(elx){ elx.scrollIntoView({block:'center'}); elx.style.background='var(--accent-soft)'; setTimeout(()=>elx.style.background='',1400); } }); }
+}
+
+// ============================================================ onboarding
+const OB = [
+  {g:'चाबी · chave · چابی', h:'Nine languages. One graph.', p:'Clavis teaches several languages at once through comic bubbles you can almost read — one to three new words at a time, never a wall of vocabulary. The comic is Pepper&Carrot, a libre webcomic that exists in all nine of your languages.', refs:[1,4]},
+  {g:'____', h:'Tap what you don\'t know.', p:'New words come back right before you\'d forget them — in a few seconds, then a day, then a week, as questions rather than re-reading. No lessons, no XP. Just short encounters until a word stops needing effort.', refs:[2,3]},
+  {g:'es → 日本語 → عربي', h:'It hops languages on purpose.', p:'Mixing languages across a session is the method, not a glitch — spacing one language stretches another\'s memory. In Paths you can see every branch open to you and take one yourself; otherwise Clavis follows wherever you\'re improving fastest.', refs:[2,10]},
+  {g:'62%', h:'Progress is real reading.', p:'Your progress is the share of the actual comic you can read unaided, per language — and the Cosmos shows every word you\'ve touched as a point of light among the world\'s languages. Short yes/no tests first, so a language you half-own isn\'t treated as new.', refs:[1,31]},
+];
+function renderOnboard(v){
+  const step = S.ob||0;
+  if(step < OB.length){
+    const o = OB[step];
+    const w = el('div',{class:'ob'});
+    w.append(el('div',{class:'glyphs'}, o.g));
+    w.append(el('h2',{}, o.h));
+    w.append(el('p',{}, o.p, o.refs? cite(...o.refs): null));
+    const dots = el('div',{class:'obdots'}); for(let i=0;i<OB.length+1;i++) dots.append(el('i',{class:i===step?'on':''})); w.append(dots);
+    const acts = el('div',{class:'actions', style:'width:100%;max-width:340px'});
+    if(step>0) acts.append(el('button',{onclick:()=>{ S.ob=step-1; save(); render(); }}, 'Back'));
+    acts.append(el('button',{class:'primary', onclick:()=>{ S.ob=step+1; save(); render(); }}, step===OB.length-1?'Choose my languages':'Next'));
+    w.append(acts);
+    v.append(w);
+    return;
+  }
+  v.append(el('h2',{}, 'Your nine.'));
+  v.append(el('p',{class:'small'}, 'Speaking practice is heavier than reading, so one speaking language per family is the honest default — the rest you\'ll learn to read and recognise. Change any of this later in Settings.'));
+  const card = el('div',{class:'card'});
+  for(const l of LANE_ORDER) card.append(laneRow(l));
+  v.append(card);
+  const dots = el('div',{class:'obdots'}); for(let i=0;i<OB.length+1;i++) dots.append(el('i',{class:i===OB.length?'on':''})); v.append(dots);
+  v.append(el('div',{class:'actions'}, el('button',{onclick:()=>{ S.ob=OB.length-1; save(); render(); }},'Back'), el('button',{class:'primary', onclick:()=>{ S.onboarded=true; S.view='learn'; save(); render(); }}, 'Begin')));
+}
+function laneRow(l){
+  const row = el('div',{class:'lane'});
+  row.append(el('div',{class:'name'}, laneDot(l), ' ', LANGS[l].n));
+  const seg = el('div',{class:'seg'});
+  for(const [m,lab] of [['prod','speak'],['rec','read'],['off','off']]){
+    seg.append(el('button',{class:S.lanes[l]===m?'on':'', onclick:()=>{ S.lanes[l]=m; save(); render(); }}, lab));
+  }
+  row.append(seg);
+  row.append(el('div',{class:'meta'}, `${byLang[l].length} bubbles · ${LANGS[l].c} family${S.tests[l]?'':' · untested'}`));
+  return row;
+}
+
+// ============================================================ learn (home)
+function renderLearn(v){
+  const now = Date.now();
+  const lanes = activeLanes();
+  const due = lanes.reduce((a,l)=>a+dueCards(l,now).length,0);
+  const untested = lanes.filter(l=>!S.tests[l]);
+  const pool = el('div',{class:'pool'});
+  const wrap = el('div',{class:'orbwrap grainy', role:'button', tabindex:'0', 'aria-label':'Start a session', onclick:startSession, onkeydown:e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); startSession(); } }});
+  const label = el('div',{class:'orblabel'}, el('b',{}, 'Begin'), el('span',{}, session? '' : (due? `${due} word${due===1?'':'s'} pulling` : 'a two-minute dip')));
+  pool.append(wrap); wrap.append(label);
+  orbStop = orb(wrap, {due:()=>Math.min(24, lanes.reduce((a,l)=>a+dueCards(l,Date.now()).length,0))});
+  pool.append(el('div',{class:'poolcap'}, due
+    ? 'The pool stirs and glows when words are ready to come back. Tap to begin.'
+    : 'A still pool — nothing is overdue. A session will meet a few new words.'));
+  v.append(pool);
+  if(untested.length){
+    const c = el('div',{class:'card'});
+    c.append(el('div',{class:'eyebrow'},'Before your first dip'));
+    c.append(el('p',{class:'small'}, 'Three minutes per language: you\'ll see words and say if you know them. Without this, Clavis treats that language as brand new.'));
+    const r = el('div',{class:'row'});
+    for(const l of untested.slice(0,9)){ r.append(el('button',{onclick:()=>startTest(l)}, laneDot(l), ' '+LANGS[l].n)); }
+    c.append(r); v.append(c);
+  }
+  const c3 = el('div',{class:'card'});
+  c3.append(el('div',{class:'eyebrow'},'How much comic you can read'));
+  for(const l of lanes){
+    const cov = corpusCoverage(l, now);
+    c3.append(el('div',{class:'row'}, el('span',{class:'grow'}, laneDot(l), ' '+LANGS[l].n), el('span',{class:'mono small'}, pct(cov))));
+    const pb = el('div',{class:'progressbar'}); pb.append(el('i',{style:`width:${Math.max(1,cov*100)}%;background:${LANGS[l].col}`})); c3.append(pb);
+  }
+  c3.append(el('p',{class:'small'}, 'The only score here: bubbles you could read with no help', cite(1), '. It grows as words take root.'));
+  v.append(c3);
+  const cs = el('div',{class:'card'});
+  cs.append(el('div',{class:'eyebrow'},'Just reading'));
+  cs.append(el('p',{class:'small'}, 'Read the comic itself — no grading, no clock. Words merely met now are relearned faster later', cite(15,17), '.'));
+  cs.append(el('div',{class:'actions'}, el('button',{onclick:()=>{ S.view='story'; save(); render(); }}, 'Open the comic')));
+  v.append(cs);
+}
+
+// ============================================================ tests
+function startTest(l){
+  const rnd = a=>a[Math.floor(Math.random()*a.length)];
+  const items = [];
+  const pool = lexArr[l].filter(x=> x[2]>0 && (LANGS[l].t!=='latin' || (x[0].length>=3 && /^[^\W\d_]+$/u.test(x[0]))) && !/^[A-Z]/.test(x[3]||''));
+  for(const [lo,hi] of BANDS){ const band = pool.filter(x=>x[2]>=lo && x[2]<hi); const take = Math.min(8, band.length); const used=new Set();
+    for(let i=0;i<take;i++){ let x, guard=0; do{ x=rnd(band); guard++; }while(used.has(x[0]) && guard<50); used.add(x[0]); items.push({w:x[3]||x[0], lm:x[0], z:x[2], r:x[4]||'', real:true}); } }
+  for(const p of (D.pseudo[l]||[]).slice(0,8)) items.push({w:p, lm:p, z:0, r:'', real:false});
+  items.sort(()=>Math.random()-0.5);
+  T = {l, items, i:0, yes:new Set(), start:Date.now()};
+  render();
+}
+function renderTest(v){
+  const it = T.items[T.i];
+  v.append(el('div',{class:'row'}, laneDot(T.l), el('b',{}, LANGS[T.l].n), el('span',{class:'small'}, `· do you know this word? · ${T.i+1}/${T.items.length}`)));
+  v.append(el('p',{class:'small'}, '"Know" means you could say what it means. Some words are invented — saying yes to those lowers your estimate, so be honest.'));
+  const pb = el('div',{class:'progressbar'}); pb.append(el('i',{style:`width:${(T.i/T.items.length)*100}%`})); v.append(pb);
+  const card = el('div',{class:'card'});
+  card.append(el('div',{class:'testword'+(LANGS[T.l].t!=='latin'?' plain':''), dir:dirOf(T.l), lang:T.l}, it.w));
+  card.append(el('div',{class:'testread'}, S.settings.readings && it.r ? it.r : ' '));
+  if(canSpeak(T.l) && it.real) card.append(el('div',{style:'text-align:center;margin-bottom:8px'}, speakBtn(it.w, T.l, true)));
+  const answer = yes=>{ if(yes) T.yes.add(T.i); T.i++; if(T.i>=T.items.length) finishTest(); else render(); };
+  card.append(el('div',{class:'actions'}, el('button',{onclick:()=>answer(false)}, "Don't know"), el('button',{class:'primary', onclick:()=>answer(true)}, 'Know it')));
+  v.append(card);
+  v.append(el('button',{class:'quiet', onclick:()=>{ T=null; render(); }}, 'Cancel'));
+  document.onkeydown = e=>{ if(!T) return; if(e.key==='ArrowRight'||e.key==='y') answer(true); if(e.key==='ArrowLeft'||e.key==='n') answer(false); };
+}
+function finishTest(){
+  const l = T.l;
+  const pseudo = T.items.map((x,i)=>[x,i]).filter(([x])=>!x.real);
+  const fa = pseudo.length ? pseudo.filter(([x,i])=>T.yes.has(i)).length/pseudo.length : 0;
+  const bands = BANDS.map(([lo,hi,lab])=>{ const idx = T.items.map((x,i)=>[x,i]).filter(([x])=>x.real && x.z>=lo && x.z<hi); const hits = idx.filter(([x,i])=>T.yes.has(i)).length; return {lo,hi,lab,n:idx.length,hit: idx.length? hits/idx.length : null}; });
+  let thrZ = 9;
+  for(const b of bands){ if(b.n===0) continue; const adj = b.hit - fa; if(adj >= 0.6) thrZ = b.lo; else break; }
+  const now = Date.now();
+  T.items.forEach((x,i)=>{ if(!x.real) return;
+    if(T.yes.has(i)){ S.cards[l][x.lm] = S.cards[l][x.lm] || {prov:true, s:0, d:0, due:now+30*DAY, last:now, reps:0, lapses:0, g:3}; }
+    else if(x.z>=thrZ){ S.cards[l][x.lm] = S.cards[l][x.lm] || {intro:true, s:0, d:0, due:now, last:now, reps:0, lapses:0, g:1}; } });
+  S.tests[l] = {done:now, thr:thrZ, fa, bands, ms:now-T.start};
+  S.log.push({t:now, l, type:'test', thr:thrZ, fa});
+  save(); T=null; document.onkeydown=null;
+  toast(thrZ>=9 ? `${LANGS[l].n}: treated as brand new — every word will earn its place` : `${LANGS[l].n}: Clavis now assumes you know ${bandLabel(thrZ)}`);
+  render();
+}
+
+// ============================================================ session
+function startSession(){
+  rollDay();
+  session = {i:0, n:S.settings.sessionSize, start:Date.now(), lanes:[], correct:0, newWords:0, done:false};
+  if(S.intent){ session.hold = S.intent.l; session.holdWhy = 'the path you chose'; session.intentScene = S.intent.sc; S.intent = null; save(); }
+  else if(S.settings.monoSession){ const c = chooseLane(Date.now(), null); session.hold = c.l; session.holdWhy = c.why; }
+  nextEncounter();
+}
+function makeEcho(now){
+  const lanes = activeLanes().filter(l=>byLang[l].length).sort(()=>Math.random()-0.5);
+  for(const l of lanes){
+    const mets = Object.entries(S.cards[l]).filter(([lm,c])=>!c.prov && c.reps>=1 && (now-c.last)>20*3600000);
+    if(!mets.length) continue;
+    for(const [lm,c] of mets.sort(()=>Math.random()-0.5).slice(0,6)){
+      const ids = (byLemma[l][lm]||[]).filter(id=>!S.seen[id]);
+      for(const id of ids.sort(()=>Math.random()-0.5).slice(0,4)){
+        const sc = D.scenes[id]; const st = sceneStats(l, sc, now);
+        if(st.cov >= 0.7){ const tok = sc.k[l].find(t=>lemmaOf(t)===lm); return {type:'echo', l, sc, lemma:lm, tok, card:c, st}; }
+      }
+    }
+  }
+  return null;
+}
+function nextEncounter(){
+  const now = Date.now();
+  if(session.i >= session.n){ session.done=true; S.lastSession = {t:now, correct:session.correct, n:session.n, newWords:session.newWords, lanes:session.lanes}; save(); render(); return; }
+  if(session.intentScene != null){
+    const sc = D.scenes[session.intentScene]; session.intentScene = null;
+    const l = session.hold; const st = sceneStats(l, sc, now);
+    if(st.unk.length){ session.cur = {type:'read', l, sc, st, why:'the path you chose'}; session.lanes.push(l); render(); return; }
+  }
+  const avoid = session.hold? null : session.lanes[session.lanes.length-1];
+  if(!session.hold && session.i === session.n-1 && activeLanes().length>=3 && Math.random()<0.7){
+    session.cur = makeLangId(now); render(); return;
+  }
+  if(session.i>0 && Math.random()<0.22){
+    const e = makeEcho(now);
+    if(e){ e.why = 'an echo from earlier'; session.cur = e; session.lanes.push(e.l); render(); return; }
+  }
+  let tries=0, enc=null, choice=null;
+  while(tries<6 && !enc){
+    choice = session.hold? {l:session.hold, why:session.holdWhy||'held for this session'} : chooseLane(now, avoid);
+    enc = pickForLane(choice.l, now); tries++;
+    if(session.hold && !enc) { session.hold=null; }
+  }
+  if(!enc){ enc = makeLangId(now); }
+  else { enc.why = choice.why; session.lanes.push(enc.l); }
+  session.cur = enc; render();
+}
+function makeLangId(now){
+  const lanes = activeLanes().filter(l=>byLang[l].length); const l = lanes[Math.floor(Math.random()*lanes.length)];
+  const sc = D.scenes[byLang[l][Math.floor(Math.random()*byLang[l].length)]];
+  const opts = new Set([l]);
+  const same = LANE_ORDER.filter(x=>x!==l && LANGS[x].t===LANGS[l].t).sort(()=>Math.random()-0.5);
+  const rest = LANE_ORDER.filter(x=>x!==l && LANGS[x].t!==LANGS[l].t).sort(()=>Math.random()-0.5);
+  for(const x of [...same, ...rest]){ if(opts.size>=4) break; opts.add(x); }
+  return {type:'langid', l, sc, opts:[...opts].sort(()=>Math.random()-0.5)};
+}
+
+// ============================================================ scene rendering
+function fitBubbleText(box, min){
+  min = min || 8;
+  let fs = parseFloat(box.style.fontSize)||16;
+  let guard = 30;
+  while(guard-- && fs>min && (box.scrollHeight > box.clientHeight+1 || box.scrollWidth > box.clientWidth+1)){ fs -= Math.max(0.4, fs*0.08); box.style.fontSize = fs+'px'; }
+}
+// Per-language balloon boxes. Episodes 1-12 give a real flowRegion; 13-23 are
+// reconstructed from the line baselines. ~90% land inside the drawn balloon.
+function rectFor(sc, l){ return (sc.q && sc.q[l]) || sc.r; }
+function rectOK(r){ return !!r && r[2]>=0.045 && r[2]<=0.70 && r[3]>=0.010 && r[3]<=0.45; }
+function pageOf(sc, lang){ return (byPage[sc.m]||[]).map(i=>D.scenes[i]).filter(s=>s.x[lang]); }
+// Letter an entire comic page in one language: the page reads as the comic it is,
+// and the line under study wears the halo. opts.mask hides the cloze answer.
+function letterPage(box, cur, lang, opts){
+  opts = opts || {};
+  const here = pageOf(cur, lang);
+  const items = [];
+  here.forEach((s, i)=>{
+    const r = rectFor(s, lang), isCur = s.i===cur.i;
+    const pos = n=>{ n.style.left=(r[0]*100)+'%'; n.style.top=(r[1]*100)+'%'; n.style.width=(r[2]*100)+'%'; n.style.height=(r[3]*100)+'%'; };
+    if(!rectOK(r)){
+      if(isCur || opts.numbers){
+        const cx=clamp((r[0]+r[2]/2)*100,2,98), cy=clamp((r[1]+r[3]/2)*100,2,98);
+        box.append(opts.numbers ? bMark(cx, cy, String(i+1)) : bMark(cx, cy, null));
+      }
+      return;
+    }
+    if(isCur && !opts.noHalo){ const halo = el('div',{class:'bhalo'}); pos(halo); box.append(halo); }
+    if(isCur && opts.mask===''){ return; }    // cloze word we could not blank: leave this balloon unlettered
+    box.append(bPlate(r));
+    const txt = lineOf(lang, (isCur && opts.mask) ? opts.mask : s.x[lang]);
+    const bt = el('div',{class:'btext page'+(opts.onTap?' tap':'')+(isCur && opts.mask?' maskedline':''), dir:dirOf(lang), lang});
+    if(isCur && opts.mask) bt.dataset.full = lineOf(lang, s.x[lang]);
+    pos(bt); bt.textContent = txt;
+    if(opts.onTap) bt.addEventListener('click', ()=>opts.onTap(s, i));
+    box.append(bt);
+    if(opts.numbers){
+      const num = el('div',{class:'pagenum'}, String(i+1));
+      num.style.left = clamp((r[0]-r[2]*0.04)*100, 1.2, 98.5)+'%'; num.style.top = clamp((r[1]-r[3]*0.10)*100, 1.2, 98.5)+'%';
+      box.append(num);
+    }
+    items.push([bt, r, txt.length]);
+  });
+  const relayout = ()=>{
+    const w = box.clientWidth, h = box.clientHeight;
+    if(!w || !h) return;
+    for(const [bt, r, len] of items){
+      const fs = Math.sqrt(Math.max(50, r[2]*w*r[3]*h)/Math.max(6, len))*1.06;
+      bt.style.fontSize = clamp(fs, 4.5, 26)+'px';
+      fitBubbleText(bt, 4.5);
+    }
+  };
+  requestAnimationFrame(relayout);
+  const img = box.querySelector('img');
+  if(img && !img.complete) img.addEventListener('load', ()=>requestAnimationFrame(relayout), {once:true});
+  if(window.ResizeObserver && items.length){ const ro = new ResizeObserver(relayout); ro.observe(box); }
+  return items.length;
+}
+function bPlate(r){
+  const pl = el('div',{class:'bplate'});
+  pl.style.left = ((r[0]-r[2]*0.09)*100)+'%'; pl.style.top = ((r[1]-r[3]*0.16)*100)+'%';
+  pl.style.width = (r[2]*1.18*100)+'%'; pl.style.height = (r[3]*1.32*100)+'%';
+  return pl;
+}
+function bMark(leftPct, topPct, label, mini){
+  const m = el('div',{class:'bmark'+(mini?' mini':'')+(label?' num':'')});
+  m.style.left = leftPct+'%'; m.style.top = topPct+'%';
+  m.append(el('i',{}, label||null));
+  return m;
+}
+function sceneBox(sc, lang, full, opts){
+  opts = opts || {};
+  const box = el('div',{class:'scene'+(full?' full':'')});
+  const src = IMAGES[sc.m]; const [W,H] = SIZES[sc.m];
+  const r0 = rectFor(sc, lang);
+  const [rx,ry,rw,rh] = r0;
+  const credible = rectOK(r0);
+  if(full){
+    box.append(el('img',{src, alt:'comic page'}));
+    box._lettered = letterPage(box, sc, lang, {mask: opts.mask, onTap: opts.onTap});
+    box._credible = credible;
+    return box;
+  }
+  let ww = credible ? Math.max(W*0.5, rw*W*1.5) : W*0.55;
+  let wh = ww*0.78;
+  if(credible && wh < rh*H*1.35){ wh = Math.min(rh*H*1.35, H); ww = wh/0.78; }
+  ww = Math.min(ww, W); wh = Math.min(wh, H);
+  const cx = (rx+rw/2)*W, cy = (ry+rh/2)*H;
+  const x0 = clamp(cx-ww/2, 0, W-ww), y0 = clamp(cy-wh/2, 0, H-wh);
+  box.style.aspectRatio = `${ww}/${wh}`;
+  box.style.backgroundImage = `url("${src}")`;
+  box.style.backgroundSize = `${(W/ww)*100}% auto`;
+  box.style.backgroundPosition = `${W-ww>0 ? (x0/(W-ww))*100 : 0}% ${H-wh>0 ? (y0/(H-wh))*100 : 0}%`;
+  const bx = (rx*W-x0)/ww*100, by = (ry*H-y0)/wh*100, bw = rw*W/ww*100, bh = rh*H/wh*100;
+  const mx = (cx-x0)/ww*100, my = (cy-y0)/wh*100;
+  const vg = el('div',{class:'vignette'});
+  vg.style.background = `radial-gradient(ellipse ${Math.max(bw*1.7,52)}% ${Math.max(bh*2.6,52)}% at ${mx}% ${my}%, rgba(0,0,0,0) 56%, rgba(8,10,16,.34) 100%)`;
+  box.append(vg);
+  let lettered = false;
+  const maskEmpty = opts.mask==='';         // a cloze word we could not blank: safer to letter nothing
+  if(credible && lang && sc.x[lang] && !maskEmpty){
+    const pl = bPlate([bx/100, by/100, bw/100, bh/100]);
+    box.append(pl);
+    const bt = el('div',{class:'btext'+(opts.mask? ' maskedline':''), dir:dirOf(lang), lang});
+    if(opts.mask) bt.dataset.full = lineOf(lang, sc.x[lang]);
+    bt.style.left = bx+'%'; bt.style.top = by+'%'; bt.style.width = bw+'%'; bt.style.height = Math.min(bh, 96-by)+'%';
+    bt.style.fontSize = clamp(Math.sqrt((rw*640)*(rh*H*(640/W))/Math.max(6,sc.x[lang].length))*1.05, 9, 26)+'px';
+    bt.textContent = lineOf(lang, opts.mask != null ? opts.mask : sc.x[lang]);
+    box.append(bt);
+    lettered = true;
+    requestAnimationFrame(()=>fitBubbleText(bt));
+  }
+  if(!lettered) box.append(bMark(mx, my, null, opts.mini));
+  box._credible = credible;
+  return box;
+}
+function tokenSpans(l, toks, opts){
+  const cap = el('div',{class:'caption'+(LANGS[l].t==='cjk'?' cjk':''), dir:dirOf(l), lang:l});
+  const now = Date.now();
+  toks.forEach((t,idx)=>{
+    const known = isKnown(l,t,now);
+    const sp = el('span',{class:'tok'+(opts.gapIdx===idx?' gap':'')+(!known && opts.markUnknown && opts.gapIdx!==idx ? ' unk':''), 'data-i':idx});
+    sp.append(el('span',{class:'t-s'}, opts.gapIdx===idx ? '____' : t[0]));
+    const r = romOf(t);
+    if(S.settings.readings && r && opts.gapIdx!==idx) sp.append(el('span',{class:'t-r'}, r));
+    if(opts.onTap) sp.addEventListener('click', ()=>opts.onTap(idx, t, sp));
+    cap.append(sp); if(LANGS[l].t!=='cjk' || l==='ko') cap.append(' ');
+  });
+  return cap;
+}
+function bridgeLine(l, t){
+  const b = brOf(t); if(!b) return null;
+  const parts = b.map(([v,w,k])=> `${v==='en'?'English':LANGS[v].n} <b>${esc(w)}</b>`);
+  return el('div',{class:'bridge', html:'looks related to '+parts.join(' · ')+' <span class="small">(a guess from spelling — verify)</span>'});
+}
+function parallelBox(sc, l, showFamily){
+  const box = el('div',{class:'parallel'});
+  box.append(el('div',{}, el('span',{class:'l'},'en'), sc.x.en));
+  if(showFamily){ for(const s of LANGS[l].sib){ if(sc.x[s] && S.lanes[s]!=='off') box.append(el('div',{dir:dirOf(s)}, el('span',{class:'l'}, s), sc.x[s])); } }
+  return box;
+}
+function showHint(sp, l, t){
+  document.querySelectorAll('.hint').forEach(h=>h.remove());
+  const lm = lemmaOf(t); const c = S.cards[l][lm]; const now=Date.now();
+  const h = el('div',{class:'hint'});
+  const r = romOf(t);
+  h.append(el('div',{}, el('b',{}, t[0]), r? ' · '+r : '', ' ', el('span',{class:'small mono'}, lm!==t[0].toLowerCase()? '→ '+lm : ''), ' ', el('span',{class:'small'}, `· ${bandLabel(t[2])}`)));
+  if(c && c.s) h.append(el('div',{class:'small'}, `memory ${pct(cardR(c,now))} · holds ~${c.s.toFixed(1)} days · met ${c.reps}×`));
+  const b = bridgeLine(l,t); if(b) h.append(b);
+  sp.closest('#view').append(h);
+  const rr = sp.getBoundingClientRect(), pr = h.parentElement.getBoundingClientRect();
+  h.style.left = Math.max(0, Math.min(rr.left-pr.left, pr.width-260))+'px'; h.style.top = (rr.bottom-pr.top+6)+'px';
+  setTimeout(()=>{ document.addEventListener('click', ()=>h.remove(), {once:true}); }, 0);
+  setTimeout(()=>h.remove(), 5000);
+}
+
+// ============================================================ encounters
+function renderEncounter(v){
+  const e = session.cur; const now = Date.now();
+  const bar = el('div',{class:'sessionbar'}); for(let i=0;i<session.n;i++) bar.append(el('i',{class:i<session.i?'done':(i===session.i?'now':'')})); v.append(bar);
+  const head = e.type==='langid'
+    ? el('div',{class:'row'}, el('span',{class:'chip warn'}, 'Which language is this?'), el('span',{class:'small grow', style:'text-align:right'}, 'a between-rounds game'))
+    : el('div',{class:'row'}, laneDot(e.l), el('b',{}, LANGS[e.l].n), el('span',{class:'small'}, e.type==='cloze'?'· do you remember?':e.type==='echo'?'· an echo':(e.fluency?'· easy read':'· new bubble')), el('span',{class:'small grow', style:'text-align:right'}, e.why||''));
+  v.append(head);
+  if(e.type==='langid') return renderLangId(v, e);
+  if(e.type==='echo') return renderEcho(v, e);
+  const sc = e.sc;
+  let full=false; const sceneWrap = el('div');
+  // during a cloze the balloon keeps the gap too — lettering the full line would hand over the answer
+  const maskNow = ()=>{
+    if(e.type!=='cloze' || e._revealed) return null;
+    const t = (sc.k[e.l]||[]).find(x=>lemmaOf(x)===e.lemma);
+    if(!t) return '';
+    const m = sc.x[e.l].replace(t[0], '____');
+    return m===sc.x[e.l] ? '' : m;
+  };
+  const firstBox = sceneBox(sc, e.l, false, {mask: maskNow()}); sceneWrap.append(firstBox); v.append(sceneWrap);
+  const hint = el('p',{class:'scenehint'});
+  const setHint = ()=>{
+    hint.textContent = full
+      ? `The whole page, lettered in ${LANGS[e.l].n} — the glowing balloon is this line. Tap any balloon for its English.`
+      : (firstBox._credible ? 'The line below is spoken in the marked balloon.'
+                            : 'The marker shows roughly where this line sits — the translators\' file doesn\'t give this balloon\'s exact shape.');
+  };
+  const gloss = el('div',{class:'pagegloss'}); gloss.hidden = true;
+  const showGloss = (s2)=>{
+    gloss.hidden = false; gloss.innerHTML='';
+    const tx = el('div',{class:'tx'});
+    tx.append(el('div',{dir:dirOf(e.l), lang:e.l}, lineOf(e.l, s2.x[e.l])));
+    if(s2.x.en) tx.append(el('span',{class:'en'}, s2.x.en));
+    gloss.append(tx);
+    if(canSpeak(e.l)) gloss.append(speakBtn(s2.x[e.l], e.l, true));
+    speak(s2.x[e.l], e.l);
+  };
+  const toggle = el('button',{class:'quiet', onclick:()=>{
+    full=!full; sceneWrap.innerHTML=''; gloss.hidden = true;
+    sceneWrap.append(full ? sceneBox(sc, e.l, true, {mask: maskNow(), onTap: showGloss}) : sceneBox(sc, e.l, false));
+    if(full) sceneWrap.append(gloss);
+    toggle.textContent = full?'Back to the balloon':'See the whole page'; setHint();
+  }}, 'See the whole page');
+  v.append(toggle);
+  setHint(); v.append(hint);
+  const toks = sc.k[e.l];
+  if(e.type==='cloze') return renderCloze(v, e, toks);
+  const flips = new Map();
+  const cap = tokenSpans(e.l, toks, {markUnknown:true, onTap:(idx,t,sp)=>{ const cur = flips.get(idx)||false; flips.set(idx, !cur); sp.classList.toggle('unk'); sp.classList.toggle('known', !sp.classList.contains('unk') && !isKnown(e.l,t,now)); speak(t[0], e.l); showHint(sp, e.l, t); }});
+  const capRow = el('div',{class:'row'}, el('div',{class:'grow'}, cap));
+  if(canSpeak(e.l)) capRow.append(speakBtn(sc.x[e.l], e.l, true));
+  v.append(capRow);
+  if(!S.coach.read && !e.fluency){ v.append(el('div',{class:'coach'}, 'First one: the highlighted words are probably new to you. Tap any word to hear it and see where it comes from — tapping also flips it between "new to me" and "I know this". Then be honest with the two buttons below.')); }
+  else v.append(el('p',{class:'small'}, e.fluency
+    ? 'You should know everything here — enjoy the read. Tap anything that\'s actually unfamiliar.'
+    : (thr(e.l)>=9 && !S.tests[e.l]
+        ? `Everything looks new because ${LANGS[e.l].n} is untested — a three-minute test in You fixes that.`
+        : `${e.st.unk.length} word${e.st.unk.length===1?'':'s'} here ${e.st.unk.length===1?'is':'are'} probably new; the rest you know (${pct(e.st.cov)} of the bubble).`)));
+  const par = el('div');
+  v.append(el('button',{class:'quiet', onclick:()=>{ par.innerHTML=''; par.append(parallelBox(sc, e.l, false)); }}, 'Show the English'));
+  v.append(par);
+  const finish = (understood)=>{
+    S.coach.read = true;
+    const t0 = Date.now(); let unknownNow=[], knownNow=[]; let rewardNum=0, rewardDen=0;
+    toks.forEach((t,idx)=>{ const modelKnown = isKnown(e.l,t,now); const flipped = flips.get(idx)||false; const userUnknown = modelKnown ? flipped : !flipped; const lm=lemmaOf(t);
+      if(userUnknown) unknownNow.push(lm); else knownNow.push(lm);
+      if(modelKnown){ rewardDen++; if(!userUnknown) rewardNum++; } });
+    unknownNow = [...new Set(unknownNow)]; knownNow=[...new Set(knownNow)];
+    let introduced=0;
+    for(const lm of unknownNow){ const isNew = !S.cards[e.l][lm]; if(isNew){ if(introduced>=3) continue; introduced++; S.newToday[e.l]++; session.newWords++; } const c = S.cards[e.l][lm] || {}; S.cards[e.l][lm]=c; rate(c,1,t0); }
+    for(const lm of knownNow){ const c = S.cards[e.l][lm];
+      if(c && !c.prov && c.due<=t0) rate(c, understood?3:2, t0);
+      else if(!c && !e.fluency){ const t = toks.find(x=>lemmaOf(x)===lm); if(t && t[2] < thr(e.l)) S.cards[e.l][lm] = {prov:true, s:0, d:0, due:t0+30*DAY, last:t0, reps:0, lapses:0, g:3}; } }
+    reward(e.l, understood ? (rewardDen? rewardNum/rewardDen : 1) : 0);
+    S.seen[sc.i]=t0; S.lastScene = S.lastScene||{}; S.lastScene[e.l]=sc.i;
+    S.log.push({t:t0, l:e.l, type:'read', sc:sc.i, unk:unknownNow.length, ok:understood?1:0}); if(S.log.length>6000) S.log.splice(0, S.log.length-6000);
+    if(understood) session.correct++;
+    save(); session.i++; nextEncounter();
+  };
+  v.append(el('div',{class:'actions'}, el('button',{onclick:()=>finish(false)}, 'Too hard'), el('button',{class:'primary', onclick:()=>finish(true)}, 'Understood')));
+}
+function renderCloze(v, e, toks){
+  const sc = e.sc; const lm = e.lemma;
+  const idx = toks.findIndex(t=>lemmaOf(t)===lm); const target = toks[idx];
+  const cap = tokenSpans(e.l, toks, {gapIdx:idx, markUnknown:false, onTap:(i,t,sp)=>{ if(i!==idx){ speak(t[0], e.l); showHint(sp,e.l,t); } }});
+  v.append(cap);
+  const c0 = S.cards[e.l][lm];
+  if(c0 && (c0.reps||0)<=1 && c0.first && (Date.now()-c0.first) < 45*60000){
+    v.append(el('p',{class:'small'}, 'You met this one a few minutes ago — the first return comes fast on purpose, then the gaps stretch', cite(2), '.'));
+  }
+  if(!S.coach.cloze){ v.append(el('div',{class:'coach'}, 'A word you\'ve met is hidden. Answering from memory is what makes it stick', cite(3), ' — and one option may be its look-alike from a neighbouring language.')); S.coach.cloze=true; save(); }
+  if(e.lowCov){ v.append(el('p',{class:'small'}, 'This is the only bubble with that word, and it\'s a hard one — the English is open below.')); v.append(parallelBox(sc, e.l, false)); }
+  const correct = target[0];
+  const distract = [];
+  const sib = (brOf(target)||[]).find(([vv])=> LANGS[e.l].sib.includes(vv));
+  if(sib && sib[1].toLowerCase()!==correct.toLowerCase()) distract.push({w:sib[1], sib:sib[0]});
+  const pool = lexArr[e.l].filter(x=> x[0]!==lm && Math.abs(x[2]-target[2])<1.2 && Math.abs((x[3]||x[0]).length-correct.length)<=2 && (x[3]||x[0]).toLowerCase()!==correct.toLowerCase());
+  while(distract.length<2 && pool.length){ const x = pool.splice(Math.floor(Math.random()*pool.length),1)[0]; const w = x[3]||x[0]; if(!distract.find(d=>d.w.toLowerCase()===w.toLowerCase())) distract.push({w, sib:null, r:x[4]||''}); }
+  const opts = [{w:correct, right:true, r:romOf(target)||''}, ...distract].sort(()=>Math.random()-0.5);
+  const ch = el('div',{class:'choices'}); let answered=false; const t0 = Date.now();
+  const after = el('div');
+  for(const o of opts){
+    const b = el('button',{dir:dirOf(e.l), lang:e.l, onclick:()=>{
+      if(answered) return; answered=true; const ms = Date.now()-t0;
+      const ok = !!o.right; b.classList.add(ok?'right':'wrong');
+      if(!ok){ [...ch.children].forEach(x=>{ if(x.dataset.w===correct) x.classList.add('right'); }); if(o.sib){ S.inter[e.l][o.sib]=(S.inter[e.l][o.sib]||0)+1; } }
+      const c = S.cards[e.l][lm] || {}; S.cards[e.l][lm]=c; rate(c, ok ? (ms<2500 && c.reps>=2 ? 4 : 3) : 1, Date.now());
+      reward(e.l, ok?1:0); if(ok) session.correct++;
+      const gap = cap.querySelector('.gap'); gap.textContent = correct; gap.classList.add(ok?'hit':'miss'); e._revealed = true;
+      document.querySelectorAll('.btext.maskedline').forEach(b=>{ if(b.dataset.full){ b.textContent = b.dataset.full; fitBubbleText(b, 4.5); } });
+      speak(sc.x[e.l], e.l);
+      S.seen[sc.i]=Date.now(); S.log.push({t:Date.now(), l:e.l, type:'cloze', sc:sc.i, lm, ok:ok?1:0, ms, sib:o.sib||null}); if(S.log.length>6000) S.log.splice(0,S.log.length-6000);
+      after.append(parallelBox(sc, e.l, (c.reps||0)>=2));
+      const br = bridgeLine(e.l, target);
+      if(br){ after.append(br); const rr = el('div',{class:'row small'}, 'Did one of these help you remember? ');
+        for(const [vv,w] of (brOf(target)||[])){ rr.append(el('button',{class:'quiet', onclick:(ev)=>{ S.routes[e.l][vv]=(S.routes[e.l][vv]||0)+1; save(); ev.target.textContent='✓ '+(vv==='en'?'English':LANGS[vv].n); }}, vv==='en'?'English':LANGS[vv].n)); }
+        after.append(rr); }
+      after.append(el('div',{class:'small'}, ok ? `Held. It returns in about ${Math.max(1,Math.round((c.due-Date.now())/DAY))} day${Math.round((c.due-Date.now())/DAY)===1?'':'s'}.` : 'No harm — it comes straight back in ten minutes.'));
+      after.append(el('div',{class:'actions'}, el('button',{class:'primary', onclick:()=>{ save(); session.i++; nextEncounter(); }}, 'Next')));
+      save();
+    }, 'data-w':o.w});
+    b.append(el('span',{}, o.w));
+    if(S.settings.readings && o.r) b.append(el('span',{class:'t-r'}, o.r));
+    ch.append(b);
+  }
+  v.append(ch); v.append(after);
+}
+function renderEcho(v, e){
+  const sc = e.sc;
+  const eb = sceneBox(sc, e.l, false); v.append(eb);
+  v.append(el('p',{class:'scenehint'}, eb._credible ? 'The line below is spoken in the marked balloon.' : 'The marker shows roughly where this line sits on the page.'));
+  const idx = sc.k[e.l].findIndex(t=>lemmaOf(t)===e.lemma);
+  const cap = tokenSpans(e.l, sc.k[e.l], {markUnknown:false, onTap:(i,t,sp)=>{ if(i!==idx){ speak(t[0], e.l); showHint(sp,e.l,t); } }});
+  const gapEl = cap.children[idx]; if(gapEl) gapEl.classList.add('hit');
+  v.append(cap);
+  v.append(el('p',{class:'small'}, 'A bubble you\'ve never studied — but the highlighted word has crossed your path before. How does it land?'));
+  const ch = el('div',{class:'choices echoq'}); const after = el('div'); let done=false;
+  const answer = (g, label)=>{
+    if(done) return; done=true;
+    const c = S.cards[e.l][e.lemma]; const days = c? Math.max(1, Math.round((Date.now()-((c.first)||c.last))/DAY)) : null;
+    rate(c, g, Date.now());
+    reward(e.l, g>=3?1:(g===2?0.5:0));
+    if(g>=3) session.correct++;
+    S.seen[sc.i]=Date.now();
+    S.log.push({t:Date.now(), l:e.l, type:'echo', lm:e.lemma, ok:g>=3?1:0, g});
+    speak(sc.x[e.l], e.l);
+    const et = D.etym && D.etym[e.l] && D.etym[e.l][e.lemma];
+    after.append(parallelBox(sc, e.l, false));
+    const met = S.log.find(x=>x.type!=='echo' && x.lm===e.lemma && x.l===e.l);
+    after.append(el('div',{class:'small'},
+      `${surfaceOf(e.l, e.lemma)}${readingOf(e.l,e.lemma)? ' ('+readingOf(e.l,e.lemma)+')':''} — you met it ${days? days+' day'+(days===1?'':'s')+' ago':'earlier'}${et&&et.o? ' · '+(et.ot==='bor'?'borrowed from ':'grew from ')+et.o:''}. That feeling of almost-knowing is real memory — glimpsed words are relearned faster than new ones`, cite(14,15,35), '.'));
+    after.append(el('div',{class:'actions'}, el('button',{class:'primary', onclick:()=>{ save(); session.i++; nextEncounter(); }}, 'Next')));
+    save();
+  };
+  ch.append(el('button',{onclick:()=>answer(3)}, 'I know it'));
+  ch.append(el('button',{onclick:()=>answer(2)}, 'Familiar, can\'t place it'));
+  ch.append(el('button',{onclick:()=>answer(1)}, 'New to me'));
+  v.append(ch); v.append(after);
+}
+function renderLangId(v, e){
+  const sc = e.sc;
+  const card = el('div',{class:'card'});
+  card.append(el('div',{class:'caption'+(LANGS[e.l].t==='cjk'?' cjk':''), dir:dirOf(e.l), style:'margin-top:0'}, sc.x[e.l]));
+  v.append(card);
+  const ch = el('div',{class:'choices'}); let done=false; const after = el('div');
+  for(const o of e.opts){ const b = el('button',{onclick:()=>{ if(done) return; done=true; const ok = o===e.l; b.classList.add(ok?'right':'wrong'); if(!ok) [...ch.children].forEach(x=>{ if(x.dataset.l===e.l) x.classList.add('right'); });
+    S.log.push({t:Date.now(), l:e.l, type:'langid', ok:ok?1:0, guess:o}); if(ok) session.correct++;
+    speak(sc.x[e.l], e.l);
+    after.append(parallelBox(sc, e.l, false));
+    after.append(el('div',{class:'actions'}, el('button',{class:'primary', onclick:()=>{ save(); session.i++; nextEncounter(); }}, 'Next'))); save(); }, 'data-l':o}, laneDot(o), ' '+LANGS[o].n); ch.append(b); }
+  v.append(ch); v.append(after);
+  const note = el('div',{class:'card', style:'margin-top:14px'});
+  note.append(el('div',{class:'eyebrow'}, 'Why this game is here'));
+  note.append(el('p',{class:'small'}, 'Skirgård, Roberts and Yencken analysed nearly 15 million guesses across the 78 languages of The Great Language Game and found that a language is confused with its ', el('em',{},'geographic'), ' neighbours more often than with its genealogical relatives', cite(33), ' — so naming a language by its shapes teaches the map, not only the family tree. In a study of GeoGuessr play, written signs were the largest single category of cues people used to place an unfamiliar scene', cite(34), '.'));
+  note.append(el('p',{class:'small', style:'margin:0'}, 'Full citations in ', el('a',{role:'link', tabindex:'0', onclick:()=>{ S.view='colophon'; save(); render(); }}, 'Evidence & credits'), '.'));
+  v.append(note);
+}
+function renderSummary(v){
+  const s = S.lastSession || {};
+  v.append(el('h2',{}, 'That\'s one dip.'));
+  const st = el('div',{class:'stat'});
+  st.append(el('div',{}, el('b',{}, `${s.correct||0}/${s.n||0}`), el('span',{},'understood or recalled')));
+  st.append(el('div',{}, el('b',{}, String(s.newWords||0)), el('span',{},'new words met')));
+  st.append(el('div',{}, el('b',{}, String(new Set(s.lanes||[]).size)), el('span',{},'languages visited')));
+  v.append(st);
+  v.append(el('p',{class:'small'}, 'Clavis noted where you\'re improving', cite(10), ' — Paths shows every branch now open, and you can take the next one yourself.'));
+  v.append(el('div',{class:'actions'}, el('button',{onclick:()=>{ session=null; S.view='paths'; save(); render(); }}, 'See the paths'), el('button',{class:'primary', onclick:()=>{ session=null; startSession(); }}, 'Another'), el('button',{onclick:()=>{ session=null; save(); render(); }}, 'Done')));
+}
+</script>
+<script>
+// ============================================================ letters & sounds
+const HIRA = [['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],['や','ya'],['',''],['ゆ','yu'],['',''],['よ','yo'],['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],['わ','wa'],['',''],['を','o'],['',''],['ん','n']];
+const KATA2 = [['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],['ヤ','ya'],['',''],['ユ','yu'],['',''],['ヨ','yo'],['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro'],['ワ','wa'],['',''],['ヲ','o'],['',''],['ン','n']];
+const JAMO_C = [['ㄱ','g','가'],['ㄴ','n','나'],['ㄷ','d','다'],['ㄹ','r/l','라'],['ㅁ','m','마'],['ㅂ','b','바'],['ㅅ','s','사'],['ㅇ','(ng)','아'],['ㅈ','j','자'],['ㅊ','ch','차'],['ㅋ','k','카'],['ㅌ','t','타'],['ㅍ','p','파'],['ㅎ','h','하']];
+const JAMO_V = [['ㅏ','a','아'],['ㅑ','ya','야'],['ㅓ','eo','어'],['ㅕ','yeo','여'],['ㅗ','o','오'],['ㅛ','yo','요'],['ㅜ','u','우'],['ㅠ','yu','유'],['ㅡ','eu','으'],['ㅣ','i','이']];
+const TONES = [['妈','mā','high and flat'],['麻','má','rising, like a question'],['马','mǎ','dips then rises'],['骂','mà','falls sharply']];
+const ABJAD = [['ا','alif','a/ā'],['ب','bā','b'],['ت','tā','t'],['ث','thā','th'],['ج','jīm','j'],['ح','ḥā','ḥ'],['خ','khā','kh'],['د','dāl','d'],['ذ','dhāl','dh'],['ر','rā','r'],['ز','zāy','z'],['س','sīn','s'],['ش','shīn','sh'],['ص','ṣād','ṣ'],['ض','ḍād','ḍ'],['ط','ṭā','ṭ'],['ظ','ẓā','ẓ'],['ع','ʿayn','ʿ'],['غ','ghayn','gh'],['ف','fā','f'],['ق','qāf','q'],['ك','kāf','k'],['ل','lām','l'],['م','mīm','m'],['ن','nūn','n'],['ه','hā','h'],['و','wāw','w/ū'],['ي','yā','y/ī']];
+function kanaCell(glyph, sound, l, sub){
+  if(!glyph) return el('div',{});
+  const k = el('div',{class:'kana'+(glyph.length>1?' wide':''), role:'button', tabindex:'0', onclick:()=>{ if(!speak(glyph, l)) toast('No '+LANGS[l].n+' voice on this device'); }, onkeydown:e=>{ if(e.key==='Enter') speak(glyph,l); }});
+  k.append(el('b',{lang:l}, glyph)); k.append(el('span',{}, sound)); if(sub) k.append(el('span',{}, sub));
+  return k;
+}
+function renderLetters(v){
+  S.letterTab = S.letterTab || 'ja';
+  v.append(el('h2',{}, 'Letters and their sounds'));
+  v.append(el('p',{class:'small'}, 'Tap anything to hear it (uses your device\'s voices). Readings also appear under every word in sessions — turn that off in Settings once a script feels like home.'));
+  const tabs = el('div',{class:'scripttabs'});
+  for(const [id,lab] of [['ja','Japanese'],['ko','Korean'],['zh','Chinese'],['ar','Arabic']]){
+    tabs.append(el('button',{class:S.letterTab===id?'on':'', onclick:()=>{ S.letterTab=id; save(); render(); }}, lab));
+  }
+  v.append(tabs);
+  const c = el('div',{class:'card'});
+  if(S.letterTab==='ja'){
+    S.kanaSet = S.kanaSet||'hira';
+    const seg = el('div',{class:'seg'},
+      el('button',{class:S.kanaSet==='hira'?'on':'', onclick:()=>{S.kanaSet='hira'; save(); render();}},'Hiragana'),
+      el('button',{class:S.kanaSet==='kata'?'on':'', onclick:()=>{S.kanaSet='kata'; save(); render();}},'Katakana'));
+    c.append(el('div',{class:'row'}, seg, el('span',{class:'small grow'}, S.kanaSet==='hira'?'the native syllabary — one symbol, one syllable':'same sounds, used for loanwords — many from English')));
+    const g = el('div',{class:'kana-grid'});
+    for(const [k,r] of (S.kanaSet==='hira'?HIRA:KATA2)) g.append(kanaCell(k,r,'ja'));
+    c.append(g);
+    c.append(el('p',{class:'small'}, 'Two small marks voice a sound: か ka → が ga, は ha → ば ba (and ぱ pa with a circle). Small ゃゅょ blend: き ki + ゃ → きゃ kya. The third script, kanji, are Chinese characters — the Chinese tab is secretly also about Japanese.'));
+  }
+  if(S.letterTab==='ko'){
+    c.append(el('p',{class:'small', html:'Hangul looks like characters but is an <b>alphabet folded into blocks</b>: 한 = ㅎ h + ㅏ a + ㄴ n. Learn 24 letters and you can sound out everything.'}));
+    c.append(el('h3',{},'Consonants'));
+    const g1 = el('div',{class:'kana-grid'}); for(const [j,r,ex] of JAMO_C) g1.append(kanaCell(ex, r, 'ko', j)); c.append(g1);
+    c.append(el('h3',{},'Vowels'));
+    const g2 = el('div',{class:'kana-grid'}); for(const [j,r,ex] of JAMO_V) g2.append(kanaCell(ex, r, 'ko', j)); c.append(g2);
+    c.append(el('p',{class:'small'}, 'Each tile speaks the letter inside the syllable shown (ㄱ alone has no sound of its own). ㅇ is silent at the start of a block and "ng" at the end.'));
+  }
+  if(S.letterTab==='zh'){
+    c.append(el('p',{class:'small', html:'Chinese has no alphabet — words are characters, and <b>pīnyīn</b> (the Latin reading under every word here) tells you the sound. The accent mark is the <b>tone</b>, and tone changes meaning:'}));
+    const g = el('div',{class:'kana-grid', style:'grid-template-columns:repeat(4,1fr)'});
+    for(const [h,p,d] of TONES) g.append(kanaCell(h, p, 'zh', d));
+    c.append(g);
+    c.append(el('p',{class:'small'}, 'All four are "ma" — mother, hemp, horse, to scold. Characters are built from reusable parts (氵 water appears in 河 river, 海 sea), and the same characters power Japanese kanji: learn one, get a discount on the other.'));
+  }
+  if(S.letterTab==='ar'){
+    c.append(el('p',{class:'small', html:'Arabic reads <b>right to left</b>. Letters join like cursive, so shapes shift slightly with position. Short vowels usually aren\'t written — the readings under words show the consonant skeleton, and you supply vowels as you learn words.'}));
+    const g = el('div',{class:'kana-grid', style:'grid-template-columns:repeat(4,1fr)'});
+    for(const [ch,name,snd] of ABJAD) g.append(kanaCell(ch, snd, 'ar', name));
+    c.append(g);
+    c.append(el('p',{class:'small'}, 'The same script writes Urdu (with a few extra letters and a different pen style) — your Urdu is a head start here, and this alphabet is the bridge back to it.'));
+  }
+  v.append(c);
+}
+
+// ============================================================ paths
+function unlockCount(l, learnedSet, now){
+  let n = 0;
+  for(const id of byLang[l]){
+    const st = sceneStats(l, D.scenes[id], now);
+    if(st.unk.length && st.unk.length<=learnedSet.size+1 && st.unk.every(t=>learnedSet.has(lemmaOf(t)))) n++;
+  }
+  return n;
+}
+function computeBranches(now){
+  const cand = [];
+  for(const l of activeLanes()){
+    if(!byLang[l].length) continue;
+    const sc = laneScore(l, now);
+    if(!S.tests[l]){
+      cand.push({l, kind:'test', score: sc.score + 0.35,
+        title:`Take the ${LANGS[l].n} check`,
+        why:'three minutes of yes/no, so words you already own don\'t arrive as new',
+        then:`Clavis stops treating ${LANGS[l].n} as brand new`});
+      continue;
+    }
+    const due = dueCards(l, now);
+    if(due.length){
+      cand.push({l, kind:'due', score: sc.score + 0.25, n: due.length,
+        title:`Bring back ${due.length} ${LANGS[l].n} word${due.length===1?'':'s'}`,
+        words: due.slice(0,3).map(([lm])=>({w: surfaceOf(l,lm), r: readingOf(l,lm)})),
+        why: whyText(sc),
+        then:'each one you recall settles for days, then weeks'});
+      continue;
+    }
+    const enc = pickForLane(l, now);
+    if(enc && enc.type==='read' && !enc.fluency){
+      const learned = new Set(enc.st.unk.map(lemmaOf));
+      const u = unlockCount(l, learned, now);
+      cand.push({l, kind:'new', score: sc.score, sc: enc.sc,
+        title:`Meet ${enc.st.unk.length} new ${LANGS[l].n} word${enc.st.unk.length===1?'':'s'}`,
+        words: enc.st.unk.slice(0,3).map(t=>({w: t[0], r: romOf(t)||''})),
+        why: whyText(sc),
+        then: u ? `${u} more bubble${u===1?' becomes':'s become'} readable` : 'the next bubbles get easier'});
+    }
+  }
+  cand.sort((a,b)=>b.score-a.score);
+  // keep the fan varied: at most two of any one kind
+  const out = [], seen = {};
+  for(const b of cand){ seen[b.kind]=(seen[b.kind]||0); if(seen[b.kind]>=2) continue; seen[b.kind]++; out.push(b); if(out.length>=4) break; }
+  const readLane = activeLanes().find(l=>byLang[l].length && S.tests[l]) || activeLanes().find(l=>byLang[l].length);
+  if(readLane && out.length<5) out.push({l:readLane, kind:'read', score:0,
+    title:`Read ${LANGS[readLane].n} freely`, why:'no grading, no clock — just the comic',
+    then:'glimpsed words are relearned faster later', cites:[15,17]});
+  if(activeLanes().length>=3 && out.length<5) out.push({l:null, kind:'game', score:0,
+    title:'Which language is this?', why:'name a line by its shapes alone',
+    then:'places scripts on the map, not just the family tree', cites:[33]});
+  return out;
+}
+function takeBranch(b){
+  S.pathLog = S.pathLog || [];
+  S.pathLog.push({t:Date.now(), kind:b.kind, l:b.l||null, title:b.title});
+  if(S.pathLog.length>12) S.pathLog.shift();
+  if(b.kind==='test'){ save(); return startTest(b.l); }
+  if(b.kind==='read'){ S.story = Object.assign({ep:null, pi:0}, S.story||{}, {lane:b.l}); S.view='story'; save(); return render(); }
+  if(b.kind==='game'){ S.intent=null; save(); startSession(); session.cur = makeLangId(Date.now()); return render(); }
+  S.intent = {l: b.l, sc: b.kind==='new' && b.sc ? b.sc.i : null}; save(); startSession();
+}
+function pathsMap(v, branches){
+  const wrap = el('div',{class:'cosmos-wrap grainy'});
+  const box = el('div',{class:'explore-box'}); wrap.append(box);
+  const cap = el('div',{class:'wordcard'}); cap.hidden=true; wrap.append(cap);
+  wrap.append(el('div',{class:'cosmos-hint'}, 'tap a branch to take that path · everything can be dragged'));
+  v.append(wrap);
+  const KC = {test:'#DCAA47', due:'#93A4F5', new:'#86C197', read:'#B0B6C6', game:'#E6907F'};
+  const SUB = {test:'a check', due:'bring back', new:'new words', read:'free reading', game:'which language?'};
+  const SURF = cssVar('--surface')||'#F4F1E6', INK = cssVar('--ink')||'#1A1B1F';
+  const LBL = cssVar('--cosmos-label')||'#F7F4EA', LBLBG = cssVar('--cosmos-labelbg')||'rgba(18,18,15,.55)';
+  const GHOSTLN = cssVar('--ink-3')||'#CFCCC2';
+  const nodes = [{id:'root', data:{k:'root'}, style:{x:0, y:0, size:46, fill:SURF, zIndex:5, stroke:GHOSTLN, lineWidth:0.8,
+    label:true, labelText:'you', labelPlacement:'center', labelFill:INK, labelFontSize:12.5, labelFontWeight:600, labelFontFamily:'Hind'}}];
+  const edges = []; const groups = {};
+  branches.forEach((b,i)=>{
+    const a = (i/branches.length)*Math.PI*2 - Math.PI/2;
+    const bid = 'b'+i;
+    nodes.push({id:bid, data:{k:'branch', gi:i, bi:i}, style:{x:Math.cos(a)*130, y:Math.sin(a)*130, size:36, fill:KC[b.kind], zIndex:4, cursor:'pointer',
+      label:true, labelText:(b.l? LANGS[b.l].n : 'A game')+'\n'+SUB[b.kind], labelFill:LBL, labelFontSize:11, labelFontWeight:600, labelFontFamily:'Hind',
+      labelTextAlign:'center', labelBackground:true, labelBackgroundFill:LBLBG, labelBackgroundRadius:4, labelBackgroundPadding:[1,5]}});
+    edges.push({id:'e-'+bid, source:'root', target:bid, style:{stroke:KC[b.kind], lineWidth:2, strokeOpacity:0.85}});
+    groups[i] = [bid];
+    const gn = b.kind==='new'? 3 : 2;
+    for(let g=0; g<gn; g++){
+      const gid = 'g'+i+'_'+g;
+      nodes.push({id:gid, data:{k:'ghost', gi:i}, style:{x:Math.cos(a+(g-1)*0.35)*200, y:Math.sin(a+(g-1)*0.35)*200,
+        size: 11+hash01(gid)*7, fill:KC[b.kind], fillOpacity:0.4, label:false, zIndex:1}});
+      edges.push({id:'e-'+gid, source:bid, target:gid, style:{stroke:GHOSTLN, lineDash:[3,4], lineWidth:1, strokeOpacity:0.5}});
+      groups[i].push(gid);
+    }
+  });
+  const W3 = Math.min(innerWidth-28, 572);
+  const H3 = Math.round(Math.min(W3, innerHeight*0.6));
+  box.style.height = H3+'px';
+  let graph = null, dead = false;
+  (async ()=>{
+    try{
+      graph = new G6.Graph({
+        container: box, width: box.clientWidth || W3, height: H3, animation: false, padding: 26,
+        data: {nodes, edges},
+        autoFit: 'view',
+        layout: {type:'d3-force', link:{distance:110, strength:0.9}, manyBody:{strength:-460}, collide:{radius:40}},
+        behaviors: [
+          {type:'drag-element-force', key:'dragel'},
+          {type:'zoom-canvas', key:'zoom'},
+          {type:'drag-canvas', key:'pan'},
+        ],
+        plugins: Object.keys(groups).map(gi=>({type:'bubble-sets', key:'pbs-'+gi, members: groups[gi],
+          fill: KC[branches[gi].kind], fillOpacity: 0.08, stroke: KC[branches[gi].kind], strokeOpacity: 0.5, lineWidth: 1.2})),
+      });
+      await graph.render();
+      if(dead){ graph.destroy(); return; }
+      box._graph = graph;
+      graph.on('node:click', ev=>{
+        const id = ev.target && ev.target.id; if(!id) return;
+        const nd = graph.getNodeData(id); const d = nd && nd.data;
+        if(!d || d.k!=='branch'){ cap.hidden = true; return; }
+        const b = branches[d.bi];
+        cap.hidden = false; cap.innerHTML = '';
+        cap.append(el('div',{class:'w'}, b.title));
+        cap.append(el('button',{class:'quiet close', 'aria-label':'Close', onclick:()=>{ cap.hidden=true; }}, '✕'));
+        cap.append(el('div',{class:'o'}, b.why, ' · then · ', b.then));
+        cap.append(el('div',{class:'rels'}, el('button',{class:'accent', onclick:()=>takeBranch(b)}, 'Walk this way')));
+      });
+      graph.on('canvas:click', ()=>{ cap.hidden = true; });
+    }catch(err){ box.append(el('div',{class:'loading'}, 'The map could not start here: '+esc(err.message))); }
+  })();
+  const prevStop = cosmosStop;
+  cosmosStop = ()=>{ dead = true; try{ if(graph) graph.destroy(); }catch(e){} graph=null; if(prevStop) prevStop(); };
+}
+function renderPaths(v){
+  const now = Date.now();
+  S.pathView = S.pathView || 'tree';
+  v.append(el('p',{class:'small', style:'margin-top:6px'}, 'No fixed course. Each branch below is a real next step Clavis can take right now — with the actual words it would use, and what it opens up. Take one yourself, or let Clavis choose: it leans toward wherever your results are changing fastest', cite(10,11), '.'));
+  const branches = computeBranches(now);
+  const modes = el('div',{class:'row', style:'margin:8px 0 2px'});
+  for(const [id,lab] of [['tree','As a tree'],['map','As a map']]){
+    modes.append(el('button',{class:S.pathView===id?'primary':'', style:'padding:6px 12px;font-size:.82rem', onclick:()=>{ S.pathView=id; save(); render(); }}, lab));
+  }
+  if(S.pathLog && S.pathLog.length){
+    const last = S.pathLog[S.pathLog.length-1];
+    const trail = el('span',{class:'small grow', style:'text-align:right'}, 'last: '+last.title);
+    modes.append(trail);
+    if(S.intent) modes.append(el('button',{class:'quiet', title:'Undo that choice', onclick:()=>{ S.intent=null; S.pathLog.pop(); save(); render(); toast('Choice undone — the fan is open again'); }}, '↶ undo'));
+  }
+  v.append(modes);
+  if(S.pathView==='map'){ pathsMap(v, branches); v.append(el('p',{class:'small'}, 'The same branches, drawn by force', cite(40), ': springs pull each choice away from the others, and a soft contour groups choices of the same kind', cite(39), '. Faint nodes beyond each branch are the paths that would open — not computed, just possible.')); }
+  const tree = el('div',{class:'tree'+(S.pathView==='map'?' hidden':'')});
+  tree.append(el('div',{class:'rootrow'}, el('div',{class:'rootdot'},'you'), el('div',{}, el('b',{},'Here, now'), el('div',{class:'small'}, branches.length+' ways forward'))));
+  for(const b of branches){
+    const wrap = el('div',{class:'branch'});
+    const c = el('div',{class:'pathcard k-'+b.kind});
+    const kindLabel = {test:'first, a check', due:'bring back', new:'something new', read:'free reading', game:'a game'}[b.kind];
+    c.append(el('div',{class:'k'}, b.l? laneDot(b.l):null, b.l? LANGS[b.l].n+' · ':'', kindLabel));
+    c.append(el('h3',{}, b.title));
+    if(b.kind==='new' && b.sc){ const mini = el('div',{class:'mini'}); mini.append(sceneBox(b.sc, b.l, false, {mini:true})); c.append(mini); }
+    if(b.words && b.words.length){
+      const w = el('div',{class:'words', dir:dirOf(b.l)});
+      for(const x of b.words){ const sp = el('span',{lang:b.l}, x.w); if(S.settings.readings && x.r) sp.append(el('i',{}, x.r)); w.append(sp); }
+      c.append(w);
+    }
+    c.append(el('div',{class:'why'}, b.why));
+    c.append(el('button',{class:'primary', onclick:()=>takeBranch(b)}, b.kind==='test'?'Take the check':b.kind==='read'?'Open the comic':b.kind==='game'?'Play a round':'Walk this way'));
+    const then = el('div',{class:'thenrow'});
+    const dots = el('div',{class:'thendots'}); dots.append(el('i',{}),el('i',{}),el('i',{})); then.append(dots);
+    then.append(el('span',{}, 'then · '+b.then, b.cites? cite(...b.cites):null));
+    c.append(then);
+    wrap.append(c); tree.append(wrap);
+  }
+  const tail = el('div',{class:'branch tail'});
+  const tc = el('div',{class:'tailcard'});
+  tc.append(el('div',{class:'fuzz'}));
+  tc.append(el('span',{}, 'and onward — the paths after these are not computed yet. They form from what you do next.'));
+  tail.append(tc); tree.append(tail);
+  v.append(tree);
+  const card = el('div',{class:'card'});
+  card.append(el('div',{class:'eyebrow'},'The longer view, per language'));
+  for(const l of LANE_ORDER){
+    if(S.lanes[l]==='off') continue;
+    const sc = laneScore(l, now); const cov = corpusCoverage(l, now); const known = knownCount(l, now);
+    const row2 = el('div',{class:'lane'});
+    row2.append(el('div',{class:'name'}, laneDot(l), ' '+LANGS[l].n+' ', el('span',{class:'chip '+(S.lanes[l]==='prod'?'prod':'rec')}, S.lanes[l]==='prod'?'speak':'read')));
+    row2.append(el('button',{class: S.pin===l?'primary':'', onclick:()=>{ S.pin = S.pin===l?null:l; save(); render(); }}, S.pin===l?'Pinned':'Pin'));
+    const lpv = sc.lp==null ? 'still watching you' : (sc.lp>0.1? 'improving fast' : 'steady');
+    row2.append(el('div',{class:'meta'}, `${lpv} · ${sc.due} ready · ${known} held · ${pct(cov)} readable · new today ${S.newToday[l]}/${S.settings.newPerDay} · assumes ${S.tests[l]? bandLabel(S.tests[l].thr) : 'nothing (untested)'}`));
+    const inter = Object.entries(S.inter[l]).filter(([k,n])=>n>0).map(([k,n])=>`${LANGS[k].n} ×${n}`).join(', ');
+    if(inter) row2.append(el('div',{class:'why'}, `look-alikes that fooled you: ${inter}`));
+    const routes = Object.entries(S.routes[l]).filter(([k,n])=>n>0).map(([k,n])=>`${k==='en'?'English':LANGS[k].n} ×${n}`).join(', ');
+    if(routes) row2.append(el('div',{class:'why'}, `bridges that helped: ${routes}`));
+    card.append(row2);
+  }
+  v.append(card);
+}
+
+// ============================================================ you
+function renderYou(v){
+  const now = Date.now();
+  v.append(el('h2',{}, 'Your record'));
+  const total = S.log.filter(e=>e.type!=='test').length; const days = new Set(S.log.map(e=>new Date(e.t).toDateString())).size;
+  const cl = S.log.filter(e=>e.type==='cloze'); const acc = cl.length? cl.filter(e=>e.ok).length/cl.length : 0;
+  const st = el('div',{class:'stat'});
+  st.append(el('div',{}, el('b',{}, String(total)), el('span',{},'encounters')));
+  st.append(el('div',{}, el('b',{}, String(days)), el('span',{},'days you showed up')));
+  st.append(el('div',{}, el('b',{}, cl.length? pct(acc):'—'), el('span',{},'recall when asked')));
+  v.append(st);
+  const wrap = el('div',{class:'tablewrap'}); const tb = el('table');
+  tb.append(el('thead',{}, el('tr',{}, el('th',{},'Language'), el('th',{},'Assumes you know'), el('th',{class:'n'},'Held'), el('th',{class:'n'},'Ready'), el('th',{class:'n'},'Readable'), el('th',{class:'n'},'Recall'), el('th',{class:'n'},'Mix-ups'))));
+  const body = el('tbody');
+  for(const l of LANE_ORDER){ if(S.lanes[l]==='off') continue;
+    const c = S.log.filter(e=>e.type==='cloze'&&e.l===l); const a = c.length? pct(c.filter(e=>e.ok).length/c.length):'—';
+    const conf = Object.values(S.inter[l]).reduce((x,y)=>x+y,0);
+    body.append(el('tr',{}, el('td',{}, laneDot(l),' '+LANGS[l].n), el('td',{}, S.tests[l]? bandLabel(S.tests[l].thr) : 'nothing — untested'), el('td',{class:'n'}, String(knownCount(l,now))), el('td',{class:'n'}, String(dueCards(l,now).length)), el('td',{class:'n'}, pct(corpusCoverage(l,now))), el('td',{class:'n'}, a), el('td',{class:'n'}, String(conf)))); }
+  tb.append(body); wrap.append(tb); v.append(el('div',{class:'card'}, wrap));
+  v.append(el('p',{class:'small'}, '"Readable" = share of that language\'s bubbles you could read unaided', cite(1), '. "Mix-ups" counts times a neighbouring language\'s look-alike fooled you', cite(9), ' — the interference your future self will thank you for measuring. Terms are defined in ', el('a',{role:'link', tabindex:'0', onclick:()=>{ S.view='colophon'; save(); render(); }}, 'Evidence & credits'), '.'));
+  const cT = el('div',{class:'card'});
+  cT.append(el('div',{class:'eyebrow'}, 'Baseline tests'));
+  for(const l of LANE_ORDER){ if(S.lanes[l]==='off') continue; cT.append(el('div',{class:'row', style:'margin:6px 0'}, el('span',{class:'grow'}, laneDot(l), ' '+LANGS[l].n, ' ', el('span',{class:'small'}, S.tests[l]? '· knows '+bandLabel(S.tests[l].thr) : '· untested')), el('button',{onclick:()=>startTest(l)}, S.tests[l]?'Retake':'Take test'))); }
+  v.append(cT);
+  const c2 = el('div',{class:'card'});
+  c2.append(el('div',{class:'eyebrow'}, 'Your data'));
+  c2.append(el('p',{class:'small'}, 'Everything lives in this browser. Copy the text to back up or move devices; paste it back to restore.'));
+  const ta = el('textarea',{'aria-label':'state JSON'}); c2.append(ta);
+  c2.append(el('div',{class:'actions'},
+    el('button',{onclick:()=>{ ta.value = JSON.stringify(S); ta.select(); try{ navigator.clipboard.writeText(ta.value); toast('Copied'); }catch(e){ toast('Select and copy'); } }}, 'Export'),
+    el('button',{onclick:()=>{ try{ const s = JSON.parse(ta.value); if(!s.cards) throw 0; S = Object.assign(freshState(), s); S.settings = Object.assign(freshState().settings, s.settings||{}); save(); render(); toast('Restored'); }catch(e){ toast('That doesn\'t look like a Clavis backup'); } }}, 'Import')));
+  v.append(c2);
+}
+
+// ============================================================ settings
+function renderSettings(v){
+  v.append(el('h2',{}, 'Settings'));
+  const c = el('div',{class:'card'}); c.append(el('div',{class:'eyebrow'},'Languages')); for(const l of LANE_ORDER) c.append(laneRow(l)); v.append(c);
+  const c2 = el('div',{class:'card'}); c2.append(el('div',{class:'eyebrow'},'Rhythm'));
+  const mk = (label, key, min, max, step)=>{ const out = el('span',{class:'mono'}, String(S.settings[key]));
+    const inp = el('input',{type:'range', min, max, step, value:S.settings[key], 'aria-label':label, oninput:e=>{ S.settings[key]=parseFloat(e.target.value); out.textContent=S.settings[key]; save(); }});
+    return el('div',{class:'row'}, el('span',{class:'grow'}, label), inp, out); };
+  c2.append(mk('How firmly words should stick (retention)', 'retention', 0.8, 0.95, 0.01));
+  c2.append(mk('New words per language per day', 'newPerDay', 2, 30, 1));
+  c2.append(mk('Encounters per session', 'sessionSize', 3, 10, 1));
+  const tgl = (label, key, note)=> el('div',{class:'row', style:'margin-top:6px'}, el('span',{class:'grow'}, label, note? el('span',{class:'small'}, ' — '+note):null),
+    el('button',{onclick:e=>{ S.settings[key]=!S.settings[key]; save(); render(); }}, S.settings[key]?'On':'Off'));
+  c2.append(tgl('Readings under words', 'readings', 'rōmaji, pīnyīn, romanised Korean and Arabic'));
+  c2.append(tgl('One language per session', 'monoSession', 'hold a single language instead of hopping'));
+  c2.append(tgl('Motion', 'motion', 'the pool and the Cosmos hold still when off'));
+  v.append(c2);
+  const c4 = el('div',{class:'card'}); c4.append(el('div',{class:'eyebrow'},'About'));
+  c4.append(el('p',{class:'small'}, 'Voices come from your device (on Android, install them under Text-to-speech settings). Add this page to your home screen to use it as an app. Everything stays on this device — there is no server. The evidence behind every design choice, the materials and their licences, and a glossary live in ', el('a',{role:'link', tabindex:'0', onclick:()=>{ S.view='colophon'; save(); render(); }}, 'Evidence & credits'), '.'));
+  c4.append(el('div',{class:'actions'},
+    el('button',{onclick:()=>{ S.view='colophon'; save(); render(); }}, 'Evidence & credits'),
+    el('button',{onclick:()=>{ S.ob=0; S.onboarded=false; save(); render(); }}, 'Replay the intro'),
+    el('button',{onclick:()=>{ if(confirm('Erase all local progress?')){ localStorage.removeItem(STORE_KEY); S = freshState(); render(); } }}, 'Reset everything')));
+  v.append(c4);
+}
+
+// ============================================================ boot
+async function boot(){
+  try{
+    const bin = Uint8Array.from(atob(DATA_B64), c=>c.charCodeAt(0));
+    if(typeof DecompressionStream === 'undefined') throw new Error('This browser cannot unpack the corpus (needs Chrome 80+, Firefox 113+, or Safari 16.4+).');
+    const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
+    D = JSON.parse(await new Response(stream).text());
+    indexCorpus();
+    S = load();
+    if(!NAV.find(d=>d.id===S.view) && !['set','colophon','story'].includes(S.view)) S.view='learn';
+    session=null; T=null;
+    render();
+  }catch(err){ $('#view').innerHTML = '<p style="padding:40px 0">Could not load: '+esc(err.message)+'</p>'; }
+}
+boot();
+</script>

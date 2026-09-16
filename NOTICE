@@ -1,0 +1,42 @@
+Clavis
+Copyright 2026 Madhav Baliga
+
+The application code (shared/, composeApp/) and the corpus pipeline (pipeline/) are licensed
+under the Apache License, Version 2.0 — see LICENSE. Binary distributions of Clavis (Android
+APK/AAB, Linux .deb and uber-jar, macOS .dmg, Windows .msi) additionally contain:
+
+  * Third-party libraries under the Apache License 2.0: Kotlin and kotlinx (coroutines,
+    serialization, datetime), JetBrains Compose Multiplatform and the org.jetbrains.androidx.*
+    multiplatform builds, AndroidX, Skiko (which bundles Skia, BSD 3-Clause), okio,
+    multiplatform-settings, JSpecify annotations and Guava listenablefuture. Their licence
+    texts travel inside the artifacts (META-INF/); of the artifacts resolved for the reviewed
+    release and desktop runtime graphs none ships a NOTICE file that requires reproduction here.
+    THIRD_PARTY_NOTICES.md lists the families and the procedure that re-checks this per release.
+
+  * On desktop, an Eclipse Temurin 17 runtime image produced by jlink/jpackage (OpenJDK,
+    GPL v2 with the Classpath Exception), whose own third-party notices are installed with
+    the application under runtime/legal/.
+
+  * On desktop only, the audio decoders JavaZOOM MP3SPI 1.9.5.4, JLayer 1.0.1.4 and VorbisSPI
+    1.0.3.3, JCraft JOrbis 0.0.17.4 and Tritonus share 0.3.7.4 under the GNU Lesser General
+    Public License 2.1. The licence text ships in the application resources
+    (licenses/LGPL-2.1.txt), is shown in the app's colophon and is reproduced in
+    THIRD_PARTY_NOTICES.md, Appendix B; the jpackage images keep the jars replaceable and the
+    uber-jar's copies can be replaced by re-jarring.
+
+  * Typefaces under the SIL Open Font License 1.1, which the Apache licence above does not
+    cover: Hind and Rozha One (Copyright 2014 Indian Type Foundry), IBM Plex Mono
+    (Copyright 2017 IBM Corp., Reserved Font Name "Plex"), and the Noto Sans families
+    (Copyright The Noto Project Authors; Noto Sans CJK: Copyright 2014-2021 Adobe, Reserved
+    Font Name "Source"). Full notices: THIRD_PARTY_NOTICES.md.
+
+  * Content packs under Creative Commons licences, which the Apache licence above does not
+    cover: Pepper&Carrot by David Revoy and its translators (CC BY 4.0), wordfreq-derived
+    frequencies by Robyn Speer (CC BY-SA 4.0), Wiktionary via wiktextract/kaikki.org and
+    EtymDB 2.1 by Fourrier & Sagot (CC BY-SA 4.0), Tatoeba sentences (CC BY 2.0 FR) and
+    Wikimedia Commons audio (per-file licence). Each pack carries a generated ATTRIBUTION.md
+    naming every author, translator and source; the pack as a whole is CC BY-SA 4.0.
+
+Piper (MIT) and espeak-ng (GPL-3.0) are not distributed with Clavis. A Piper voice is
+downloaded only when the user asks for it and runs as a separate process
+(docs/DECISIONS.md D-8; THIRD_PARTY_NOTICES.md §"Optional downloads").

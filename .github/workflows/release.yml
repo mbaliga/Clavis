@@ -1,0 +1,641 @@
+# Release: on a tag `v<version>` builds every artifact in docs/DECISIONS.md D-16 on its own OS runner and publishes
+# one GitHub Release with SHA256SUMS.txt. `workflow_dispatch` with a version builds the same artifacts as a dry run:
+# they go into a temporary draft Release (`dryrun-<run id>`) whose asset list is printed and which is then deleted;
+# nothing is published. Signing is optional everywhere: without secrets the Android and macOS artifacts are still
+# built and carry "-unsigned" in their names; the Windows MSI is always unsigned for now.
+#
+# Transport: no GitHub Actions artifact storage. `preflight` creates ONE draft Release, every build job uploads its
+# outputs straight into it (`gh release upload`), the `release` job downloads them back from the draft to check,
+# checksum and publish it, and `cleanup` deletes the draft when the run did not publish. A release run's
+# intermediates (~630 MB) never fitted the account's 500 MB Actions artifact quota; Release assets are stored with
+# the Release and are not subject to it (docs/RELEASE.md §8 "Storage").
+# Action pinning policy: see the header of ci.yml (major tags of Node-24 release lines).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, e.g. 0.2.0 or 0.2.0-rc.1 (dry run: a temporary draft Release, deleted at the end; nothing is published)'
+        required: true
+        type: string
+
+# The floor for any job that forgets to declare its own. Every job below overrides it with `contents: write`, the
+# least the token needs to create, upload into, publish or delete a (draft) Release.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # `gh` is preinstalled on every hosted runner (ubuntu, macos, windows) and reads these two: the job's token, and
+  # the repository so it never has to infer it from a checkout (the cleanup job has none).
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  # ---------------------------------------------------------------------------------------------------------
+  preflight:
+    name: Version ↔ tag ↔ ClavisVersion.kt ↔ CHANGELOG · draft Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+      publish: ${{ steps.v.outputs.publish }}
+      release_tag: ${{ steps.draft.outputs.release_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            version="${GITHUB_REF_NAME#v}"; publish=true
+          else
+            version="${INPUT_VERSION#v}"; publish=false
+          fi
+          # Same shape as gradle/version.gradle.kts: MAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N] with N in 1..29
+          # (the MSI ProductVersion offsets cap N at 29; a tag the build would reject must fail here, not in four jobs).
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.([1-9]|[12][0-9]))?$ ]]; then
+            echo "::error::'$version' is not MAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N] with N in 1..29 (gradle/version.gradle.kts)"; exit 1
+          fi
+          fail_or_warn() { if [ "$publish" = true ]; then echo "::error::$1"; exit 1; else echo "::warning::$1"; fi; }
+          kt=$(sed -n 's/.*const val NAME = "\([^"]*\)".*/\1/p' shared/src/commonMain/kotlin/io/github/mbaliga/clavis/core/ClavisVersion.kt)
+          [ "$kt" = "$version" ] || fail_or_warn "ClavisVersion.NAME is '$kt' but the release version is '$version' — bump shared/src/commonMain/kotlin/io/github/mbaliga/clavis/core/ClavisVersion.kt first (docs/RELEASE.md §2)"
+          grep -q "^## \[$version\]" CHANGELOG.md || fail_or_warn "CHANGELOG.md has no '## [$version]' section (docs/RELEASE.md §2)"
+          case "$version" in *-*) prerelease=true ;; *) prerelease=false ;; esac
+          {
+            echo "version=$version"
+            echo "prerelease=$prerelease"
+            echo "publish=$publish"
+          } >> "$GITHUB_OUTPUT"
+          echo "Building Clavis $version (prerelease=$prerelease, publish=$publish)"
+
+      # One draft Release receives every job's assets. A tag build drafts under its own tag; a dry run drafts under
+      # `dryrun-<run id>` against the commit — a draft creates its tag only when published, and this one never is
+      # (the cleanup job deletes it). A re-run finds its draft still there and reuses it (uploads use --clobber);
+      # a tag whose release was already published is refused rather than rebuilt in place.
+      - name: Create (or reuse) the draft Release every job uploads into
+        id: draft
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          PRERELEASE: ${{ steps.v.outputs.prerelease }}
+          PUBLISH: ${{ steps.v.outputs.publish }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$PUBLISH" = true ]; then
+            tag="$GITHUB_REF_NAME"
+            create=(--title "Clavis $VERSION" --notes "Build in progress: $run_url")
+          else
+            tag="dryrun-$GITHUB_RUN_ID"
+            create=(--target "$GITHUB_SHA" --title "Clavis $VERSION (dry run — deleted at the end of the run)" --notes "Dry run: $run_url")
+          fi
+          if [ "$PRERELEASE" = true ]; then create+=(--prerelease); fi
+          if state=$(gh release view "$tag" --json isDraft --jq .isDraft 2>&1); then
+            if [ "$state" != true ]; then
+              echo "::error::'$tag' already has a published release — releases are not rebuilt in place; fix forward with a new tag (docs/RELEASE.md §3)"; exit 1
+            fi
+            echo "Reusing the existing draft release '$tag'"
+          elif [[ "$state" == *"release not found"* ]]; then
+            gh release create "$tag" --draft "${create[@]}"
+          else
+            echo "::error::gh release view '$tag' failed: $state"; exit 1
+          fi
+          echo "release_tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Assets go to the draft release '$tag'"
+
+  # ---------------------------------------------------------------------------------------------------------
+  android:
+    name: Android APK + AAB (ubuntu-24.04)
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Keep in step with gradle/libs.versions.toml (android-compileSdk) and the build-tools path below.
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
+          log-accepted-android-sdk-licenses: false
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      # `secrets` is not available in `if:`; convert presence into a step output.
+      - name: Detect Android signing secrets
+        id: signing
+        env:
+          HAS_KEYSTORE: ${{ secrets.CLAVIS_KEYSTORE_BASE64 != '' && secrets.CLAVIS_KEYSTORE_PASSWORD != '' && secrets.CLAVIS_KEY_ALIAS != '' && secrets.CLAVIS_KEY_PASSWORD != '' }}
+        run: |
+          echo "enabled=$HAS_KEYSTORE" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_KEYSTORE" != true ]; then echo "::warning::No Android signing secrets — the APK and AAB will be UNSIGNED"; fi
+
+      # The Gradle build decodes CLAVIS_KEYSTORE_BASE64 under composeApp/build/signing/ itself
+      # (gradle/release-signing.gradle.kts); empty values mean "unsigned".
+      - name: Test, lint, assemble release APK and AAB
+        env:
+          CLAVIS_KEYSTORE_BASE64: ${{ secrets.CLAVIS_KEYSTORE_BASE64 }}
+          CLAVIS_KEYSTORE_PASSWORD: ${{ secrets.CLAVIS_KEYSTORE_PASSWORD }}
+          CLAVIS_KEY_ALIAS: ${{ secrets.CLAVIS_KEY_ALIAS }}
+          CLAVIS_KEY_PASSWORD: ${{ secrets.CLAVIS_KEY_PASSWORD }}
+        run: >
+          ./gradlew
+          :shared:allTests
+          :composeApp:desktopTest
+          :composeApp:lintDebug
+          :composeApp:assembleRelease
+          :composeApp:bundleRelease
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      - name: Verify (badging, 16 KB alignment, signature) and name the outputs
+        env:
+          SIGNED: ${{ steps.signing.outputs.enabled }}
+        run: |
+          bt="$ANDROID_HOME/build-tools/36.0.0"
+          mkdir -p dist
+          apk=$(ls composeApp/build/outputs/apk/release/*.apk)
+          aab=composeApp/build/outputs/bundle/release/composeApp-release.aab
+          "$bt/aapt2" dump badging "$apk" | head -2
+          badged=$("$bt/aapt2" dump badging "$apk" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
+          [ "$badged" = "$CLAVIS_VERSION" ] || { echo "::error::APK versionName '$badged' != '$CLAVIS_VERSION'"; exit 1; }
+          "$bt/zipalign" -c -P 16 -v 4 "$apk" | tail -1
+          if [ "$SIGNED" = true ]; then
+            "$bt/apksigner" verify --verbose --print-certs "$apk"
+            cp "$apk" "dist/clavis-$CLAVIS_VERSION-android.apk"
+            cp "$aab" "dist/clavis-$CLAVIS_VERSION-android.aab"
+          else
+            cp "$apk" "dist/clavis-$CLAVIS_VERSION-android-unsigned.apk"
+            cp "$aab" "dist/clavis-$CLAVIS_VERSION-android-unsigned.aab"
+          fi
+          cp composeApp/build/outputs/mapping/release/mapping.txt "dist/clavis-$CLAVIS_VERSION-android-mapping.txt"
+          ls -la dist
+
+      # Same step in every build job: straight into the draft Release, no artifact storage. An empty dist/ is an
+      # error (the old `if-no-files-found: error`); --clobber makes the one retry, and any re-run, idempotent.
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
+  linux:
+    name: Linux .deb + uber-jar (ubuntu-24.04)
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      # jpackage's DEB bundler needs fakeroot and dpkg-deb; both are preinstalled on ubuntu-24.04 (docs/build-platform.md §5).
+      - name: Desktop tests, .deb and uber-jar
+        run: >
+          ./gradlew
+          :composeApp:desktopTest
+          :composeApp:packageDeb
+          :composeApp:packageUberJarForCurrentOS
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      - name: Dependency graphs for the licence review (THIRD_PARTY_NOTICES.md)
+        run: |
+          mkdir -p dist
+          ./gradlew -q :composeApp:dependencies --configuration releaseRuntimeClasspath --no-daemon > "dist/clavis-$CLAVIS_VERSION-dependencies-android.txt"
+          ./gradlew -q :composeApp:dependencies --configuration desktopRuntimeClasspath --no-daemon > "dist/clavis-$CLAVIS_VERSION-dependencies-desktop.txt"
+
+      - name: Uber-jar headless smoke test and naming
+        run: |
+          jar=$(ls composeApp/build/compose/jars/*.jar)
+          set +e
+          out=$(timeout 90 java -Djava.awt.headless=true -jar "$jar" 2>&1)
+          set -e
+          if echo "$out" | grep -q 'ClassNotFoundException\|NoClassDefFoundError'; then echo "$out" | tail -20; echo "::error::missing class in uber-jar"; exit 1; fi
+          echo "$out" | grep -q 'HeadlessException'
+          cp composeApp/build/compose/binaries/main/deb/*.deb "dist/clavis_${CLAVIS_VERSION}_amd64.deb"
+          cp "$jar" "dist/clavis-$CLAVIS_VERSION-linux-x64.jar"
+          dpkg-deb --info "dist/clavis_${CLAVIS_VERSION}_amd64.deb" | grep -E 'Package|Version|Architecture'
+          ls -la dist
+
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
+  macos:
+    name: macOS .dmg + uber-jar (macos-15, arm64)
+    needs: preflight
+    runs-on: macos-15
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      # macos-15 runners have 7 GB: smaller daemons than gradle.properties asks for.
+      GRADLE_JVMARGS: -Xmx2g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v7
+
+      # macos-15 defaults to JDK 21; jpackage must run on the documented 17.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      - name: Desktop tests and uber-jar
+        run: >
+          ./gradlew
+          :composeApp:desktopTest
+          :composeApp:packageUberJarForCurrentOS
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}" -Pkotlin.daemon.jvmargs=-Xmx1536m
+
+      - name: Detect Apple signing secrets
+        id: apple
+        env:
+          HAS_CERT: ${{ secrets.MACOS_CERT_P12_BASE64 != '' && secrets.MACOS_CERT_PASSWORD != '' && secrets.APPLE_ID != '' && secrets.APPLE_TEAM_ID != '' && secrets.APPLE_APP_PASSWORD != '' }}
+        run: |
+          echo "enabled=$HAS_CERT" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_CERT" != true ]; then echo "::warning::No Apple signing secrets — the DMG will be UNSIGNED (see README → Downloads → macOS)"; fi
+
+      # Pattern from GitHub's "Installing an Apple certificate on macOS runners"; provisioning-profile steps
+      # dropped (a Developer ID app has none). The identity is read back from the imported certificate unless
+      # MACOS_SIGNING_IDENTITY overrides it.
+      - name: Import Developer ID certificate into a temporary keychain
+        if: steps.apple.outputs.enabled == 'true'
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+        run: |
+          CERT="$RUNNER_TEMP/developer-id.p12"
+          KEYCHAIN="$RUNNER_TEMP/clavis-signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          echo -n "$MACOS_CERT_P12_BASE64" | base64 --decode -o "$CERT"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT" -P "$MACOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN"
+          rm -f "$CERT"
+          identity="$MACOS_SIGNING_IDENTITY"
+          if [ -z "$identity" ]; then
+            identity=$(security find-identity -v -p codesigning "$KEYCHAIN" | sed -n 's/.*"\(Developer ID Application:[^"]*\)".*/\1/p' | head -1)
+          fi
+          [ -n "$identity" ] || { echo "::error::no 'Developer ID Application' identity in the imported certificate"; exit 1; }
+          echo "KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+          echo "SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
+
+      # notarizeDmg = packageDmg + `xcrun notarytool submit --wait` + `xcrun stapler staple` (Compose Multiplatform 1.8.2).
+      # hdiutil "Resource busy" is intermittent on hosted macOS, hence the retry loop.
+      - name: Package, sign, notarize and staple the DMG
+        if: steps.apple.outputs.enabled == 'true'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          for attempt in 1 2 3; do
+            if ./gradlew :composeApp:notarizeDmg --no-daemon --stacktrace "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}" \
+                -Pkotlin.daemon.jvmargs=-Xmx1536m \
+                -Pcompose.desktop.mac.sign=true \
+                "-Pcompose.desktop.mac.signing.identity=$SIGNING_IDENTITY" \
+                "-Pcompose.desktop.mac.signing.keychain=$KEYCHAIN" \
+                "-Pcompose.desktop.mac.notarization.appleID=$APPLE_ID" \
+                "-Pcompose.desktop.mac.notarization.password=$APPLE_APP_PASSWORD" \
+                "-Pcompose.desktop.mac.notarization.teamID=$APPLE_TEAM_ID"; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
+          dmg=$(ls composeApp/build/compose/binaries/main/dmg/*.dmg)
+          xcrun stapler validate "$dmg"
+          echo "DMG_SUFFIX=" >> "$GITHUB_ENV"
+
+      - name: Package the DMG (unsigned)
+        if: steps.apple.outputs.enabled != 'true'
+        run: |
+          for attempt in 1 2 3; do
+            if ./gradlew :composeApp:packageDmg --no-daemon --stacktrace "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}" -Pkotlin.daemon.jvmargs=-Xmx1536m; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 20
+          done
+          echo "DMG_SUFFIX=-unsigned" >> "$GITHUB_ENV"
+
+      - name: Name the outputs
+        run: |
+          mkdir -p dist
+          cp composeApp/build/compose/binaries/main/dmg/*.dmg "dist/Clavis-$CLAVIS_VERSION-macos-arm64$DMG_SUFFIX.dmg"
+          cp composeApp/build/compose/jars/*.jar "dist/clavis-$CLAVIS_VERSION-macos-arm64.jar"
+          ls -la dist
+
+      - name: Remove the temporary keychain
+        if: always() && env.KEYCHAIN != ''
+        run: security delete-keychain "$KEYCHAIN" || true
+
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
+  windows:
+    name: Windows .msi + uber-jar (windows-2025)
+    needs: preflight
+    runs-on: windows-2025
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      # jpackage 17 needs WiX 3.x (candle.exe / light.exe on PATH). windows-2025 preinstalls WiX Toolset 3.14
+      # with %WIX%\bin on the machine PATH; the choco fallback covers an image that drops it.
+      - name: Ensure WiX 3.x
+        run: |
+          if command -v candle.exe > /dev/null 2>&1; then
+            echo "WiX found: $(command -v candle.exe)"
+          else
+            echo "::warning::WiX not on PATH — installing wixtoolset 3.14.1 via Chocolatey"
+            choco install wixtoolset --version=3.14.1 -y --no-progress
+            printf '%s\n' 'C:\Program Files (x86)\WiX Toolset v3.14\bin' >> "$GITHUB_PATH"
+          fi
+
+      - name: Desktop tests, MSI and uber-jar
+        run: >
+          ./gradlew
+          :composeApp:desktopTest
+          :composeApp:packageMsi
+          :composeApp:packageUberJarForCurrentOS
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      # No Authenticode signing yet (no certificate): SmartScreen shows "Windows protected your PC" → More info →
+      # Run anyway. docs/RELEASE.md §"Signing later" lists the options.
+      - name: Name the outputs
+        run: |
+          mkdir -p dist
+          cp composeApp/build/compose/binaries/main/msi/*.msi "dist/Clavis-$CLAVIS_VERSION-windows-x64.msi"
+          cp composeApp/build/compose/jars/*.jar "dist/clavis-$CLAVIS_VERSION-windows-x64.jar"
+          ls -la dist
+
+      # Git Bash (the workflow default shell) has gh on PATH on windows-2025.
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
+  # The reference single-file web app (docs/DECISIONS.md D-1) is rebuilt from the content packs committed under
+  # composeApp/src/commonMain/composeResources/files/packs/ (D-22; standard library only, ~3 s). Should that
+  # directory ever be absent, the job records a notice and uploads nothing instead of failing the release.
+  web:
+    name: Reference web build from the committed packs
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      built: ${{ steps.packs.outputs.present }}
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      PACKS: composeApp/src/commonMain/composeResources/files/packs
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Are the packs committed?
+        id: packs
+        run: |
+          if [ -f "$PACKS/manifest.json" ] && [ -f "$PACKS/comics/scenes.json.gz" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No committed packs under $PACKS — skipping the reference web build (pipeline/README.md: pack_assets.py --install)"
+          fi
+
+      - uses: actions/setup-python@v7
+        if: steps.packs.outputs.present == 'true'
+        with:
+          python-version: '3.11'
+
+      # pack_web.py needs only the standard library (pipeline/config.py); no downloads. It writes a standalone
+      # wrapper and pack_web-stats.json beside its output, so it builds into build/web and only the reference
+      # page is copied into dist — everything under dist/ becomes a release asset.
+      - name: Build clavis.html from the committed packs
+        if: steps.packs.outputs.present == 'true'
+        run: |
+          mkdir -p build/web dist
+          python pipeline/pack_web.py --packs "$PACKS" --out "build/web/clavis-$CLAVIS_VERSION-web.html"
+          cp "build/web/clavis-$CLAVIS_VERSION-web.html" dist/
+          ls -la build/web dist
+
+      - name: Upload to the draft Release
+        if: steps.packs.outputs.present == 'true'
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
+  release:
+    # Runs for a dry run too (only the final "Publish" step is skipped) so a dry run exercises the same
+    # download/checksum/body-composition path a real release goes through, not just the five build jobs.
+    name: Assemble the Release (and publish it, on a tag)
+    needs: [preflight, android, linux, macos, windows, web]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      PRERELEASE: ${{ needs.preflight.outputs.prerelease }}
+      PUBLISH: ${{ needs.preflight.outputs.publish }}
+      WEB_BUILT: ${{ needs.web.outputs.built }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # `needs` already guarantees the five build jobs succeeded; this checks that what they uploaded is all there
+      # (one name per asset, so a missing one names its job) and that nothing else is, before it is checksummed
+      # and published.
+      - name: Download the draft's assets and check that every job delivered
+        run: |
+          mkdir -p dist
+          gh release download "$RELEASE_TAG" -D dist
+          rm -f dist/SHA256SUMS.txt   # left by an earlier attempt whose publish failed after uploading it; regenerated below
+          ls -la dist
+          missing=0
+          expect() { compgen -G "dist/$1" > /dev/null || { echo "::error::missing release asset $1 (job: $2)"; missing=1; }; }
+          expect "clavis-$CLAVIS_VERSION-android*.apk" android
+          expect "clavis-$CLAVIS_VERSION-android*.aab" android
+          expect "clavis-$CLAVIS_VERSION-android-mapping.txt" android
+          expect "clavis_${CLAVIS_VERSION}_amd64.deb" linux
+          expect "clavis-$CLAVIS_VERSION-linux-x64.jar" linux
+          expect "clavis-$CLAVIS_VERSION-dependencies-android.txt" linux
+          expect "clavis-$CLAVIS_VERSION-dependencies-desktop.txt" linux
+          expect "Clavis-$CLAVIS_VERSION-macos-arm64*.dmg" macos
+          expect "clavis-$CLAVIS_VERSION-macos-arm64.jar" macos
+          expect "Clavis-$CLAVIS_VERSION-windows-x64.msi" windows
+          expect "clavis-$CLAVIS_VERSION-windows-x64.jar" windows
+          expected=11
+          if [ "$WEB_BUILT" = true ]; then expect "clavis-$CLAVIS_VERSION-web.html" web; expected=12; fi
+          [ "$missing" = 0 ] || exit 1
+          actual=$(find dist -mindepth 1 -maxdepth 1 | wc -l)
+          [ "$actual" = "$expected" ] || { echo "::error::expected $expected assets in the draft '$RELEASE_TAG', found $actual — a stale or unexpected upload; inspect the draft before re-running"; exit 1; }
+
+      - name: SHA256SUMS.txt
+        run: |
+          (cd dist && sha256sum -- * > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          gh release upload "$RELEASE_TAG" dist/SHA256SUMS.txt --clobber
+
+      - name: Release body
+        run: |
+          # The CHANGELOG section for this version becomes the top of the body (Keep a Changelog headings).
+          awk -v v="$CLAVIS_VERSION" '/^## \[/ { p = ($0 ~ ("^## \\[" v "\\]")) } p' CHANGELOG.md > release-body.md
+          unsigned_android=$(ls dist/*-android-unsigned.apk 2>/dev/null || true)
+          unsigned_dmg=$(ls dist/*-macos-*-unsigned.dmg 2>/dev/null || true)
+          # The backticks in the single-quoted lines are Markdown code spans, not command substitutions:
+          # shellcheck disable=SC2016
+          {
+            echo
+            echo '### Verify your download'
+            echo '```'
+            echo 'sha256sum -c SHA256SUMS.txt --ignore-missing'
+            echo '```'
+            echo
+            echo '### Installing'
+            echo '- **Android:** install the `.apk`; the `.aab` is for Google Play only.'
+            [ -n "$unsigned_android" ] && echo '  This build is **unsigned** (no signing secrets were configured) — Android will refuse to install it over a signed build and vice versa.'
+            echo '- **Linux:** `sudo apt install ./clavis_'"$CLAVIS_VERSION"'_amd64.deb`, or `java -jar clavis-'"$CLAVIS_VERSION"'-linux-x64.jar` on any JRE 17+.'
+            echo '- **macOS (Apple silicon):** open the `.dmg` and drag Clavis to Applications.'
+            [ -n "$unsigned_dmg" ] && echo '  This DMG is **not signed or notarized**: after the first double-click choose *Done*, then System Settings → Privacy & Security → *Open Anyway* (Control-click → Open no longer bypasses Gatekeeper since macOS 15). Details in the README.'
+            echo '- **Windows:** run the `.msi`. It is not code-signed; SmartScreen shows "Windows protected your PC" → *More info* → *Run anyway*.'
+            echo
+            echo 'Clavis is one person'"'"'s experiment (N=1); it is not a validated pedagogy. See the README.'
+          } >> release-body.md
+          cat release-body.md
+
+      # Publishing is flipping the draft. The curated CHANGELOG section is the whole body — no auto-generated
+      # notes, which would list every commit since the repository began. Pre-releases are never "latest".
+      # Skipped on a dry run: everything above (download, checksum, body) still ran, so a dry run's log shows
+      # exactly what a real release would contain; `cleanup` deletes the temporary draft afterwards.
+      - name: Publish
+        if: env.PUBLISH == 'true'
+        run: |
+          if [ "$PRERELEASE" = true ]; then latest=false; else latest=true; fi
+          gh release edit "$RELEASE_TAG" --draft=false --title "Clavis $CLAVIS_VERSION" --notes-file release-body.md \
+            --prerelease="$PRERELEASE" --latest="$latest"
+          gh release view "$RELEASE_TAG" --json url,isDraft,isPrerelease,assets \
+            --jq '"Published \(.url) (draft=\(.isDraft), prerelease=\(.isPrerelease), \(.assets | length) assets)"' \
+            || echo "::warning::published, but reading the release back failed — check it in the Releases tab"
+
+      - name: Dry run — not publishing
+        if: env.PUBLISH != 'true'
+        run: |
+          echo "Dry run — the draft '$RELEASE_TAG' holds everything a real release would ship (see 'release-body.md' above and the asset list cleanup prints next); it is not published, and cleanup deletes it."
+
+  # ---------------------------------------------------------------------------------------------------------
+  # Runs whatever happened above. Prints what the draft holds — a dry run's log thereby records exactly what a
+  # real release would have shipped, with sizes. A dry run's draft (`dryrun-<run id>`, no tag, never published)
+  # is always deleted. A tag build's draft is deleted once it publishes; if it did NOT publish, it is left in
+  # place for a subsequent "Re-run failed jobs" (or a fresh push of the same tag) to find and reuse via
+  # --clobber, rather than deleted unconditionally here — a maintainer who wants it gone can delete the draft
+  # Release from the UI. A published release is never touched, and nothing is when preflight failed before
+  # creating a draft.
+  cleanup:
+    name: Clean up the draft Release
+    if: always()
+    needs: [preflight, android, linux, macos, windows, web, release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      PUBLISH: ${{ needs.preflight.outputs.publish }}
+    steps:
+      - name: List the draft's assets, then delete it if it is a dry run or it published
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then echo "preflight created no draft release — nothing to clean up"; exit 0; fi
+          if ! state=$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft 2>&1); then
+            if [[ "$state" == *"release not found"* ]]; then echo "no release '$RELEASE_TAG' left to clean up"; exit 0; fi
+            echo "::error::gh release view '$RELEASE_TAG' failed: $state"; exit 1
+          fi
+          echo "Assets of release '$RELEASE_TAG' (draft=$state):"
+          gh release view "$RELEASE_TAG" --json assets \
+            --jq '(.assets[] | "  \(((.size / 1048576 * 10) | round) / 10) MB\t\(.name)"), "  total: \(((.assets | map(.size) | add) // 0) / 1048576 | round) MB in \(.assets | length) assets"'
+          if [ "$PUBLISH" != true ]; then
+            [ "$state" = true ] && gh release delete "$RELEASE_TAG" --yes
+            echo "Dry run: deleted the temporary draft '$RELEASE_TAG'"
+          elif [ "$state" = true ]; then
+            # Still a draft: this tag build did not publish. Keep it — a job's own status here can be
+            # "always()"-successful even though something upstream failed, so "re-run failed jobs" is not
+            # guaranteed to touch this job; deleting unconditionally would then destroy already-uploaded
+            # assets a re-run could otherwise reuse (uploads are --clobber).
+            echo "::warning::'$RELEASE_TAG' did not publish and is left as a draft — its uploaded assets are reused (--clobber) by 'Re-run failed jobs' or a fresh push of the same tag; delete it by hand from the Releases tab if you don't want that."
+          else
+            echo "'$RELEASE_TAG' is published — left untouched"
+          fi

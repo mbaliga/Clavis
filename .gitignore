@@ -1,0 +1,47 @@
+# Gradle
+.gradle/
+build/
+**/build/
+.kotlin/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Machine-local
+local.properties
+*.hprof
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+captures/
+.vscode/
+.fleet/
+
+# Signing material never enters the repo
+*.keystore
+*.jks
+
+# Android release staging (Android Studio drops signed outputs here)
+composeApp/release/
+
+# Compose Desktop distribution outputs (also covered by build/, listed for clarity)
+composeApp/build/compose/
+*.dmg
+*.msi
+*.deb
+
+# agent worktrees
+.claude/worktrees/
+
+# Signing material and secrets (release signing reads keystore.properties or CLAVIS_* env vars)
+keystore.properties
+*.p12
+*.b64
+.env
+.env.*
+
+# Built app binaries never enter the repo (Releases carry them)
+*.apk
+*.aab

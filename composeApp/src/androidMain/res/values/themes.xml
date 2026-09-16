@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Platform theme only paints the window before Compose draws; everything else is ClavisTheme. -->
+    <style name="Theme.Clavis" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/clavis_paper_light</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ (API 31+) Auto Backup rules (D-13: keep learner data on the device the user chose).
+
+  Cloud backup excludes the learner-state document, its atomic-write temp file, and the
+  corrupt/ directory of timestamped corrupt-document backups kept beside it. dataExtractionRules
+  has no wildcard support, which is why corrupt-document backups (clavis-state.json.corrupt-
+  <epochMillis>) are written into their own corrupt/ subdirectory: a single directory-level
+  exclude covers all of them regardless of name (see JsonStateStore.corruptPath).
+
+  Downloaded recording clips and their in-progress .part files live under the app's cache
+  directory (Context.cacheDir/audio/, see ClavisStore.clipPath / HttpDownloader), which Android
+  excludes from Auto Backup by default for every app — no rule is needed here for them.
+
+  Device-transfer (the "Copy your data" migration flow) is intentionally left unrestricted: every
+  file here, including clavis-state.json, still moves with the learner when they set up a new
+  device — only cloud backup is narrowed.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="clavis-state.json"/>
+        <exclude domain="file" path="clavis-state.json.tmp"/>
+        <exclude domain="file" path="corrupt/"/>
+    </cloud-backup>
+    <device-transfer>
+        <!-- Intentionally empty: every app file, including clavis-state.json, moves with D2D transfer. -->
+    </device-transfer>
+</data-extraction-rules>

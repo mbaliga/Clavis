@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Legacy Auto Backup rules for API 26-30 (before Android 12's dataExtractionRules split cloud
+  backup from device-to-device transfer). On these OS versions there is no such split: excluding
+  a path here also withholds it from D2D "Copy your data" transfer. That is a platform limitation,
+  not a choice this file makes — see PRIVACY.md and docs/RELEASE.md §9.
+
+  Same exclusions as data_extraction_rules.xml's cloud-backup block, for the same reasons
+  (the app's cache directory, where recording clips live, is already excluded by the platform on
+  every API level and needs no rule here).
+-->
+<full-backup-content>
+    <exclude domain="file" path="clavis-state.json"/>
+    <exclude domain="file" path="clavis-state.json.tmp"/>
+    <exclude domain="file" path="corrupt/"/>
+</full-backup-content>

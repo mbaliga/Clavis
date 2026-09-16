@@ -1,0 +1,165 @@
+{
+ "id": "clavis-pronunciations",
+ "kind": "PRONUNCIATIONS",
+ "version": "2026.09.16",
+ "title": "Pronunciations (IPA + Commons audio references)",
+ "languages": [
+  "ar",
+  "de",
+  "en",
+  "es",
+  "fr",
+  "hi",
+  "it",
+  "ja",
+  "ko",
+  "la",
+  "nl",
+  "pl",
+  "pt",
+  "ru",
+  "tr",
+  "uk",
+  "zh"
+ ],
+ "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
+ "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
+ "generatedAt": "2026-09-16T09:42:18Z",
+ "attribution": [
+  {
+   "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
+   "role": "etymology, IPA and audio references",
+   "url": "https://kaikki.org/dictionary/",
+   "licence": "CC BY-SA 4.0"
+  },
+  {
+   "name": "Wikimedia Commons contributors (per-file licence and author in the pack)",
+   "role": "word audio",
+   "url": "https://commons.wikimedia.org/",
+   "licence": "CC0 / CC BY / CC BY-SA / public domain per file"
+  }
+ ],
+ "files": {
+  "es.json.gz": 29757,
+  "fr.json.gz": 50737,
+  "it.json.gz": 33435,
+  "de.json.gz": 51021,
+  "nl.json.gz": 44057,
+  "ja.json.gz": 22485,
+  "ko.json.gz": 14172,
+  "zh.json.gz": 35915,
+  "ar.json.gz": 8121,
+  "en.json.gz": 53310,
+  "pt.json.gz": 34695,
+  "la.json.gz": 9705,
+  "ru.json.gz": 57857,
+  "pl.json.gz": 31566,
+  "uk.json.gz": 43146,
+  "tr.json.gz": 8881,
+  "hi.json.gz": 1395
+ },
+ "stats": {
+  "es": {
+   "lemmas": 1627,
+   "ipa": 1500,
+   "audio": 560,
+   "audioExcluded": 0
+  },
+  "fr": {
+   "lemmas": 1767,
+   "ipa": 1564,
+   "audio": 1523,
+   "audioExcluded": 0
+  },
+  "it": {
+   "lemmas": 1598,
+   "ipa": 1411,
+   "audio": 767,
+   "audioExcluded": 0
+  },
+  "de": {
+   "lemmas": 1770,
+   "ipa": 1418,
+   "audio": 1548,
+   "audioExcluded": 0
+  },
+  "nl": {
+   "lemmas": 1700,
+   "ipa": 1302,
+   "audio": 1483,
+   "audioExcluded": 0
+  },
+  "ja": {
+   "lemmas": 2062,
+   "ipa": 1556,
+   "audio": 63,
+   "audioExcluded": 0
+  },
+  "ko": {
+   "lemmas": 1115,
+   "ipa": 899,
+   "audio": 102,
+   "audioExcluded": 0
+  },
+  "zh": {
+   "lemmas": 2439,
+   "ipa": 447,
+   "audio": 1100,
+   "audioExcluded": 0
+  },
+  "ar": {
+   "lemmas": 583,
+   "ipa": 407,
+   "audio": 121,
+   "audioExcluded": 0
+  },
+  "en": {
+   "lemmas": 1603,
+   "ipa": 1529,
+   "audio": 1521,
+   "audioExcluded": 0
+  },
+  "pt": {
+   "lemmas": 1557,
+   "ipa": 1378,
+   "audio": 689,
+   "audioExcluded": 1
+  },
+  "la": {
+   "lemmas": 642,
+   "ipa": 584,
+   "audio": 143,
+   "audioExcluded": 0
+  },
+  "ru": {
+   "lemmas": 1757,
+   "ipa": 1505,
+   "audio": 1330,
+   "audioExcluded": 0
+  },
+  "pl": {
+   "lemmas": 1863,
+   "ipa": 1682,
+   "audio": 413,
+   "audioExcluded": 0
+  },
+  "uk": {
+   "lemmas": 1431,
+   "ipa": 1142,
+   "audio": 1032,
+   "audioExcluded": 0
+  },
+  "tr": {
+   "lemmas": 437,
+   "ipa": 316,
+   "audio": 205,
+   "audioExcluded": 1
+  },
+  "hi": {
+   "lemmas": 45,
+   "ipa": 39,
+   "audio": 14,
+   "audioExcluded": 0
+  }
+ }
+}
