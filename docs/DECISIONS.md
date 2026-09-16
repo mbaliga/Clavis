@@ -470,10 +470,14 @@ the blank P00 title pages (F-1) — they are the upstream header artwork, faithf
 **Decision.** `release.yml` no longer hands artifacts between jobs. `preflight` creates one *draft*
 Release (for a tag, on that tag; for a `workflow_dispatch` dry run, a throw-away draft that is
 deleted at the end and never published); every build job uploads its files into it with
-`gh release upload`; the `release` job downloads them back, writes `SHA256SUMS.txt`, and flips the
-draft to published only when all five build jobs succeeded; a `cleanup` job deletes any draft that
-did not publish. `ci.yml` uploads only the R8 release APK and its mapping, for three days, and an
-upload failure can no longer fail the verification job.
+`gh release upload`; the `release` job (which also runs, minus the final publish step, on a dry
+run — so a dry run exercises the download/checksum/body path too) downloads them back, writes
+`SHA256SUMS.txt`, and flips the draft to published only when all five build jobs succeeded; a
+`cleanup` job always deletes a dry run's throw-away draft, but leaves a failed *tag* build's draft
+in place — deleting it unconditionally would strand its already-uploaded assets past a `Re-run
+failed jobs`, which is exactly the case a partial multi-OS release run needs. `ci.yml` uploads only
+the R8 release APK and its mapping, for three days, and an upload failure can no longer fail the
+verification job.
 
 **Reason (measured).** GitHub Actions *artifact* storage is metered per account (500 MB on the
 Free plan, recalculated every 6–12 h) and was exhausted on 2026‑09‑15 by CI itself: every push

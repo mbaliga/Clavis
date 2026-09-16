@@ -501,8 +501,9 @@ jobs:
 
   # ---------------------------------------------------------------------------------------------------------
   release:
-    name: Publish the GitHub Release
-    if: needs.preflight.outputs.publish == 'true'
+    # Runs for a dry run too (only the final "Publish" step is skipped) so a dry run exercises the same
+    # download/checksum/body-composition path a real release goes through, not just the five build jobs.
+    name: Assemble the Release (and publish it, on a tag)
     needs: [preflight, android, linux, macos, windows, web]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -512,6 +513,7 @@ jobs:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
       RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       PRERELEASE: ${{ needs.preflight.outputs.prerelease }}
+      PUBLISH: ${{ needs.preflight.outputs.publish }}
       WEB_BUILT: ${{ needs.web.outputs.built }}
     steps:
       - uses: actions/checkout@v7
@@ -578,7 +580,10 @@ jobs:
 
       # Publishing is flipping the draft. The curated CHANGELOG section is the whole body — no auto-generated
       # notes, which would list every commit since the repository began. Pre-releases are never "latest".
+      # Skipped on a dry run: everything above (download, checksum, body) still ran, so a dry run's log shows
+      # exactly what a real release would contain; `cleanup` deletes the temporary draft afterwards.
       - name: Publish
+        if: env.PUBLISH == 'true'
         run: |
           if [ "$PRERELEASE" = true ]; then latest=false; else latest=true; fi
           gh release edit "$RELEASE_TAG" --draft=false --title "Clavis $CLAVIS_VERSION" --notes-file release-body.md \
@@ -587,13 +592,21 @@ jobs:
             --jq '"Published \(.url) (draft=\(.isDraft), prerelease=\(.isPrerelease), \(.assets | length) assets)"' \
             || echo "::warning::published, but reading the release back failed — check it in the Releases tab"
 
+      - name: Dry run — not publishing
+        if: env.PUBLISH != 'true'
+        run: |
+          echo "Dry run — the draft '$RELEASE_TAG' holds everything a real release would ship (see 'release-body.md' above and the asset list cleanup prints next); it is not published, and cleanup deletes it."
+
   # ---------------------------------------------------------------------------------------------------------
   # Runs whatever happened above. Prints what the draft holds — a dry run's log thereby records exactly what a
-  # real release would have shipped, with sizes — then deletes the draft unless the run published it: every dry
-  # run (`dryrun-<run id>` has no tag to clean up) and every tag build that failed on the way. A published release
-  # is never touched, and nothing is when preflight failed before creating a draft.
+  # real release would have shipped, with sizes. A dry run's draft (`dryrun-<run id>`, no tag, never published)
+  # is always deleted. A tag build's draft is deleted once it publishes; if it did NOT publish, it is left in
+  # place for a subsequent "Re-run failed jobs" (or a fresh push of the same tag) to find and reuse via
+  # --clobber, rather than deleted unconditionally here — a maintainer who wants it gone can delete the draft
+  # Release from the UI. A published release is never touched, and nothing is when preflight failed before
+  # creating a draft.
   cleanup:
-    name: Delete the draft unless it was published
+    name: Clean up the draft Release
     if: always()
     needs: [preflight, android, linux, macos, windows, web, release]
     runs-on: ubuntu-24.04
@@ -604,7 +617,7 @@ jobs:
       RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       PUBLISH: ${{ needs.preflight.outputs.publish }}
     steps:
-      - name: List the draft's assets, then delete it if it is still a draft
+      - name: List the draft's assets, then delete it if it is a dry run or it published
         run: |
           if [ -z "$RELEASE_TAG" ]; then echo "preflight created no draft release — nothing to clean up"; exit 0; fi
           if ! state=$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft 2>&1); then
@@ -614,10 +627,15 @@ jobs:
           echo "Assets of release '$RELEASE_TAG' (draft=$state):"
           gh release view "$RELEASE_TAG" --json assets \
             --jq '(.assets[] | "  \(((.size / 1048576 * 10) | round) / 10) MB\t\(.name)"), "  total: \(((.assets | map(.size) | add) // 0) / 1048576 | round) MB in \(.assets | length) assets"'
-          if [ "$state" = true ]; then
-            if [ "$PUBLISH" = true ]; then echo "::warning::The run did not publish '$RELEASE_TAG'; deleting the half-built draft — re-run with 'Re-run all jobs' or push a fixed tag"; fi
-            gh release delete "$RELEASE_TAG" --yes
-            echo "Deleted the draft release '$RELEASE_TAG'"
+          if [ "$PUBLISH" != true ]; then
+            [ "$state" = true ] && gh release delete "$RELEASE_TAG" --yes
+            echo "Dry run: deleted the temporary draft '$RELEASE_TAG'"
+          elif [ "$state" = true ]; then
+            # Still a draft: this tag build did not publish. Keep it — a job's own status here can be
+            # "always()"-successful even though something upstream failed, so "re-run failed jobs" is not
+            # guaranteed to touch this job; deleting unconditionally would then destroy already-uploaded
+            # assets a re-run could otherwise reuse (uploads are --clobber).
+            echo "::warning::'$RELEASE_TAG' did not publish and is left as a draft — its uploaded assets are reused (--clobber) by 'Re-run failed jobs' or a fresh push of the same tag; delete it by hand from the Releases tab if you don't want that."
           else
             echo "'$RELEASE_TAG' is published — left untouched"
           fi
