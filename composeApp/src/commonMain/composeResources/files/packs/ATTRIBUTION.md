@@ -65,10 +65,10 @@ Pack `clavis-sentences` (SENTENCES, version 2026.09.02), languages ar, de, es, f
 
 ### Pronunciations (IPA + Commons audio references) — CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain
 
-Pack `clavis-pronunciations` (PRONUNCIATIONS, version 2026.09.02), languages ar, de, en, es, fr, hi, it, ja, ko, la, nl, pl, pt, ru, tr, uk, zh. Source: https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API).
+Pack `clavis-pronunciations` (PRONUNCIATIONS, version 2026.09.16), languages ar, de, en, es, fr, hi, it, ja, ko, la, nl, pl, pt, ru, tr, uk, zh. Source: https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API).
 - Wiktionary contributors (via wiktextract / kaikki.org) — etymology, IPA and audio references — https://kaikki.org/dictionary/ — CC BY-SA 4.0
 - Wikimedia Commons contributors (per-file licence and author in the pack) — word audio — https://commons.wikimedia.org/ — CC0 / CC BY / CC BY-SA / public domain per file
 
 ## Generator
 
-Built 2026-09-02T13:51:05Z by the Clavis pipeline (`pipeline/`, Apache-2.0) from corpus `corpus-framagit`.
+Built 2026-09-16T09:43:01Z by the Clavis pipeline (`pipeline/`, Apache-2.0) from corpus `corpus-framagit`.

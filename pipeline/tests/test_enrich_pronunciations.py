@@ -105,6 +105,88 @@ def test_ipa_only_records_and_shape(run):
 def test_report_and_manifest(run):
     cov, packs, frag = run
     assert cov["per_language"]["de"] == {"lemmas": 2, "kaikki_matched": 2, "records": 1, "ipa": 1, "audio_ok": 1, "audio_excluded": 0,
-                                         "pct_ipa": 50.0, "pct_audio": 50.0}
+                                         "pct_ipa": 50.0, "pct_audio": 50.0, "audio_by_source": {"kaikki": 1}}
     assert frag["kind"] == "PRONUNCIATIONS" and frag["stats"]["de"]["audio"] == 1
     assert any("Commons" in a["name"] for a in frag["attribution"])
+
+
+# ---------------------------------------------------------------- second audio source (offline, no network)
+
+@pytest.mark.parametrize("lang,filename,expected", [
+    ("es", "Es-amor.ogg", "amor"),
+    ("es", "Es-am-lat-actividad.ogg", "actividad"),
+    ("es", "(spa)-Saviourofthe-a posteriori.flac", "a posteriori"),
+    ("es", "LL-Q1321 (spa)-JOAN-Calígine.wav", "calígine"),
+    ("it", "It-Signorina.oga", "signorina"),
+    ("ja", "LL-Q5287 (jpn)-葵心-虹.wav", "虹"),
+    ("ko", "(kor)-Speaker-그리고.ogg", "그리고"),
+    ("es", "Zz-nope.ogg", None),        # wrong language prefix
+    ("es", "not-a-pronunciation-file.png", None),  # not an audio extension -> no pattern matches
+])
+def test_category_word_parses_every_filename_convention(lang, filename, expected):
+    assert ep.category_word(lang, filename) == expected
+
+
+def test_category_word_normalises_nfc_and_case():
+    import unicodedata
+    nfd_name = "Es-" + unicodedata.normalize("NFD", "adiós") + ".oga"
+    assert ep.category_word("es", nfd_name) == "adiós"
+    assert unicodedata.is_normalized("NFC", ep.category_word("es", nfd_name))
+
+
+def test_lexicon_word_index_covers_lemma_and_surface():
+    idx = ep.lexicon_word_index({"episodio": [1, 1, "Episodio", ""], "y": [1, 1, "y", ""]})
+    assert idx == {"episodio": "episodio", "y": "y"}
+
+
+def test_esc_sparql_string_escapes_quotes_and_backslashes():
+    assert ep.esc_sparql_string('a"b\\c') == '"a\\"b\\\\c"'
+
+
+def test_group_lingualibre_rows_dedupes_and_filters_to_lexicon():
+    rows = [
+        {"file": "http://commons.wikimedia.org/wiki/Special:FilePath/LL-Q386%20%28spa%29-A-casa.wav", "transcription": "casa"},
+        {"file": "http://commons.wikimedia.org/wiki/Special:FilePath/LL-Q386%20%28spa%29-B-casa.wav", "transcription": "casa"},
+        {"file": "http://commons.wikimedia.org/wiki/Special:FilePath/LL-Q386%20%28spa%29-A-casa.wav", "transcription": "casa"},  # dup
+        {"file": "http://commons.wikimedia.org/wiki/Special:FilePath/LL-Q386%20%28spa%29-A-perro.wav", "transcription": "perro"},
+        {"file": "http://commons.wikimedia.org/wiki/Special:FilePath/x-fuera.wav", "transcription": "fuera"},  # not in lexicon
+    ]
+    out = ep.group_lingualibre_rows(rows, {"casa": [1, 1, "casa", ""], "perro": [1, 1, "perro", ""]})
+    assert out == {"casa": ["LL-Q386 (spa)-A-casa.wav", "LL-Q386 (spa)-B-casa.wav"], "perro": ["LL-Q386 (spa)-A-perro.wav"]}
+
+
+def test_add_extra_candidates_appends_after_kaikki_deduped_and_capped():
+    cands = {"es": {"llave": {"ipa": "/x/", "audio": [{"file": "Es-llave.ogg", "ogg": "u", "mp3": None, "tags": [], "penalty": 0, "source": "kaikki"}]}}}
+    added = ep.add_extra_candidates(cands, "es", {"llave": ["LL-a-llave.wav", "LL-b-llave.wav"], "nueva": ["LL-c-nueva.wav"]},
+                                    "lingualibre", cap=1, max_total=2)
+    assert added == 2
+    # kaikki candidate stays first; only one Lingua Libre candidate appended (cap=1) even though two were offered
+    assert [a["file"] for a in cands["es"]["llave"]["audio"]] == ["Es-llave.ogg", "LL-a-llave.wav"]
+    assert cands["es"]["llave"]["audio"][1]["source"] == "lingualibre"
+    # a lemma kaikki never matched gets a fresh entry
+    assert cands["es"]["nueva"] == {"ipa": None, "audio": [{"file": "LL-c-nueva.wav", "ogg": None, "mp3": None, "tags": [], "penalty": 0, "source": "lingualibre"}]}
+    # re-running with an overlapping file is a no-op for that file (dedup) and respects max_total
+    added2 = ep.add_extra_candidates(cands, "es", {"llave": ["LL-a-llave.wav", "LL-b-llave.wav"]}, "category", cap=1, max_total=2)
+    assert added2 == 0 and len(cands["es"]["llave"]["audio"]) == 2
+
+
+def test_audio_url_for_prefers_transcode_then_falls_back_to_commons_url():
+    class FakeCommons:
+        cache = {"File:LL-a-casa.wav": {"url": "https://upload.wikimedia.org/x/LL-a-casa.wav"}}
+    assert ep.audio_url_for({"file": "x.ogg", "mp3": "m.mp3", "ogg": "o.ogg"}, FakeCommons()) == "m.mp3"
+    assert ep.audio_url_for({"file": "x.ogg", "mp3": None, "ogg": "o.ogg"}, FakeCommons()) == "o.ogg"
+    assert ep.audio_url_for({"file": "LL-a-casa.wav", "mp3": None, "ogg": None}, FakeCommons()) == "https://upload.wikimedia.org/x/LL-a-casa.wav"
+    assert ep.audio_url_for({"file": "missing.wav", "mp3": None, "ogg": None}, FakeCommons()) is None
+
+
+def test_langs_from_iso_and_label_rows():
+    iso_rows = [{"lang": "https://lingualibre.org/entity/Q386", "iso": "spa"}, {"lang": "https://lingualibre.org/entity/Qbad", "iso": "zzz"}]
+    assert ep._langs_from_iso_rows(iso_rows, {"spa": "es", "ita": "it"}) == {"es": "Q386"}
+    label_rows = [{"lang": "https://lingualibre.org/entity/Q385", "label": "Italian"}]
+    assert ep._langs_from_label_rows(label_rows, {"Italian": "it", "Polish": "pl"}) == {"it": "Q385"}
+
+
+def test_lingualibre_records_for_offline_returns_nothing_without_network():
+    ll = ep.LinguaLibre(interval=0, offline=True)
+    rows, failed = ll.records_for("Q386", ["casa", "perro"])
+    assert rows == [] and failed == 0 and ll.requests == 0

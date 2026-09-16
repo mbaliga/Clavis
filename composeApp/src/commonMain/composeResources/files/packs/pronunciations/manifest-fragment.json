@@ -1,7 +1,7 @@
 {
  "id": "clavis-pronunciations",
  "kind": "PRONUNCIATIONS",
- "version": "2026.09.02",
+ "version": "2026.09.16",
  "title": "Pronunciations (IPA + Commons audio references)",
  "languages": [
   "ar",
@@ -24,7 +24,7 @@
  ],
  "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
  "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
- "generatedAt": "2026-09-02T07:00:20Z",
+ "generatedAt": "2026-09-16T09:42:18Z",
  "attribution": [
   {
    "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
@@ -40,20 +40,20 @@
   }
  ],
  "files": {
-  "es.json.gz": 18678,
+  "es.json.gz": 29757,
   "fr.json.gz": 50737,
-  "it.json.gz": 21952,
+  "it.json.gz": 33435,
   "de.json.gz": 51021,
   "nl.json.gz": 44057,
-  "ja.json.gz": 20148,
-  "ko.json.gz": 11487,
+  "ja.json.gz": 22485,
+  "ko.json.gz": 14172,
   "zh.json.gz": 35915,
   "ar.json.gz": 8121,
   "en.json.gz": 53310,
   "pt.json.gz": 34695,
-  "la.json.gz": 7155,
+  "la.json.gz": 9705,
   "ru.json.gz": 57857,
-  "pl.json.gz": 22713,
+  "pl.json.gz": 31566,
   "uk.json.gz": 43146,
   "tr.json.gz": 8881,
   "hi.json.gz": 1395
@@ -62,7 +62,7 @@
   "es": {
    "lemmas": 1627,
    "ipa": 1500,
-   "audio": 3,
+   "audio": 560,
    "audioExcluded": 0
   },
   "fr": {
@@ -74,7 +74,7 @@
   "it": {
    "lemmas": 1598,
    "ipa": 1411,
-   "audio": 144,
+   "audio": 767,
    "audioExcluded": 0
   },
   "de": {
@@ -92,13 +92,13 @@
   "ja": {
    "lemmas": 2062,
    "ipa": 1556,
-   "audio": 1,
+   "audio": 63,
    "audioExcluded": 0
   },
   "ko": {
    "lemmas": 1115,
    "ipa": 899,
-   "audio": 5,
+   "audio": 102,
    "audioExcluded": 0
   },
   "zh": {
@@ -128,7 +128,7 @@
   "la": {
    "lemmas": 642,
    "ipa": 584,
-   "audio": 0,
+   "audio": 143,
    "audioExcluded": 0
   },
   "ru": {
@@ -140,7 +140,7 @@
   "pl": {
    "lemmas": 1863,
    "ipa": 1682,
-   "audio": 0,
+   "audio": 413,
    "audioExcluded": 0
   },
   "uk": {

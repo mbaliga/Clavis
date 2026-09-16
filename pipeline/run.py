@@ -73,6 +73,8 @@ def main(argv=None):
     ap.add_argument('--web-languages', default='core', help="languages for the web build (default 'core' = the frozen ten)")
     ap.add_argument('--enrich', action='store_true', help='also run the enrichment stages (enrich_*.py; need kaikki/EtymDB/Tatoeba data, see ENRICHMENT.md)')
     ap.add_argument('--network', action='store_true', help='let enrich_pronunciations query Wikimedia Commons (default: --offline, cache only)')
+    ap.add_argument('--lingualibre', action='store_true', help='enrich_pronunciations: also query the Lingua Libre SPARQL endpoint for a second audio source (needs --network)')
+    ap.add_argument('--commons-categories', action='store_true', help='enrich_pronunciations: also scan small Commons pronunciation categories for a second audio source (needs --network)')
     a = ap.parse_args(argv)
     cfg = Config.from_args(a)
     stages = [s.strip() for s in a.stages.split(',') if s.strip()]
@@ -101,8 +103,12 @@ def main(argv=None):
         # enrichment stages (owned by ENRICHMENT.md): read the lexicon, write <build>/packs/<kind>/ + <build>/enrich/
         'enrich_etymology': dict(cmd=[PY, 'enrich_etymology.py', '--lexicon', str(cfg.lexicon), '--out-dir', str(cfg.build), '--kaikki-dir', str(cfg.kaikki)],
                                  inputs=[cfg.lexicon], outputs=[cfg.packs / 'etymology' / 'etym.json.gz']),
-        'enrich_pronunciations': dict(cmd=[PY, 'enrich_pronunciations.py', '--lexicon', str(cfg.lexicon), '--out-dir', str(cfg.build), '--kaikki-dir', str(cfg.kaikki)] + ([] if a.network else ['--offline']),
-                                      inputs=[cfg.lexicon], outputs=[cfg.packs / 'pronunciations' / 'manifest-fragment.json'], extra={'network': a.network}),
+        'enrich_pronunciations': dict(cmd=[PY, 'enrich_pronunciations.py', '--lexicon', str(cfg.lexicon), '--out-dir', str(cfg.build), '--kaikki-dir', str(cfg.kaikki)]
+                                      + ([] if a.network else ['--offline'])
+                                      + (['--lingualibre'] if a.lingualibre else [])
+                                      + (['--commons-categories'] if a.commons_categories else []),
+                                      inputs=[cfg.lexicon], outputs=[cfg.packs / 'pronunciations' / 'manifest-fragment.json'],
+                                      extra={'network': a.network, 'lingualibre': a.lingualibre, 'commons_categories': a.commons_categories}),
         'enrich_sentences': dict(cmd=[PY, 'enrich_sentences.py', '--lexicon', str(cfg.lexicon), '--out-dir', str(cfg.build)],
                                  inputs=[cfg.lexicon], outputs=[cfg.packs / 'sentences' / 'manifest-fragment.json']),
         'pack_assets': dict(cmd=[PY, 'pack_assets.py', *common, *lang_args] + (['--version', a.version] if a.version else []) + (['--install'] if a.install else []),

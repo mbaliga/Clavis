@@ -13,7 +13,7 @@ Files owned by these stages:
 | `enrich_etymology.py` | Wiktionary graph + EtymDB port + union → `build/packs/etymology/etym.json.gz` |
 | `enrich_pronunciations.py` | IPA + Commons audio with licence lookup → `build/packs/pronunciations/<lang>.json.gz` |
 | `enrich_sentences.py` | Tatoeba selection + set cover → `build/packs/sentences/<lang>.json.gz` |
-| `tests/test_enrich_*.py` | 63 pytest tests on synthetic fixtures (20-line kaikki extract, mini lexicon, mini EtymDB, mini Tatoeba CSVs) |
+| `tests/test_enrich_*.py` | 80 pytest tests on synthetic fixtures (20-line kaikki extract, mini lexicon, mini EtymDB, mini Tatoeba CSVs) |
 | `build/enrich/` | provenance, coverage reports, caches (kaikki matches, Commons answers) |
 
 Inputs are never committed: the compacted kaikki extracts (`<Language>.jsonl.gz`, produced by
@@ -39,10 +39,15 @@ python enrich_etymology.py --lexicon build/lexicon.json \
 #    --offline never calls the API and treats uncached files as unverified = excluded)
 python enrich_pronunciations.py --lexicon build/lexicon.json --kaikki-dir $SCRATCH/data/kaikki --out-dir build
 
+# B2. second audio source for es/it/pl/ja/ko/la (§6.4), off by default, on top of B:
+python enrich_pronunciations.py --lexicon build/lexicon.json --kaikki-dir $SCRATCH/data/kaikki --out-dir build \
+    --lingualibre --commons-categories
+# or via run.py: python run.py --enrich --network --lingualibre --commons-categories
+
 # C. sentences (≈ 80 s: one pass over sentences.csv 756 MB, links.csv 455 MB, sentences_detailed.csv 1.4 GB)
 python enrich_sentences.py --lexicon build/lexicon.json --tatoeba-dir $SCRATCH/data/tatoeba --out-dir build
 
-python -m pytest tests/test_enrich_*.py -q     # 63 passed
+python -m pytest tests/test_enrich_*.py -q     # 80 passed
 ```
 
 Every stage takes `--languages es,fr,…` (default: every lexicon language that the registry knows),
@@ -343,6 +348,13 @@ sentences_detailed.csv 9 s).
 Each `manifest-fragment.json` is a `PackManifest` (`id`, `kind`, `version`, `title`, `languages`,
 `licence`, `source`, `generatedAt`, `attribution[]`, `files{name: bytes}`, `stats{lang: {…}}`).
 
+The pronunciations row's "Wikimedia Commons contributors" attribution already covers the §6.4 second
+source unchanged: Lingua Libre recordings and the per-language pronunciation categories are
+Wikimedia Commons files like any other, carrying their own `Artist`/`Credit` extmetadata (Lingua
+Libre's is typically "Speaker: `<name>` / Recorder: `<name>`", surfaced as `audioBy`), so no new
+attribution-table entry was needed — the existing per-file `audioBy`/`audioLicence` mechanism is
+exactly what names Lingua Libre's speakers.
+
 ---
 
 ## 5. Integration notes (for `run.py` / `languages.json` / the app)
@@ -366,6 +378,13 @@ Each `manifest-fragment.json` is a `PackManifest` (`id`, `kind`, `version`, `tit
   overridable with `--kaikki-dir`, `--etymdb-dir`, `--desc-dir`, `--tatoeba-dir`. Only
   `enrich_pronunciations.py` touches the network; `--offline` makes the whole enrichment run
   reproducible from caches (D-13 applies to the app, but CI should still run offline).
+- **The §6.4 second audio source** is two more off-by-default flags on the same stage,
+  `--lingualibre` and `--commons-categories`; `run.py --enrich --network --lingualibre
+  --commons-categories` passes them through (each becomes part of the stage's cache-stamp signature,
+  so turning them on/off busts the stamp and reruns the stage). They only ever add candidates for
+  the six languages in `enrich_pronunciations.LINGUALIBRE_ISO3`/`COMMONS_CATEGORIES` (es/it/pl/ja/ko/
+  la) — extending them to another language is a one-line addition to those dicts (plus, for the
+  category scan, confirming `Category:<Language> pronunciation` is small enough to page).
 - **Outputs to pack**: `build/packs/etymology/etym.json.gz` (`{lang: {lemma: EtymEntry}}`), split
   per language by `pack_assets.py` if it keeps the `etym/<iso>.json.gz` layout;
   `build/packs/pronunciations/<lang>.json.gz`; `build/packs/sentences/<lang>.json.gz` +
@@ -477,3 +496,116 @@ Commons API: 0 requests in this run, 4583 answers served from the cache, 5,243 f
 Audio rows among the candidates: {'excluded': 101310, 'permissive': 5712}. Runtime {'sentences_csv': 54.9, 'tokenise': 85.5, 'links_csv': 25.8, 'audio_csv': 2.8, 'detailed_csv': 71.7, 'total': 270.5}.
 
 <!-- /SENT_NEW -->
+
+---
+
+## 6.4 A second pronunciation-audio source: Lingua Libre + Commons categories
+
+kaikki's `{{audio}}` coverage is a property of English Wiktionary's editing conventions, not of what
+audio actually exists: the compaction stats (`*.stats.json`) show `with_audio` counts of 42/809,603
+entries for Spanish, 6/… for Japanese, 25/… for Korean, 6/… for Polish and 0 for Latin, against
+92,620 for French and 301,486 for German — English Wiktionary editors for those languages simply
+don't embed `{{audio}}` templates, even though Wikimedia Commons itself holds tens of thousands of
+recordings for Spanish and Italian (from **Lingua Libre**, a Wikimedia project that batch-records
+single-word pronunciations, all CC BY-SA 4.0 by policy) and smaller but real numbers for Japanese,
+Korean and Latin. `enrich_pronunciations.py` now has two opt-in flags, `--lingualibre` and
+`--commons-categories`, that add exactly those files as extra candidates for `es`, `it`, `pl`, `ja`,
+`ko`, `la` — the six languages kaikki barely covers — without touching the record schema, the licence
+check, the cache or the output paths, and without altering anything for the other eleven languages.
+
+**Method.**
+1. **Lingua Libre SPARQL** (`https://lingualibre.org/bigdata/namespace/wdq/sparql`). The six
+   language items are discovered once (not hard-coded) by querying items that are `prop:P2 entity:Q4`
+   ("instance of: language") for the endpoint's own ISO 639-3 property — found by listing the
+   endpoint's properties and inspecting them: `prop:P13` is "ISO 639-3 code" — with an English
+   `rdfs:label` match as fallback; the six QIDs (`es→Q386, it→Q385, pl→Q298, ja→Q389, ko→Q207,
+   la→Q384`) are cached in `build/enrich/lingualibre_languages.json`. Per language, the lexicon's
+   lemmas are sent in `VALUES ?transcription { "casa" "perro" … }` chunks of 300 (raw
+   `application/sparql-query` POST, `Accept: application/sparql-results+json`, the same descriptive
+   `User-Agent` sent to Commons), asking for `?record prop:P2 entity:Q2 ; prop:P4 entity:<qid> ;
+   prop:P3 ?file ; prop:P7 ?transcription`. A `VALUES` match is exact, so the returned
+   `?transcription` *is* one of our own lemma strings — no fuzzy matching needed on this path. The
+   Commons file name is recovered from the `Special:FilePath` URL Lingua Libre returns
+   (URL-decoded). One candidate file per lemma is kept (`NEW_SOURCE_CAP = 1`) to keep the licence
+   pass short, appended after any kaikki candidates.
+2. **Commons category scan** (fallback/supplement), `action=query&list=categorymembers` with
+   `cmcontinue` paging, over the five small generic categories only (`Category:Spanish/Italian/
+   Japanese/Korean/Latin pronunciation`, 672/1,209/248/39/720 files respectively — one to three
+   pages each). `Category:Polish pronunciation` (≈24,141 files) is deliberately skipped, per the
+   brief: Lingua Libre already covers Polish, and paging a category two orders of magnitude larger
+   for the same yield is not worth it. Filenames are parsed with one rule that covers every
+   convention seen (`Xx-<word>.ext`, `Xx-<region>-<word>.ext`, `(iso)-<speaker>-<word>.ext`,
+   `LL-Q<n> (iso)-<speaker>-<word>.ext`): the transcribed word is always the segment after the last
+   hyphen, whatever precedes it. The result is normalised NFC + lowercase and matched against a
+   `{word: lemma}` index built from both the lexicon lemma **and** its corpus surface form.
+3. **Merge and licence.** New candidates are appended after kaikki's for the same lemma, deduplicated
+   by filename, and go through the *same* `Commons` extmetadata cache and licence filter as every
+   other candidate (`prop=imageinfo&iiprop=url|extmetadata`) — nothing in the CC0/CC BY/CC BY-SA/
+   public-domain rule was weakened. `audioUrl` is taken from imageinfo's `url` (the original file —
+   `.wav` for most Lingua Libre recordings; the app already plays WAV/MP3/OGG) rather than a guessed
+   transcode path, since Lingua Libre files have no kaikki-style `mp3_url`/`ogg_url`. No existing
+   audio for fr/de/nl/en/ru/zh/uk/pt/tr/ar/hi was reordered or removed — those languages are outside
+   `LINGUALIBRE_ISO3`/`COMMONS_CATEGORIES` and are never queried by the new code paths.
+
+**Endpoint behaviour observed (2026-09-16, this egress).** The Lingua Libre SPARQL endpoint answered
+trivial and 300-value queries in well under a second in isolation, but under sustained use from this
+session it degraded in a distinctive pattern: **the first request of a fresh process usually
+succeeds; a process that keeps querying (a second language, or a later chunk of the same language)
+increasingly hits `502` with the client's exponential back-off (5→10→20→40→80 s), and after five
+failed attempts the client marks the endpoint unavailable for the rest of that process** (by design,
+so a dead endpoint doesn't stall the run — this is the "fall back to (2) only" contingency named in
+the brief, scoped per-process rather than globally). Re-running as a fresh process reliably worked
+again for a while, then a further burst of chunk requests eventually made even fresh processes time
+out outright (60 s, no response at all) rather than 502 — read as the endpoint (a small
+community-run Blazegraph instance, not WMF infrastructure) becoming genuinely overloaded rather than
+this egress being deliberately blocked, since isolated single queries kept succeeding throughout.
+Practical effect: **es, it and ko got their full lexicon queried** (6, 6 and 4 chunks respectively,
+after retrying failed chunks as separate fresh processes); **pl and ja are partial** (pl: 3 of 7
+chunks, ~1,163/1,863 lemmas queried; ja: 5 of 7 chunks, ~1,462/2,062 lemmas queried — the remaining
+chunks timed out on every retry and were not forced further); **la's 3 chunks all completed** but
+Lingua Libre simply holds almost no Latin recordings (1 hit). The Commons category scan, being a
+much smaller and gentler request pattern (1–3 pages per language, 6 s apart, on the already-proven
+Commons API), completed for all five configured languages without incident. A future run should
+expect to recover the missing pl/ja lemmas once the endpoint has had time to recover, by re-running
+`enrich_pronunciations.py --lingualibre` alone — already-permissive lemmas are left untouched, so a
+partial re-run only adds coverage.
+
+**Method limits.** (a) Lingua Libre's `transcription` field is what the recording speaker typed, not
+a normalised lemma; the SPARQL path exploits `VALUES` exact-match so it only finds lemma spellings
+that are recorded verbatim (no inflection matching, unlike the kaikki matcher's Arabic/Korean/Chinese
+candidate generation) — a lemma recorded only under an inflected or accented variant is missed.
+(b) The category-scan filename parser trusts Commons category membership for the `LL-Q…(iso)` and
+`(iso)-…` conventions rather than re-checking the embedded ISO code, since both are rare inside the
+five categories used and mis-scoped files would fail to match a lemma anyway. (c) Lingua Libre
+records many speakers per word; only one file is kept (the first permissively-licensed one returned
+by the endpoint, in whatever order SPARQL happened to return rows), so the same word from two
+requests may cite different speakers — this is fine for the app's use (hearing *a* native
+pronunciation), not a determinism guarantee across runs. (d) Most new files are `.wav` originals
+(no Commons transcode exists for Lingua Libre uploads), larger than the `.ogg`/`.mp3` files kaikki
+usually pointed to; this is intentional per the brief rather than a regression.
+
+### Before / after (2026-09-16 run, `build/packs/lexicon/lexicon.json.gz`)
+
+<!-- PRON_LL -->
+| Lang | Lemmas | Audio before | Audio after | kaikki | Lingua Libre | Category | Excluded (licence) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| es | 1627 | 3 | **560** | 3 | 492 | 65 | 0 |
+| it | 1598 | 144 | **767** | 144 | 414 | 209 | 0 |
+| pl | 1863 | 0 | **413** | 0 | 413 | — (category skipped) | 0 |
+| ja | 2062 | 1 | **63** | 1 | 60 | 2 | 0 |
+| ko | 1115 | 5 | **102** | 5 | 95 | 2 | 0 |
+| la | 642 | 0 | **143** | 0 | 1 | 142 | 0 |
+
+Requests and runtime (cumulative across the first full run, the endpoint-outage retries as
+per-language/per-chunk fresh processes, and the final merge pass): Lingua Libre SPARQL — 1 language
+discovery request + roughly 30 chunk requests (300 lemmas each) across the six languages, several
+repeated after 502s/timeouts as noted above; Commons category scan — 9 category pages (1–3 per
+language) at the existing 6 s/request pace; Commons licence pass — 39 batched `imageinfo` requests
+of ≤50 titles (18 in the main run + 21 in the merge pass), growing `commons_cache.json` from 11,373
+to 13,317 files; nothing was excluded by licence in this batch (all new files were Lingua Libre
+CC BY-SA 4.0 or the categories' usual CC0/CC BY/CC BY-SA/public-domain mix). Wall time: ≈ 8 min for
+the first full `--lingualibre --commons-categories` run (`build/enrich/pronunciation_coverage.json`,
+`timings_seconds.total`), plus the retries and merge pass described above (≈ 35 min more, dominated
+by 502/timeout back-offs on the flaky endpoint, not by useful request volume).
+
+<!-- /PRON_LL -->

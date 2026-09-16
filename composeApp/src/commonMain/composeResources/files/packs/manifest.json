@@ -2,7 +2,7 @@
  {
   "id": "clavis-comics",
   "kind": "COMICS",
-  "version": "2026.09.02",
+  "version": "2026.09.16",
   "title": "Pepper&Carrot scenes",
   "languages": [
    "es",
@@ -25,7 +25,7 @@
   ],
   "licence": "CC-BY-4.0",
   "source": "https://framagit.org/peppercarrot/webcomics",
-  "generatedAt": "2026-09-02T13:51:05Z",
+  "generatedAt": "2026-09-16T09:43:01Z",
   "attribution": [
    {
     "name": "David Revoy",
@@ -1731,7 +1731,7 @@
  {
   "id": "clavis-lexicon",
   "kind": "LEXICON",
-  "version": "2026.09.02",
+  "version": "2026.09.16",
   "title": "Corpus lexicon and frequencies",
   "languages": [
    "es",
@@ -1754,7 +1754,7 @@
   ],
   "licence": "CC-BY-SA-4.0",
   "source": "wordfreq 3.1.1 (CC BY-SA 4.0) + Pepper&Carrot corpus counts",
-  "generatedAt": "2026-09-02T13:51:05Z",
+  "generatedAt": "2026-09-16T09:43:01Z",
   "attribution": [
    {
     "name": "Robyn Speer",
@@ -2222,7 +2222,7 @@
  {
   "id": "clavis-pronunciations",
   "kind": "PRONUNCIATIONS",
-  "version": "2026.09.02",
+  "version": "2026.09.16",
   "title": "Pronunciations (IPA + Commons audio references)",
   "languages": [
    "ar",
@@ -2245,7 +2245,7 @@
   ],
   "licence": "CC BY-SA 4.0 (IPA); audio per-file CC0 / CC BY / CC BY-SA / public domain",
   "source": "https://kaikki.org/dictionary/ (wiktextract, Wiktionary CC BY-SA 4.0); https://commons.wikimedia.org/ (per-file licence via API)",
-  "generatedAt": "2026-09-02T07:00:20Z",
+  "generatedAt": "2026-09-16T09:42:18Z",
   "attribution": [
    {
     "name": "Wiktionary contributors (via wiktextract / kaikki.org)",
@@ -2261,20 +2261,20 @@
    }
   ],
   "files": {
-   "pronunciations/es.json.gz": 18678,
+   "pronunciations/es.json.gz": 29757,
    "pronunciations/fr.json.gz": 50737,
-   "pronunciations/it.json.gz": 21952,
+   "pronunciations/it.json.gz": 33435,
    "pronunciations/de.json.gz": 51021,
    "pronunciations/nl.json.gz": 44057,
-   "pronunciations/ja.json.gz": 20148,
-   "pronunciations/ko.json.gz": 11487,
+   "pronunciations/ja.json.gz": 22485,
+   "pronunciations/ko.json.gz": 14172,
    "pronunciations/zh.json.gz": 35915,
    "pronunciations/ar.json.gz": 8121,
    "pronunciations/en.json.gz": 53310,
    "pronunciations/pt.json.gz": 34695,
-   "pronunciations/la.json.gz": 7155,
+   "pronunciations/la.json.gz": 9705,
    "pronunciations/ru.json.gz": 57857,
-   "pronunciations/pl.json.gz": 22713,
+   "pronunciations/pl.json.gz": 31566,
    "pronunciations/uk.json.gz": 43146,
    "pronunciations/tr.json.gz": 8881,
    "pronunciations/hi.json.gz": 1395
@@ -2283,7 +2283,7 @@
    "es": {
     "lemmas": 1627,
     "ipa": 1500,
-    "audio": 3,
+    "audio": 560,
     "audioExcluded": 0
    },
    "fr": {
@@ -2295,7 +2295,7 @@
    "it": {
     "lemmas": 1598,
     "ipa": 1411,
-    "audio": 144,
+    "audio": 767,
     "audioExcluded": 0
    },
    "de": {
@@ -2313,13 +2313,13 @@
    "ja": {
     "lemmas": 2062,
     "ipa": 1556,
-    "audio": 1,
+    "audio": 63,
     "audioExcluded": 0
    },
    "ko": {
     "lemmas": 1115,
     "ipa": 899,
-    "audio": 5,
+    "audio": 102,
     "audioExcluded": 0
    },
    "zh": {
@@ -2349,7 +2349,7 @@
    "la": {
     "lemmas": 642,
     "ipa": 584,
-    "audio": 0,
+    "audio": 143,
     "audioExcluded": 0
    },
    "ru": {
@@ -2361,7 +2361,7 @@
    "pl": {
     "lemmas": 1863,
     "ipa": 1682,
-    "audio": 0,
+    "audio": 413,
     "audioExcluded": 0
    },
    "uk": {
