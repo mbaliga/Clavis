@@ -236,15 +236,17 @@ If 429s still appear, add to `gradle.properties` for the download phase only:
 ```
 
 plus a 16 KB page-alignment check on the release APK, a headless smoke run of the uber-jar, and a
-second job that installs `pipeline/requirements.txt` and runs `pytest pipeline/tests`. Artifacts:
-`clavis-debug-apk`, `clavis-release-apk-unsigned` (with `mapping.txt`), `clavis-desktop-jar-linux-x64`,
-and `reports` on failure. Actions are pinned to major tags of Node-24 release lines (the policy is in
-the file header; Node 20 leaves the runners on 2026-09-23).
+second job that installs `pipeline/requirements.txt` and runs `pytest pipeline/tests`. Artifacts (3-day
+retention, upload failures tolerated — Actions artifact storage is a scarce account-wide quota,
+`docs/RELEASE.md` §8): `clavis-release-apk-unsigned` (with `mapping.txt`), and `reports` on failure; the
+debug APK and the jar are built and checked but not uploaded. Actions are pinned to major tags of Node-24
+release lines (the policy is in the file header; Node 20 leaves the runners on 2026-09-23).
 
 `.github/workflows/release.yml` (tag `v*`, or manual dry run) builds the Android APK/AAB, the Linux
 `.deb` + jar, the macOS `.dmg` + jar (macos-15, optional Developer ID signing and notarization), the
-Windows `.msi` + jar (windows-2025, WiX 3 preinstalled) and the reference web build, then publishes one
-GitHub Release with `SHA256SUMS.txt`. Procedure, secrets and artifact names: `docs/RELEASE.md`.
+Windows `.msi` + jar (windows-2025, WiX 3 preinstalled) and the reference web build; each job uploads
+straight into one draft GitHub Release (`gh release upload`, no artifact storage), which the last job
+checks, completes with `SHA256SUMS.txt` and publishes. Procedure, secrets and asset names: `docs/RELEASE.md`.
 
 Verified 2026-09-02 on this machine after the versioning/signing change: `assembleRelease`,
 `bundleRelease`, `lintDebug`, `desktopTest`, `packageDeb` (`clavis_0.1.0-1_amd64.deb`) and

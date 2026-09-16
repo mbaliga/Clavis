@@ -1,6 +1,7 @@
 # CI: every push to main and every pull request. Tests, lint, debug APK, an R8 release APK (unsigned) and the
-# Linux uber-jar; a second job lints the Python pipeline. Multi-OS installers and the GitHub Release are the
-# job of release.yml.
+# Linux uber-jar (smoke-tested, not uploaded); a second job lints the Python pipeline. Only the release APK and
+# its mapping are kept, for 3 days — Actions artifact storage is a scarce account-wide quota (docs/RELEASE.md §8,
+# "Storage"). Multi-OS installers and the GitHub Release are the job of release.yml.
 #
 # Action pinning policy (applies to release.yml too): every action is pinned to a MAJOR tag (`@vN`) of a
 # release line that runs on Node 24 — GitHub removes Node 20 from hosted runners on 2026-09-23, so the older
@@ -32,7 +33,7 @@ env:
 
 jobs:
   build:
-    name: Test · lint · APKs · desktop jar (linux-x64)
+    name: Test · lint · APK · desktop jar smoke (linux-x64)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -83,17 +84,15 @@ jobs:
           if echo "$out" | grep -q 'ClassNotFoundException\|NoClassDefFoundError'; then echo "::error::missing class in uber-jar"; exit 1; fi
           echo "$out" | grep -q 'HeadlessException'
 
-      - name: Upload debug APK
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: clavis-debug-apk
-          path: composeApp/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 14
-
+      # Storage: Actions artifact storage is one quota for the whole account (500 MB on the free plan), and the
+      # 14-day debug APK (~31 MB) + release APK (~22 MB) + uber-jar (~83 MB) of every run filled it in nine runs
+      # ("Failed to CreateArtifact: Artifact storage quota has been hit"). Only the R8 release APK + mapping is kept
+      # now, for 3 days; the debug APK and the jar are still built and checked above — build locally or run the
+      # release dry run when a file is needed. continue-on-error: a quota blip must never turn a green
+      # verification job red; the checks above are the point, the upload is a convenience.
       - name: Upload release APK (unsigned, R8) and mapping
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: clavis-release-apk-unsigned
@@ -101,19 +100,11 @@ jobs:
             composeApp/build/outputs/apk/release/*.apk
             composeApp/build/outputs/mapping/release/mapping.txt
           if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload desktop uber-jar (linux-x64)
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: clavis-desktop-jar-linux-x64
-          path: composeApp/build/compose/jars/*.jar
-          if-no-files-found: error
-          retention-days: 14
+          retention-days: 3
 
       - name: Upload test and lint reports
         if: failure()
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: reports
@@ -122,7 +113,7 @@ jobs:
             composeApp/build/reports/tests/
             composeApp/build/reports/lint-results-debug.html
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 3
 
   pipeline-check:
     name: Pipeline tests and CLI smoke (no data downloads)
