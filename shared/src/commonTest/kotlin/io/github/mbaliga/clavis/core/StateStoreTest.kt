@@ -187,6 +187,17 @@ class StateStoreTest {
         assertFailsWith<IllegalArgumentException> { s.importJson("""{"cards":{},"lanes":{"es":"read"}}""") } // a lane mode the model does not know
         assertTrue(st === s.current); assertFalse(s.lastLoadWasCorrupt)
         assertEquals(4, store(d).load()!!.settings.newPerDay)
+        assertFalse(FileIo.exists("${d.data}/corrupt/clavis-state.json.before-import-$now")) // nothing was set aside either
+    }
+
+    @Test fun importKeepsACopyOfThePreviousDocument() = runTest {
+        val d = dirs(); val s = store(d)
+        val st = s.loadOrFresh(); st.settings.newPerDay = 4; s.save(st)
+        val before = assertNotNull(FileIo.read("${d.data}/clavis-state.json"))
+        s.importJson(webExport)
+        assertEquals(12, store(d).load()!!.settings.newPerDay) // the import landed
+        val copy = "${d.data}/corrupt/clavis-state.json.before-import-$now"
+        assertTrue(FileIo.exists(copy)); assertContentEquals(before, FileIo.read(copy))
     }
 
     @Test fun resetDeletesTheDocument() = runTest {
@@ -195,6 +206,24 @@ class StateStoreTest {
         assertNotNull(store(d).load())
         s.reset()
         assertNull(s.current); assertNull(store(d).load()); assertFalse(FileIo.exists("${d.data}/clavis-state.json"))
+    }
+
+    @Test fun resetKeepsACopyOfTheDocumentBesideTheFreshOne() = runTest {
+        val d = dirs(); val s = store(d)
+        val st = freshState(Fx.registry, now); st.settings.newPerDay = 4
+        s.save(st)
+        val before = assertNotNull(FileIo.read("${d.data}/clavis-state.json"))
+        s.reset()
+        assertNull(store(d).load())
+        val copy = "${d.data}/corrupt/clavis-state.json.before-reset-$now"
+        assertTrue(FileIo.exists(copy)); assertContentEquals(before, FileIo.read(copy))
+        // a second reset at the same instant gets its own name; the first copy is never overwritten
+        s.save(freshState(Fx.registry, now))
+        s.reset()
+        assertTrue(FileIo.exists("$copy.2")); assertContentEquals(before, FileIo.read(copy))
+        // nothing to set aside when nothing is stored
+        s.reset()
+        assertFalse(FileIo.exists("$copy.3"))
     }
 
     @Test fun saveIsAtomicAndRepeatable() = runTest {

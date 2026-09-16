@@ -297,6 +297,9 @@ class DesktopFileImporter : FileImporter {
         val name = dlg.file ?: return@withContext null
         val f = File(dir, name)
         if (!f.isFile) return@withContext null
+        // the dialog's filename filter is advisory on some platforms (Windows ignores it): refuse other kinds out loud
+        val ext = name.substringAfterLast('.', "").lowercase()
+        if (allowedExtensions.isNotEmpty() && ext !in allowedExtensions) throw ImportRefusedException(Copy.importWrongKind(allowedExtensions))
         if (f.length() > ImportLimits.MAX_BYTES) throw ImportRefusedException(Copy.IMPORT_TOO_LARGE)
         ImportedFile(name, f.inputStream().use { readBoundedText(it) })
     }

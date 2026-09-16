@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -101,7 +100,7 @@ fun Rail(active: String, onSelect: (String) -> Unit, onSettings: () -> Unit, mod
             Column(
                 Modifier
                     .padding(vertical = 3.dp)
-                    .size(width = 72.dp, height = 56.dp)
+                    .defaultMinSize(minWidth = 72.dp, minHeight = 56.dp) // a minimum, not a fixed box: labels grow with the font scale
                     .clip(ClavisShapes.dockButton)
                     .background(if (on) p.accentSoft else Color.Transparent)
                     .selectable(selected = on, role = Role.Tab) { onSelect(item.id) }
@@ -118,24 +117,26 @@ fun Rail(active: String, onSelect: (String) -> Unit, onSettings: () -> Unit, mod
         Spacer(Modifier.weight(1f))
         // Secondary destinations (the "dock overflow" of expanded widths): Story, Languages, Your texts.
         for ((id, label, glyph) in RAIL_MORE) {
+            val on = id == active
             Column(
                 Modifier
                     .padding(vertical = 2.dp)
-                    .size(width = 72.dp, height = 48.dp)
+                    .defaultMinSize(minWidth = 72.dp, minHeight = 48.dp)
                     .clip(ClavisShapes.dockButton)
-                    .selectable(selected = false, role = Role.Button) { onSelect(id) }
+                    .background(if (on) p.accentSoft else Color.Transparent)
+                    .selectable(selected = on, role = Role.Button) { onSelect(id) }
                     .semantics { contentDescription = label }
                     .tagged("rail-$id")
                     .padding(top = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(glyph, style = ClavisTheme.type.small, color = p.ink3)
-                Text(label, style = ClavisTheme.type.dockLabel, color = p.ink3)
+                Text(glyph, style = ClavisTheme.type.small, color = if (on) p.accentInk else p.ink3)
+                Text(label, style = ClavisTheme.type.dockLabel, color = if (on) p.accentInk else p.ink3)
             }
         }
         Column(
             Modifier
-                .size(width = 72.dp, height = 56.dp)
+                .defaultMinSize(minWidth = 72.dp, minHeight = 56.dp)
                 .clip(ClavisShapes.dockButton)
                 .background(if (active == "set") p.accentSoft else Color.Transparent)
                 .selectable(selected = active == "set", role = Role.Button, onClick = onSettings)

@@ -102,7 +102,7 @@ fun CaptionTokens(
                     val tappable = onTap != null && mark != TokenMark.GAP
                     Column(
                         Modifier
-                            .defaultMinSize(minHeight = 44.dp, minWidth = if (isGap) 46.dp else 0.dp)
+                            .defaultMinSize(minHeight = 48.dp, minWidth = if (isGap) 46.dp else 0.dp)
                             .clip(ClavisShapes.tok)
                             .background(bg)
                             .then(if (tappable) Modifier.clickable(role = Role.Button) { onTap!!(i, tok) } else Modifier)

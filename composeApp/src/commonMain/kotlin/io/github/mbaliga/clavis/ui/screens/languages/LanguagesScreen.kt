@@ -70,7 +70,16 @@ object LanguagesCopy {
     fun readInstead(y: String) = "Read $y instead"
     const val SPEAK_BOTH = "Speak both anyway"
     fun alongside(x: String) = "speaking alongside $x — mix-ups are being counted"
-    fun thin(episodes: Int, lang: String) = "Only $episodes episode${if (episodes == 1) "" else "s"} ${if (episodes == 1) "is" else "are"} translated into $lang; sessions will repeat pages sooner."
+    /**
+     * Explains why a lane is thin by pages — true whether the cause is the absolute floor or the
+     * relative one (under half the richest enabled lane's pages, usability review); `richest == 0`
+     * when there is nothing to compare against.
+     */
+    fun thin(pages: Int, richest: Int, lang: String): String {
+        val p = "$pages page${if (pages == 1) "" else "s"}"
+        val compared = if (richest > pages) " of $richest" else ""
+        return "Only $p$compared ${if (pages == 1) "is" else "are"} translated into $lang; sessions will repeat pages sooner."
+    }
     const val THIN = "thin"
     fun resting(kept: Int) = "resting · $kept word${if (kept == 1) "" else "s"} kept"
     fun noVoice(lang: String) = "no permissively licensed voice exists for $lang yet — it uses your device's voice if it has one"
@@ -120,8 +129,16 @@ object LanguagesCopy {
 data class Coverage(
     val scenes: Int?, val pages: Int?, val episodes: Int?, val totalEpisodes: Int,
     val lemmas: Int?, val origins: Int?, val ipa: Int?, val audio: Int?, val sentences: Int?, val sentenceAudio: Int?,
+    /** The richest enabled lane's page count — the relative-thin baseline below (0 when unknown). */
+    val richestPages: Int = 0,
 ) {
-    val thin: Boolean get() = (scenes ?: 0) < 200 || (episodes ?: 0) < 6
+    /**
+     * Absolute floors, plus relative to the richest enabled lane (usability review): Korean's 470
+     * scenes / 137 pages cleared the old absolute floor outright while sitting under half of
+     * Spanish's 1,442 / 304 — so a lane under 50% of the richest enabled lane's pages is thin too.
+     */
+    val thin: Boolean get() = (scenes ?: 0) < 200 || (episodes ?: 0) < 6 ||
+        (richestPages > 0 && (pages ?: 0) < richestPages / 2.0)
 
     fun line(): String {
         if (scenes == null && lemmas == null) return LanguagesCopy.NO_FIGURES
@@ -139,6 +156,14 @@ data class Coverage(
     }
 }
 
+/** The largest `pages` figure among enabled (non-OFF) catalogue lanes — the relative-thin baseline. */
+fun richestPages(store: ClavisStore): Int {
+    val comics = store.manifests.firstOrNull { it.kind == PackKind.COMICS } ?: return 0
+    return catalogue(store).filter { store.state.laneMode(it.iso) != LaneMode.OFF }
+        .mapNotNull { comics.stats[it.iso.code]?.get("pages") }
+        .maxOrNull() ?: 0
+}
+
 fun coverageOf(store: ClavisStore, l: Lang): Coverage {
     fun stat(kind: PackKind, key: String): Int? = store.manifests.firstOrNull { it.kind == kind }?.stats?.get(l.code)?.get(key)
     val total = store.manifests.firstOrNull { it.kind == PackKind.COMICS }?.stats?.values?.mapNotNull { it["episodes"] }?.maxOrNull() ?: 0
@@ -148,6 +173,7 @@ fun coverageOf(store: ClavisStore, l: Lang): Coverage {
         lemmas = stat(PackKind.LEXICON, "lemmas") ?: stat(PackKind.PRONUNCIATIONS, "lemmas") ?: store.corpus.lex[l]?.size,
         origins = stat(PackKind.ETYMOLOGY, "origins"), ipa = stat(PackKind.PRONUNCIATIONS, "ipa"), audio = stat(PackKind.PRONUNCIATIONS, "audio"),
         sentences = stat(PackKind.SENTENCES, "sentences"), sentenceAudio = stat(PackKind.SENTENCES, "withAudio"),
+        richestPages = richestPages(store),
     )
 }
 
@@ -258,7 +284,7 @@ private fun LanguageRow(store: ClavisStore, info: LanguageInfo, onWantSpeak: (La
             return@Column
         }
         Text(cov.line(), style = t.small, color = p.ink2, modifier = Modifier.padding(top = 8.dp).tagged("lang-cov-${l.code}"))
-        if (cov.thin && cov.episodes != null) Text(LanguagesCopy.thin(cov.episodes, name), style = t.tiny, color = p.ochre, modifier = Modifier.padding(top = 2.dp))
+        if (cov.thin && cov.pages != null) Text(LanguagesCopy.thin(cov.pages, cov.richestPages, name), style = t.tiny, color = p.ochre, modifier = Modifier.padding(top = 2.dp))
         val voice = store.services.speaker.providerFor(l)
         Text("voice: ${voice ?: LanguagesCopy.VOICE_NONE}", style = t.small, color = p.ink2, modifier = Modifier.padding(top = 4.dp))
         if (l.code in LanguagesCopy.NO_PERMISSIVE_VOICE) Text(LanguagesCopy.noVoice(name), style = t.tiny, color = p.ink3, modifier = Modifier.padding(top = 2.dp))

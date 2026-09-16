@@ -34,6 +34,8 @@ data class Confirm(
     val text: String,
     val confirmLabel: String,
     val dismissLabel: String,
+    /** True when confirming erases what cannot come back (Reset): the dialog emphasises Cancel and Enter does not confirm. */
+    val destructive: Boolean = false,
     val onConfirm: () -> Unit,
 )
 

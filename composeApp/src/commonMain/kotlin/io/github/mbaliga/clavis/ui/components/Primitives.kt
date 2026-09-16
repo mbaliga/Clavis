@@ -196,7 +196,7 @@ fun Segmented(
             val on = i == selected
             Box(
                 Modifier
-                    .defaultMinSize(minHeight = 44.dp, minWidth = 52.dp)
+                    .defaultMinSize(minHeight = 48.dp, minWidth = 52.dp)
                     .background(if (on) p.accentSoft else Color.Transparent)
                     .selectable(selected = on, role = Role.RadioButton, onClick = { onSelect(i) })
                     .then(if (testTagPrefix != null) Modifier.tagged("$testTagPrefix-$label") else Modifier)

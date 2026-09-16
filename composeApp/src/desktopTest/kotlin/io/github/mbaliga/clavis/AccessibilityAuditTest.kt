@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
  * Automated accessibility checks over every screen of [Screens] at phone size:
  *  1. every clickable carries a role, a description or (merged) text, and every text field a label;
  *  2. every clickable is a 48 dp target — legitimate exceptions are allowlisted with a reason, the
- *     rest is reported (see [clickablesAre48dpTargets] for why that report does not fail today);
+ *     rest fails the assertion ([clickablesAre48dpTargets]);
  *  3. every screen composes under right-to-left layout, and the Story page controls point the
  *     RTL-correct way (`backArrow()`/`forwardArrow()` in Primitives.kt resolve from `LocalLayoutDirection`);
  *  4. every screen composes at the 2× font-size step, and the You record table still scrolls sideways.
@@ -39,13 +39,11 @@ class AccessibilityAuditTest {
 
     /**
      * 48 dp targets, measured on the layout size (density is 1f here). The list, with a per-screen
-     * count, is printed and written to `<clavis.shots>/a11y-touch-targets.txt`. Today it names ~90
-     * controls from three sites — every [Segmented] option renders 46 dp tall (Primitives.kt,
-     * `minHeight = 44.dp`), and the Cosmos HUD pills (CosmosScreen.kt `Hud`) and the Letters tabs
-     * (LettersScreen.kt) pass `minHeight = 44.dp` to QuietButton — which is a design decision, not
-     * something to allowlist one tag at a time. So the assertion is armed only with
-     * `CLAVIS_A11Y_STRICT=true` in the environment (or `-Dclavis.a11y.strict=true` on the test JVM);
-     * once those sites are at 48 dp, make it unconditional.
+     * count, is printed and written to `<clavis.shots>/a11y-touch-targets.txt`. This test found the
+     * last three 44 dp sites in the app — [Segmented] (Primitives.kt), the Cosmos HUD pills
+     * (CosmosScreen.kt `Hud`) and the Letters tabs (LettersScreen.kt), all since raised to 48 dp —
+     * so the assertion is unconditional; `CLAVIS_A11Y_STRICT`/`clavis.a11y.strict` stay as an escape
+     * hatch if a future screen needs to allowlist a deliberate exception before fixing it.
      */
     @Test
     fun clickablesAre48dpTargets() {
@@ -59,7 +57,8 @@ class AccessibilityAuditTest {
         }
         println(report)
         File(TestBoot.shotsDir(), "a11y-touch-targets.txt").writeText(report)
-        if (STRICT) assertTrue(a.smallTargets.isEmpty(), report)
+        if (STRICT_OFF) return
+        assertTrue(a.smallTargets.isEmpty(), report)
     }
 
     @Test
@@ -113,7 +112,9 @@ class AccessibilityAuditTest {
 
 /** Minimum touch target in px: 48 dp × density, and the skiko test density is 1f. */
 private const val MIN_TARGET = 48
-private val STRICT = (System.getProperty("clavis.a11y.strict") ?: System.getenv("CLAVIS_A11Y_STRICT")) == "true"
+
+/** Escape hatch for a future regression: set to not fail the build while a new offender gets fixed. */
+private val STRICT_OFF = (System.getProperty("clavis.a11y.strict") ?: System.getenv("CLAVIS_A11Y_STRICT")) == "false"
 private val ANY_NODE = SemanticsMatcher("any node") { true }
 
 private class Audit(

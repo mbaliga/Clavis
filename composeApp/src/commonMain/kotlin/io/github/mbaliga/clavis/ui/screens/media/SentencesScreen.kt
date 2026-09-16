@@ -92,8 +92,9 @@ fun SentencesScreen(store: ClavisStore, ui: UiState, l: Lang) {
     val p = ClavisTheme.palette
     val t = ClavisTheme.type
     @Suppress("UNUSED_VARIABLE") val rev = LocalRev.current
-    val pack by produceState<List<Sentence>?>(null, l) { value = runCatching { store.sentences(l) }.getOrDefault(emptyList()) }
-    val ranked = remember(pack, rev) { pack?.let { rankSentences(store, l, it) } }
+    // null while loading; a failed Result when the pack cannot be parsed (shown as such, not as "none yet")
+    val pack by produceState<Result<List<Sentence>>?>(null, l) { value = runCatching { store.sentences(l) } }
+    val ranked = remember(pack, rev) { pack?.getOrNull()?.let { rankSentences(store, l, it) } }
     var shown by remember(l) { mutableIntStateOf(60) }
     var english by remember(l) { mutableStateOf<Long?>(null) }
     val rtl = store.isRtl(l)
@@ -107,8 +108,9 @@ fun SentencesScreen(store: ClavisStore, ui: UiState, l: Lang) {
         }
         Text(MediaCopy.SENTENCES_FOOTER, style = t.small, color = p.ink2, modifier = Modifier.padding(top = 6.dp, bottom = 8.dp))
         when {
-            ranked == null -> Text(Copy.LOADING, style = t.small, color = p.ink3, modifier = Modifier.tagged("sentences-loading"))
-            ranked.isEmpty() -> Text("No sentence pack for ${store.langName(l)} yet.", style = t.small, color = p.ink2, modifier = Modifier.tagged("sentences-empty"))
+            pack == null -> Text(MediaCopy.SENTENCES_LOADING, style = t.small, color = p.ink3, modifier = Modifier.tagged("sentences-loading"))
+            pack?.isFailure == true -> Text(MediaCopy.sentencesUnreadable(store.langName(l)), style = t.small, color = p.rust, modifier = Modifier.tagged("sentences-failed"))
+            ranked == null || ranked.isEmpty() -> Text(MediaCopy.noSentences(store.langName(l)), style = t.small, color = p.ink2, modifier = Modifier.tagged("sentences-empty"))
             else -> {
                 val gated = ranked.count { it.matched > 0 && it.coverage >= 0.9 }
                 Text("$gated of ${ranked.size} sentences at ≥ 90% known words", style = t.tiny, color = p.ink3, modifier = Modifier.tagged("sentences-gated"))

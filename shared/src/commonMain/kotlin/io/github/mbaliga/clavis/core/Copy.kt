@@ -56,6 +56,8 @@ object Copy {
     const val HINT_ECHO_NOT_CREDIBLE = "The marker shows roughly where this line sits on the page."
     const val NEXT = "Next"
     const val SHOW_ENGLISH = "Show the English"
+    /** The session bar's visible count — its coloured segments are never the sole carrier. */
+    fun progressOf(i: Int, n: Int): String = "$i of $n"
 
     // ---------- cloze, §5.2 ----------
     const val FAST_RETURN = "You met this one a few minutes ago — the first return comes fast on purpose, then the gaps stretch [2]."
@@ -119,6 +121,8 @@ object Copy {
     const val DONT_KNOW = "Don't know"
     const val KNOW_IT = "Know it"
     const val CANCEL = "Cancel"
+    /** Cancel with at least one answer on the board goes through this confirm — the answers are not kept (usability review). */
+    const val TEST_STOP_CONFIRM = "Stop this check? Your answers so far are not kept."
     fun testBrandNew(lang: String): String = "$lang: treated as brand new — every word will earn its place"
     fun testAssumes(lang: String, band: String): String = "$lang: Clavis now assumes you know $band"
     const val NOTHING_YET = "nothing yet"
@@ -228,12 +232,12 @@ object Copy {
     const val RETAKE = "Retake"
     const val TAKE_TEST = "Take test"
     const val YOUR_DATA = "Your data"
-    const val YOUR_DATA_COPY = "Everything lives in this browser. Copy the text to back up or move devices; paste it back to restore."
     const val EXPORT = "Export"
     const val IMPORT = "Import"
     const val COPIED = "Copied"
-    const val SELECT_AND_COPY = "Select and copy"
     const val RESTORED = "Restored"
+    /** `resetAll` finished — the erase gave no feedback before (usability review). */
+    const val ERASED = "Everything was erased"
     const val NOT_A_BACKUP = "That doesn't look like a Clavis backup"
     /** The stored document could not be decoded; it was renamed `clavis-state.json.corrupt-<epoch>` beside the fresh one. */
     const val STATE_UNREADABLE = "Your previous record could not be read; a copy was kept beside it."
@@ -241,6 +245,8 @@ object Copy {
     const val IMPORT_TOO_LARGE = "That file is bigger than 2 MB — Clavis reads short texts: lyrics, subtitles, a chapter"
     const val IMPORT_NOT_TEXT = "That file doesn't look like text"
     const val IMPORT_TRUNCATED = "Long text — only the first 5,000 lines were kept"
+    /** The picker returned a file the importer does not read (its type filter is advisory on Android and on some desktops). */
+    fun importWrongKind(exts: List<String>): String = "Clavis reads ${exts.joinToString(", ") { ".$it" }} files — that one is something else"
 
     // ---------- Settings / misc, §7.9, §8 ----------
     const val ERASE_CONFIRM = "Erase all local progress?"
@@ -256,10 +262,4 @@ object Copy {
     const val STORY_FOOTER = "Just reading — nothing is graded here. Words you meet leave a trace that makes later study faster [15][17][35]. Tap a word to hear it."
     fun episode(n: Int): String = "Episode $n"
     fun pageOfN(i: Int, n: Int): String = "page $i of $n"
-
-    // ---------- glossary, §7.10 ----------
-    const val GLOSS_HELD = "A word whose memory strength predicts ≥90% recall right now."
-    const val GLOSS_READY = "Due for return: recall probability has decayed to the review point."
-    const val GLOSS_READABLE = "A bubble is readable when ≥95% of its words are held or presumed known."
-    const val GLOSS_PRESUMED = "Above your tested frequency line; treated as known until evidence says otherwise."
 }

@@ -41,7 +41,7 @@ class ThemeTest {
         assertEquals(ClavisTokens.Light, pal)
         assertEquals(Color(0xFFF4F4F2), pal.paper)
         assertEquals(Color(0xFF2A2C31), pal.ink)
-        assertEquals(Color(0xFF6B6E75), pal.ink2)
+        assertEquals(Color(0xFF5E616A), pal.ink2) // darkened for WCAG AA (usability review)
         assertEquals(pal.paper, bg)
     }
 

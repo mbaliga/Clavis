@@ -12,6 +12,7 @@ import io.github.mbaliga.clavis.core.Lang
 import io.github.mbaliga.clavis.core.LaneMode
 import io.github.mbaliga.clavis.core.PackKind
 import io.github.mbaliga.clavis.ui.screens.languages.coverageOf
+import io.github.mbaliga.clavis.ui.screens.languages.richestPages
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -59,10 +60,18 @@ class LanguagesTest {
         onNodeWithTag("lang-cov-es").performScrollTo().assertTextContains("${es["scenes"]} bubbles", substring = true)
         val covAr = coverageOf(store, Lang("ar"))
         val covEs = coverageOf(store, Lang("es"))
-        assertEquals((ar["scenes"] ?: 0) < 200 || (ar["episodes"] ?: 0) < 6, covAr.thin)
+        val richest = richestPages(store)
+        assertEquals((ar["scenes"] ?: 0) < 200 || (ar["episodes"] ?: 0) < 6 || (richest > 0 && (ar["pages"] ?: 0) < richest / 2.0), covAr.thin)
         assertFalse(covEs.thin)
         if (covAr.thin) onNodeWithTag("thin-ar").assertExists()
         onNodeWithTag("thin-es").assertDoesNotExist()
+        // relative rule (usability review): Korean clears the absolute floor but sits under half of
+        // Spanish's pages, and must be flagged even though the old rule missed it
+        val ko = comics.stats.getValue("ko")
+        val covKo = coverageOf(store, Lang("ko"))
+        assertTrue((ko["pages"] ?: 0) < richest / 2.0, "fixture assumption: Korean is under half the richest lane's pages")
+        assertTrue(covKo.thin)
+        onNodeWithTag("thin-ko").performScrollTo().assertExists()
         // the MICReLa hint for a read sibling of a speaking Spanish
         onNodeWithTag("hint-it").performScrollTo().assertExists()
     }

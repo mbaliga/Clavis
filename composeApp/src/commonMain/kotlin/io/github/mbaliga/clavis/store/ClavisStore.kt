@@ -641,6 +641,7 @@ class ClavisStore(
         engine.rollDay(now)
         commit { it.copy(session = null, enc = null, test = null, colophon = null, confirm = null) }
         flushSaves()
+        toast(Copy.ERASED)
     }
 
     /** Scenes on the same page carrying a line in [l] (`pageOf`). */

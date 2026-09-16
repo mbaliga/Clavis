@@ -44,6 +44,7 @@ import io.github.mbaliga.clavis.ui.components.CitedText
 import io.github.mbaliga.clavis.ui.components.PrimaryButton
 import io.github.mbaliga.clavis.ui.components.QuietButton
 import io.github.mbaliga.clavis.ui.components.tagged
+import io.github.mbaliga.clavis.ui.nav.LocalCompact
 import io.github.mbaliga.clavis.ui.nav.ScreenTopBar
 import io.github.mbaliga.clavis.ui.nav.VIEW_NAMES
 import io.github.mbaliga.clavis.ui.screens.learn.poolColour
@@ -82,6 +83,7 @@ fun CosmosScreen(store: ClavisStore, ui: UiState) {
     val relations = store.state.cosmos.exlens == "relations"
     var query by remember { mutableStateOf("") }
     val windowH = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }.takeIf { it > 0.dp } ?: 800.dp
+    val compact = LocalCompact.current
 
     // Explore → Field handoff (`S.cosmos.webFor`)
     LaunchedEffect(data, store.state.cosmos.webFor, explore) {
@@ -95,7 +97,8 @@ fun CosmosScreen(store: ClavisStore, ui: UiState) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).tagged("view-cosmos")) {
         ScreenTopBar(store, VIEW_NAMES["cosmos"]!!)
         BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 6.dp)) {
-            val canvasH = minOf(maxWidth * 1.12f, windowH * 0.66f)
+            // The canvas pans on any drag, so on a phone it takes at most half the window and the other half still scrolls the page.
+            val canvasH = minOf(maxWidth * 1.12f, windowH * (if (compact) 0.5f else 0.66f))
             Column {
                 Box(Modifier.fillMaxWidth().height(canvasH).clip(ClavisShapes.card).background(p.paper)) {
                     if (explore) {
@@ -199,7 +202,7 @@ fun CosmosScreen(store: ClavisStore, ui: UiState) {
 private fun Hud(label: String, active: Boolean, tag: String, enabled: Boolean = true, description: String? = null, onClick: () -> Unit) {
     val m = Modifier.then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier)
     if (active) PrimaryButton(label, onClick = onClick, modifier = m, testTag = tag)
-    else QuietButton(label, onClick = onClick, modifier = m, enabled = enabled, minHeight = 44.dp, testTag = tag)
+    else QuietButton(label, onClick = onClick, modifier = m, enabled = enabled, testTag = tag)
 }
 
 @Suppress("unused")

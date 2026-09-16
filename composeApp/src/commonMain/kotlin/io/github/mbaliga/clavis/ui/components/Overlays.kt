@@ -65,10 +65,15 @@ fun ConfirmDialog(confirm: Confirm?, onDismiss: () -> Unit) {
         textContentColor = p.ink2,
         title = confirm.title?.let { { Text(it, style = ClavisTheme.type.h3) } },
         text = { Text(confirm.text, style = ClavisTheme.type.body, color = p.ink) },
+        // A destructive confirm (Reset) keeps the emphasis on Cancel: the erase is the quiet button.
         confirmButton = {
-            PrimaryButton(confirm.confirmLabel, onClick = { onDismiss(); confirm.onConfirm() }, testTag = "confirm-yes")
+            if (confirm.destructive) QuietButton(confirm.confirmLabel, onClick = { onDismiss(); confirm.onConfirm() }, testTag = "confirm-yes")
+            else PrimaryButton(confirm.confirmLabel, onClick = { onDismiss(); confirm.onConfirm() }, testTag = "confirm-yes")
         },
-        dismissButton = { QuietButton(confirm.dismissLabel, onClick = onDismiss, testTag = "confirm-no") },
+        dismissButton = {
+            if (confirm.destructive) PrimaryButton(confirm.dismissLabel, onClick = onDismiss, testTag = "confirm-no")
+            else QuietButton(confirm.dismissLabel, onClick = onDismiss, testTag = "confirm-no")
+        },
         shape = ClavisShapes.card,
     )
 }
@@ -89,7 +94,7 @@ fun TopBar(subtitle: String, modifier: Modifier = Modifier, showWordmark: Boolea
     Row(modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (showWordmark) Text("Clavis", style = ClavisTheme.type.wordmark, color = p.ink, modifier = Modifier.tagged("wordmark"))
         Spacer(Modifier.weight(1f))
-        if (subtitle.isNotEmpty()) Text(subtitle.uppercase(), style = ClavisTheme.type.viewName, color = p.ink3)
+        if (subtitle.isNotEmpty()) Text(subtitle.uppercase(), style = ClavisTheme.type.viewName, color = p.ink2)
         if (trailing != null) { Spacer(Modifier.width(10.dp)); trailing() }
     }
 }

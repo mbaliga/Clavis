@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -52,9 +54,11 @@ fun poolColour(store: ClavisStore, l: Lang) = ClavisTokens.cosmosCol[l.code] ?: 
 fun LearnScreen(store: ClavisStore, ui: UiState) {
     val p = ClavisTheme.palette
     val t = ClavisTheme.type
-    @Suppress("UNUSED_VARIABLE") val rev = LocalRev.current
+    val rev = LocalRev.current
     val now = store.now
     val lanes = store.engine.activeLanes()
+    // a full pass over the corpus per lane: once per commit, not on every recomposition
+    val coverage = remember(rev, lanes) { lanes.associateWith { store.engine.corpusCoverage(it, now) } }
     val due = store.engine.dueTotal(now)
     val untested = store.engine.untestedLanes()
     val settings = store.state.settings
@@ -95,7 +99,7 @@ fun LearnScreen(store: ClavisStore, ui: UiState) {
                     Text(store.langName(l), style = t.body, color = p.ink, modifier = Modifier.weight(1f))
                     Chip(if (store.state.laneMode(l) == LaneMode.PROD) Copy.CHIP_SPEAK else Copy.CHIP_READ)
                     Spacer(Modifier.width(8.dp))
-                    Text("$n ready", style = t.small, color = p.ink2, modifier = Modifier.width(64.dp))
+                    Text("$n ready", style = t.small, color = p.ink2, modifier = Modifier.widthIn(min = 64.dp))
                     QuietButton(if (pinned) Copy.PINNED_BUTTON else Copy.PIN, onClick = { store.setPin(if (pinned) null else l) }, selected = pinned, testTag = "pin-${l.code}")
                 }
                 HairlineDivider()
@@ -118,7 +122,7 @@ fun LearnScreen(store: ClavisStore, ui: UiState) {
         SoftCard {
             Eyebrow(Copy.HOW_MUCH)
             for (l in lanes) {
-                val cov = store.engine.corpusCoverage(l, now)
+                val cov = coverage[l] ?: 0.0
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     LaneDot(laneColour(store, l))
                     Spacer(Modifier.width(8.dp))

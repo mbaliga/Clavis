@@ -74,7 +74,8 @@ class JsonStateStore(
         private set
 
     /**
-     * Directory holding unreadable-document backups (`corrupt/`, a sibling of the state file), kept
+     * Directory holding unreadable-document backups and the copies set aside before a reset or an
+     * import (`corrupt/`, a sibling of the state file), kept
      * out of Android cloud backup as a single directory-level exclude — see
      * `composeApp/src/androidMain/res/xml/data_extraction_rules.xml` — since Android's backup rules
      * have no wildcard support and these files carry a timestamp in their name.
@@ -82,12 +83,29 @@ class JsonStateStore(
     private val corruptDir: String get() = dirs.data.trimEnd('/') + "/corrupt"
 
     /** Where an unreadable document is moved: `corrupt/clavis-state.json.corrupt-<epochMillis>` (`.2`, `.3`… when taken). */
-    fun corruptPath(epochMillis: Long): String {
-        val base = "$corruptDir/$fileName.corrupt-$epochMillis"
+    fun corruptPath(epochMillis: Long): String = asidePath("corrupt", epochMillis)
+
+    /** Where the document goes before a reset / import replaces it: `corrupt/clavis-state.json.before-<what>-<epochMillis>`. */
+    fun beforePath(what: String, epochMillis: Long): String = asidePath("before-$what", epochMillis)
+
+    /** `corrupt/<fileName>.<tag>-<epochMillis>`, with `.2`, `.3`… appended while that name is taken. */
+    private fun asidePath(tag: String, epochMillis: Long): String {
+        val base = "$corruptDir/$fileName.$tag-$epochMillis"
         var p = base
         var n = 2
         while (FileIo.exists(p)) p = "$base.${n++}"
         return p
+    }
+
+    /**
+     * Moves the stored document, if there is one, to [beforePath]: a reset or an import never
+     * destroys the only copy (usability review). Same cloud-backup-excluded directory as the
+     * corrupt copies. A failure here is swallowed — the reset or import the user asked for still
+     * goes through.
+     */
+    private fun setAside(what: String) {
+        if (!FileIo.exists(path)) return
+        runCatching { FileIo.mkdirs(corruptDir); FileIo.rename(path, beforePath(what, clock.now())) }
     }
 
     override suspend fun load(): ClavisState? {
@@ -212,12 +230,14 @@ class JsonStateStore(
         val cards = obj["cards"]
         if (cards == null || cards is JsonNull) throw IllegalArgumentException(Copy.NOT_A_BACKUP)
         val state = try { merge(obj) } catch (e: Exception) { throw IllegalArgumentException(Copy.NOT_A_BACKUP, e) }
+        setAside("import") // only once the backup is known to be good: a bad one touches nothing
         current = state
         save(state)
         return state
     }
 
     override suspend fun reset() {
+        setAside("reset")
         FileIo.delete(path)
         FileIo.delete(tmpPath)
         current = null

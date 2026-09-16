@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +70,9 @@ fun SessionScreen(store: ClavisStore, ui: UiState) {
     val s = ui.session ?: return
     if (s.done) { SummaryScreen(store) ; return }
     val eu = ui.enc ?: return
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).tagged("session")) {
+    val scroll = rememberScrollState()
+    LaunchedEffect(s, s.i) { scroll.scrollTo(0) } // every encounter starts at the top; the offset would otherwise carry over from the last one
+    Column(Modifier.fillMaxSize().verticalScroll(scroll).tagged("session")) {
         TopBar("")
         SessionBar(s, eu.enc)
         EncounterHeader(store, eu.enc)
@@ -83,18 +86,23 @@ fun SessionScreen(store: ClavisStore, ui: UiState) {
     }
 }
 
-/** `.sessionbar`: n 4 dp segments — done, now (lane-coloured), to come. */
+/** `.sessionbar`: n 4 dp segments — done, now (lane-coloured), to come — with the count in words beside them. */
 @Composable
 private fun SessionBar(s: Session, e: Encounter) {
     val p = ClavisTheme.palette
-    Row(
-        Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp).semantics { contentDescription = "encounter ${s.i + 1} of ${s.n}" }.tagged("session-bar"),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        repeat(s.n) { i ->
-            val c = when { i < s.i -> p.ink3; i == s.i -> p.ochre; else -> p.line }
-            Box(Modifier.weight(1f).height(4.dp).background(c, ClavisShapes.chip))
+    val t = ClavisTheme.type
+    Row(Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.weight(1f).semantics { contentDescription = "encounter ${s.i + 1} of ${s.n}" }.tagged("session-bar"),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            repeat(s.n) { i ->
+                val c = when { i < s.i -> p.ink3; i == s.i -> p.ochre; else -> p.line }
+                Box(Modifier.weight(1f).height(4.dp).background(c, ClavisShapes.chip))
+            }
         }
+        Spacer(Modifier.width(10.dp))
+        Text(Copy.progressOf(s.i + 1, s.n), style = t.tiny, color = p.ink2, modifier = Modifier.tagged("session-progress"))
     }
 }
 

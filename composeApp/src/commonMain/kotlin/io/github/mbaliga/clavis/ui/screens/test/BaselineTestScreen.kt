@@ -26,6 +26,7 @@ import io.github.mbaliga.clavis.core.BaselineTest
 import io.github.mbaliga.clavis.core.Copy
 import io.github.mbaliga.clavis.core.Script
 import io.github.mbaliga.clavis.store.ClavisStore
+import io.github.mbaliga.clavis.store.Confirm
 import io.github.mbaliga.clavis.store.LocalRev
 import io.github.mbaliga.clavis.ui.components.LaneDot
 import io.github.mbaliga.clavis.ui.components.LinkButton
@@ -35,8 +36,19 @@ import io.github.mbaliga.clavis.ui.components.QuietButton
 import io.github.mbaliga.clavis.ui.components.SpeakButton
 import io.github.mbaliga.clavis.ui.components.TopBar
 import io.github.mbaliga.clavis.ui.components.tagged
+import io.github.mbaliga.clavis.ui.screens.session.KEEP_GOING
+import io.github.mbaliga.clavis.ui.screens.session.STOP
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
 import io.github.mbaliga.clavis.ui.theme.ClavisTokens
+
+/**
+ * Cancel, Escape and system back all come through here: with answers on the board the test stops
+ * only after a confirm (they are not kept — usability review); an untouched test just closes.
+ */
+fun confirmCancelTest(store: ClavisStore, test: BaselineTest) {
+    if (test.i > 0) store.confirm(Confirm(null, Copy.TEST_STOP_CONFIRM, STOP, KEEP_GOING, onConfirm = store::cancelTest))
+    else store.cancelTest()
+}
 
 /** `renderTest` (template L1597–1611): yes/no with pseudoword foils; keyboard ←/n and →/y. */
 @Composable
@@ -86,7 +98,7 @@ fun BaselineTestScreen(store: ClavisStore, test: BaselineTest) {
             PrimaryButton(Copy.KNOW_IT, onClick = { store.answerTest(true) }, modifier = Modifier.weight(1f), testTag = "test-yes")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            LinkButton(Copy.CANCEL, onClick = store::cancelTest, testTag = "test-cancel")
+            LinkButton(Copy.CANCEL, onClick = { confirmCancelTest(store, test) }, testTag = "test-cancel")
         }
         Text("← / n · → / y", style = t.chip, color = p.ink3, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
         Spacer(Modifier.height(40.dp))

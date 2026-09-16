@@ -3,6 +3,7 @@ package io.github.mbaliga.clavis
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -36,8 +37,9 @@ class NavigationTest {
         waitForIdle()
         assertEquals("set", store.state.view)
         onNodeWithTag("settings").assertExists()
-        // Settings is not a dock item: Learn stays lit
-        onNodeWithTag("nav-learn").assertIsSelected()
+        // Settings is not a dock item: nothing in the dock is lit (Learn used to be, wrongly)
+        onNodeWithTag("nav-learn").assertIsNotSelected()
+        onNodeWithTag("nav-you").assertIsNotSelected()
     }
 
     @Test
@@ -50,6 +52,13 @@ class NavigationTest {
         waitForIdle()
         assertEquals("paths", store.state.view)
         onNodeWithTag("view-paths").assertExists()
+        // a rail secondary destination lights its own item, and nothing in the primary five
+        onNodeWithTag("rail-languages").performClick()
+        waitForIdle()
+        assertEquals("languages", store.state.view)
+        onNodeWithTag("rail-languages").assertIsSelected()
+        onNodeWithTag("nav-learn").assertIsNotSelected()
+        onNodeWithTag("nav-paths").assertIsNotSelected()
     }
 
     @Test

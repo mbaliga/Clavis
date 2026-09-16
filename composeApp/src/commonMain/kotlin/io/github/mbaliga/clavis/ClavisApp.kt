@@ -79,6 +79,7 @@ import io.github.mbaliga.clavis.ui.screens.session.SessionScreen
 import io.github.mbaliga.clavis.ui.screens.session.confirmStop
 import io.github.mbaliga.clavis.ui.screens.settings.SettingsScreen
 import io.github.mbaliga.clavis.ui.screens.test.BaselineTestScreen
+import io.github.mbaliga.clavis.ui.screens.test.confirmCancelTest
 import io.github.mbaliga.clavis.ui.screens.you.YouScreen
 import io.github.mbaliga.clavis.ui.theme.ClavisMotion
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
@@ -164,7 +165,7 @@ private fun Shell(store: ClavisStore, ui: UiState, reduced: Boolean) {
                 ui.confirm != null -> store.dismissConfirm()
                 ui.colophon != null -> store.closeColophon()
                 !st.onboarded -> store.obBack()
-                ui.test != null -> store.cancelTest()
+                ui.test != null -> confirmCancelTest(store, ui.test)
                 ui.session != null -> if (ui.session.done) store.endSession() else confirmStop(store)
                 else -> store.setView("learn")
             }
@@ -299,7 +300,8 @@ internal fun handleKey(store: ClavisStore, ui: UiState, ev: KeyEvent, guard: Key
     ui.confirm?.let { c ->
         return when (k) {
             Key.Escape -> { store.dismissConfirm(); true }
-            Key.Enter -> { store.dismissConfirm(); c.onConfirm(); true }
+            // Enter never confirms an erase: the key that reaches the dialog must not be the key that destroys the record
+            Key.Enter -> { if (!c.destructive) { store.dismissConfirm(); c.onConfirm() }; true }
             else -> false
         }
     }
@@ -317,7 +319,7 @@ internal fun handleKey(store: ClavisStore, ui: UiState, ev: KeyEvent, guard: Key
         return when (k) {
             Key.DirectionRight, Key.Y -> { store.answerTest(true); true }
             Key.DirectionLeft, Key.N -> { store.answerTest(false); true }
-            Key.Escape -> { store.cancelTest(); true }
+            Key.Escape -> { confirmCancelTest(store, ui.test); true }
             else -> false
         }
     }

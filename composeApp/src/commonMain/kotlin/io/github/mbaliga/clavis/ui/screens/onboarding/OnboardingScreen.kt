@@ -38,6 +38,7 @@ import io.github.mbaliga.clavis.ui.components.SoftCard
 import io.github.mbaliga.clavis.ui.components.TopBar
 import io.github.mbaliga.clavis.ui.components.tagged
 import io.github.mbaliga.clavis.ui.nav.LocalCompact
+import io.github.mbaliga.clavis.ui.screens.settings.setLaneWithFamilyGuard
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
 import io.github.mbaliga.clavis.ui.theme.ClavisTokens
 
@@ -58,7 +59,7 @@ val OB_STEPS = listOf(
         "Mixing languages across a session is the method, not a glitch — spacing one language stretches another's memory. In Paths you can see every branch open to you and take one yourself; otherwise Clavis follows wherever you're improving fastest. [2][10]",
     ),
     ObStep(
-        "62%", "Progress is real reading.",
+        "62% readable", "Progress is real reading.", // D-18: never a bare percentage
         "Your progress is the share of the actual comic you can read unaided, per language — and the Cosmos shows every word you've touched as a point of light among the world's languages. Short yes/no tests first, so a language you half-own isn't treated as new. [1][31] " +
             "A bubble counts as readable when at least 95 of every 100 words in it are ones you hold or are presumed to know — that is the only score. [1]",
     ),
@@ -117,7 +118,7 @@ fun OnboardingScreen(store: ClavisStore, ui: UiState) {
                         colour = ClavisTokens.laneColour(info.colour),
                         mode = store.state.laneMode(l),
                         meta = "${store.sceneCount(l)} bubbles · ${store.family(l)} family" + if (untested) " · untested" else "",
-                        onMode = { store.setLaneMode(l, it) },
+                        onMode = { setLaneWithFamilyGuard(store, l, info.family, it) }, // same R-4 guard as Settings; its confirm is the shell's global dialog
                         testTagPrefix = "lane-${l.code}",
                     )
                 }

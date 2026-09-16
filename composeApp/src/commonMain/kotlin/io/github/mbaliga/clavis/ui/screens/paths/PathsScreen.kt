@@ -279,12 +279,13 @@ fun WordChipView(w: String, r: String, readings: Boolean) {
 private fun LongerView(store: ClavisStore, now: Long) {
     val p = ClavisTheme.palette
     val t = ClavisTheme.type
-    @Suppress("UNUSED_VARIABLE") val rev = LocalRev.current // strong skipping: subscribe this scope to store commits
+    val rev = LocalRev.current // strong skipping: subscribe this scope to store commits
     SoftCard(Modifier.padding(top = 14.dp).tagged("longer-view")) {
         Eyebrow(Copy.LONGER_VIEW)
         val lanes = store.engine.activeLanes()
+        val overviews = remember(rev, lanes) { lanes.map { store.engine.laneOverview(it, now) } } // a corpus pass per lane: once per commit
         lanes.forEachIndexed { i, l ->
-            val o = store.engine.laneOverview(l, now)
+            val o = overviews[i]
             Column(Modifier.fillMaxWidth().padding(vertical = 8.dp).tagged("lane-overview-${l.code}")) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     LaneDot(laneColour(store, l))

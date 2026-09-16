@@ -123,7 +123,8 @@ class AndroidFileImporter(private val activity: ComponentActivity) : FileImporte
                 }
             }
             val ext = name.substringAfterLast('.', "").lowercase()
-            if (allowedExtensions.isNotEmpty() && ext !in allowedExtensions) return@withContext null
+            // the MIME filter above is advisory: a `.pdf` can arrive here — say so instead of failing silently
+            if (allowedExtensions.isNotEmpty() && ext !in allowedExtensions) throw ImportRefusedException(Copy.importWrongKind(allowedExtensions))
             val text = cr.openInputStream(uri)?.use { readBoundedText(it, declared) } ?: return@withContext null
             ImportedFile(name, text)
         }

@@ -102,6 +102,10 @@ object MediaCopy {
     const val SENTENCES_COPY = "Short sentences from Tatoeba, English on tap — more places to meet words you're already learning [17]. Nothing is scheduled from here."
     const val SENTENCES_BACK = "Back"
     fun sentencesIn(lang: String) = "Sentences in $lang"
+    const val SENTENCES_LOADING = "Finding sentences…"
+    fun noSentences(lang: String) = "No sentence pack for $lang yet."
+    /** The bundled pack failed to parse — distinct from "none yet" so a broken build is not mistaken for a missing pack. */
+    fun sentencesUnreadable(lang: String) = "The $lang sentence pack could not be read."
     const val SENTENCES_FOOTER = "Sorted so that sentences you can almost read come first (≥ 90% of their words known). Recordings are one volunteer's voice, named with their licence; the synthetic voice says so. Nothing here grades or schedules."
     const val SHOW_MORE = "Show more"
     const val KNOWN_SUFFIX = " known"

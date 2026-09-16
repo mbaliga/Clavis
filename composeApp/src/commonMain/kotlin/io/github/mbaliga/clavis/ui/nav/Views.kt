@@ -44,8 +44,12 @@ val NAV: List<NavItem> = listOf(
     NavItem("learn", "Learn"), NavItem("cosmos", "Cosmos"), NavItem("paths", "Paths"), NavItem("letters", "Letters"), NavItem("you", "You"),
 )
 
-/** Which dock item is lit for a view: the view itself, else Learn (Settings/Colophon/Story highlight Learn). */
-fun activeNav(view: String): String = if (NAV.any { it.id == view }) view else "learn"
+/**
+ * Which dock/rail item is lit for a view: the view itself when it is a dock item, a rail secondary
+ * item or Settings; nothing (`""`) otherwise (the Colophon) — Learn is never lit for a screen that
+ * is not Learn (usability review).
+ */
+fun activeNav(view: String): String = if (NAV.any { it.id == view } || RAIL_MORE.any { it.first == view } || view == "set") view else ""
 
 /** The dock icons, drawn to match the reference's line icons (bubble, dots, tree, あ, person). */
 @Composable

@@ -80,7 +80,7 @@ fun LettersScreen(store: ClavisStore, ui: UiState) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             for (code in tabs) {
                 val on = code == tab
-                QuietButton(store.langName(Lang(code)), onClick = { if (!on) store.setLetterTab(Lang(code)) }, selected = on, minHeight = 44.dp, testTag = "letters-tab-$code")
+                QuietButton(store.langName(Lang(code)), onClick = { if (!on) store.setLetterTab(Lang(code)) }, selected = on, testTag = "letters-tab-$code")
             }
         }
         SoftCard(Modifier.padding(top = 12.dp).tagged("letters-card-$tab")) {

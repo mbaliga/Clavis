@@ -6,9 +6,11 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * The full Clavis colour token table, transcribed from the v0.10 web build's `:root` block
- * (template-spec §11.1 / template-constants.json `tokens`). Light and dark are two structurally
- * identical sets — not an inversion — and the whole interface is deliberately low-contrast:
- * `ink-2` is the floor for running text (≈4.7:1 on paper), `ink-3` is decorative only.
+ * (template-spec §11.1 / template-constants.json `tokens`), with `ink-2`/`ink-3` since darkened
+ * (light) or lightened (dark) off the original web-build values to clear WCAG AA's 4.5:1 on both
+ * `paper` and `surface2` (usability review: `ink-3` was as low as 2.30:1). Light and dark are two
+ * structurally identical sets — not an inversion. `ink-2` is the floor for running text; `ink-3` is
+ * quieter (lower contrast, never the sole carrier of meaning) but no longer sub-AA.
  *
  * Read them through [LocalClavisTokens]; the Material 3 mapping in [ClavisTheme] loses this
  * intent (Material has no "quiet secondary ink" role), so components that care use the tokens.
@@ -69,8 +71,12 @@ object ClavisTokens {
         surface = Color(0xFFFBFBFA),
         surface2 = Color(0xFFEEEEEB),
         ink = Color(0xFF2A2C31),
-        ink2 = Color(0xFF6B6E75),
-        ink3 = Color(0xFF9C9EA5),
+        // usability review: the old ink2/ink3 (#6B6E75 on paper 4.64:1 / on surface2 4.39:1; #9C9EA5 on
+        // paper 2.43:1 / on surface2 2.30:1) failed WCAG AA for text that carries information (eyebrows,
+        // the cloze right/wrong line, romanisations). Darkened just enough to clear 4.5:1 on both
+        // paper and surface2 while keeping ink3 visibly lighter than ink2 (see ClavisTokens KDoc below).
+        ink2 = Color(0xFF5E616A),
+        ink3 = Color(0xFF6A6C73),
         line = Color(0xFFE6E6E2),
         line2 = Color(0xFFEFEFEC),
         accent = Color(0xFF4A5578),
@@ -115,7 +121,9 @@ object ClavisTokens {
         surface2 = Color(0xFF222328),
         ink = Color(0xFFDCDDE1),
         ink2 = Color(0xFF9B9DA5),
-        ink3 = Color(0xFF6E7077),
+        // usability review: the old dark ink3 (#6E7077, 3.66:1 on paper / 3.17:1 on surface2) failed WCAG
+        // AA. Lightened just enough to clear 4.5:1 on both while staying darker (lower contrast) than ink2.
+        ink3 = Color(0xFF888A91),
         line = Color(0xFF26272D),
         line2 = Color(0xFF202126),
         accent = Color(0xFF9AA5C8),

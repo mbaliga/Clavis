@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -113,10 +114,15 @@ fun SettingsScreen(store: ClavisStore, ui: UiState) {
         SoftCard {
             Eyebrow("Voices")
             for (l in store.engine.activeLanes()) {
+                val provider = store.services.speaker.providerFor(l)
                 Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
                     LaneDot(laneColour(store, l)); Spacer(Modifier.width(8.dp))
-                    Text(store.langName(l), style = t.body, color = p.ink, modifier = Modifier.weight(1f))
-                    Text(store.services.speaker.providerFor(l) ?: "none on this device", style = t.small, color = p.ink2)
+                    Column(Modifier.weight(1f)) {
+                        Text(store.langName(l), style = t.body, color = p.ink)
+                        // D-8: the "none" end of the chain says what to do about it, not just that it is empty
+                        if (provider == null) Text(Copy.noVoice(store.langName(l)), style = t.small, color = p.ink2, modifier = Modifier.tagged("no-voice-${l.code}"))
+                    }
+                    if (provider != null) Text(provider, style = t.small, color = p.ink2)
                 }
             }
             Text("Voices are never downloaded without your say-so; this build has no download yet. Arabic, Japanese and Korean rely on your device's own voices.", style = t.small, color = p.ink2, modifier = Modifier.padding(top = 8.dp))
@@ -137,7 +143,7 @@ fun SettingsScreen(store: ClavisStore, ui: UiState) {
             Text("v${ClavisVersion.NAME} · ${store.services.name}", style = t.chip, color = p.ink3, modifier = Modifier.padding(top = 10.dp))
             Spacer(Modifier.height(10.dp))
             QuietButton("Reset everything", onClick = {
-                store.confirm(Confirm(null, Copy.ERASE_CONFIRM, "Erase", Copy.CANCEL, onConfirm = store::resetAll))
+                store.confirm(Confirm(null, Copy.ERASE_CONFIRM, "Erase", Copy.CANCEL, destructive = true, onConfirm = store::resetAll))
             }, testTag = "reset")
         }
         Spacer(Modifier.height(130.dp))
@@ -194,7 +200,7 @@ private fun SliderRow(label: String, value: Float, range: ClosedFloatingPointRan
             modifier = Modifier.weight(1f).semantics { contentDescription = "$label ${format(v)}" }.tagged("slider-$label"),
         )
         Spacer(Modifier.width(10.dp))
-        Text(format(v), style = t.mono, color = p.ink, modifier = Modifier.width(44.dp))
+        Text(format(v), style = t.mono, color = p.ink, modifier = Modifier.widthIn(min = 44.dp))
     }
 }
 
@@ -224,9 +230,8 @@ fun YourDataCard(store: ClavisStore) {
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             QuietButton(Copy.EXPORT, onClick = {
-                val json = store.exportJson()
-                text = json
-                clipboard.setText(AnnotatedString(json))
+                // to the clipboard only: the whole learner document in the field made a phone crawl (usability review)
+                clipboard.setText(AnnotatedString(store.exportJson()))
                 store.toast(Copy.COPIED)
             }, modifier = Modifier.weight(1f), testTag = "export")
             QuietButton(Copy.IMPORT, onClick = { if (store.importJson(text)) text = "" }, modifier = Modifier.weight(1f), testTag = "import")
