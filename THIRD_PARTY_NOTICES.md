@@ -65,8 +65,8 @@ The typefaces below are bundled as application resources (docs/DECISIONS.md D-9:
 | Rozha One (Regular) | Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com) | — | SIL OFL 1.1 |
 | IBM Plex Mono (Regular, Medium) | Copyright © 2017 IBM Corp. with Reserved Font Name "Plex" | Plex | SIL OFL 1.1 |
 | Noto Sans Arabic, Noto Sans Devanagari (Regular; desktop only) | Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic, .../devanagari) | — | SIL OFL 1.1 |
-| Noto Sans Hebrew (the Thin static instance, per its own name table and OS/2 weight class; desktop only) | Copyright 2024 The Noto Project Authors (https://github.com/notofonts/hebrew) | — | SIL OFL 1.1 |
-| Noto Sans JP, Noto Sans KR, Noto Sans SC (Noto Sans CJK, the Thin static instance, per their own name tables and OS/2 weight class; desktop only) | Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source' | Source | SIL OFL 1.1 |
+| Noto Sans Hebrew (Regular — the static instance `NotoSansHebrew-Regular`, per its own name table and OS/2 weight class 400, not a variable font; desktop only) | Copyright 2024 The Noto Project Authors (https://github.com/notofonts/hebrew) | — | SIL OFL 1.1 |
+| Noto Sans JP, Noto Sans KR, Noto Sans SC (Noto Sans CJK, Regular — the static instances `NotoSansJP-Regular`, `NotoSansKR-Regular`, `NotoSansSC-Regular`, per their own name tables and OS/2 weight class 400, not variable fonts; desktop only) | (c) 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. | Source | SIL OFL 1.1 |
 
 The fonts are used unmodified; no derivative uses a Reserved Font Name. The web reference build (`reference-prototype/template.html`) loads Hind, Rozha One and IBM Plex Mono from Google Fonts instead of bundling them.
 
