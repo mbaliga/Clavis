@@ -1,20 +1,21 @@
 # Clavis release procedure
 
-Automated: `.github/workflows/release.yml` builds every artifact in D-16 on its own OS runner when a tag `v<version>` is pushed, and publishes one GitHub Release with `SHA256SUMS.txt`. Manual: bumping, tagging, verifying, and the Play Console. Every secret is optional — without them the workflow still publishes, with `-unsigned` in the Android and macOS file names. This document mirrors `Fyl-Manager/docs/RELEASE.md` where the two projects overlap.
+Automated: `.github/workflows/release.yml` builds every artifact in D-16 on its own OS runner when a tag `v<version>` is pushed, and publishes one GitHub Release with `SHA256SUMS.txt`; every job uploads straight into a draft of that Release, never through Actions artifact storage (§8, *Storage*). Manual: bumping, tagging, verifying, and the Play Console. Every secret is optional — without them the workflow still publishes, with `-unsigned` in the Android and macOS file names. This document mirrors `Fyl-Manager/docs/RELEASE.md` where the two projects overlap.
 
 ## 0. What the workflow produces
 
-| Job (runner) | Gradle tasks | Release assets (`<v>` = version without the `v`) |
+| Job (runner) | Gradle tasks | Assets, uploaded straight into the draft Release with `gh release upload --clobber` (`<v>` = version without the `v`) |
 |---|---|---|
-| `preflight` (ubuntu-24.04) | — | fails fast if the tag ≠ `ClavisVersion.NAME` or `CHANGELOG.md` has no `## [<v>]` section |
+| `preflight` (ubuntu-24.04) | — | fails fast if the tag ≠ `ClavisVersion.NAME` or `CHANGELOG.md` has no `## [<v>]` section; then creates the one **draft Release** every job uploads into (`gh release create --draft`: under the tag for a tag build, under `dryrun-<run id>` against the commit for a dry run — a draft creates no tag). A re-run reuses its draft; a tag that already has a *published* release is refused |
 | `android` (ubuntu-24.04) | `:shared:allTests :composeApp:desktopTest :composeApp:lintDebug :composeApp:assembleRelease :composeApp:bundleRelease` | `clavis-<v>-android.apk` / `clavis-<v>-android-unsigned.apk`, `clavis-<v>-android.aab` / `-unsigned.aab`, `clavis-<v>-android-mapping.txt` |
 | `linux` (ubuntu-24.04) | `:composeApp:desktopTest :composeApp:packageDeb :composeApp:packageUberJarForCurrentOS` + dependency graphs | `clavis_<v>_amd64.deb`, `clavis-<v>-linux-x64.jar`, `clavis-<v>-dependencies-{android,desktop}.txt` |
 | `macos` (macos-15, Apple silicon) | `:composeApp:desktopTest :composeApp:packageUberJarForCurrentOS` then `notarizeDmg` (secrets) or `packageDmg` | `Clavis-<v>-macos-arm64.dmg` / `Clavis-<v>-macos-arm64-unsigned.dmg`, `clavis-<v>-macos-arm64.jar` |
 | `windows` (windows-2025) | `:composeApp:desktopTest :composeApp:packageMsi :composeApp:packageUberJarForCurrentOS` | `Clavis-<v>-windows-x64.msi` (never code-signed yet), `clavis-<v>-windows-x64.jar` |
 | `web` (ubuntu-24.04) | `python pipeline/pack_web.py` on the committed packs under `composeApp/src/commonMain/composeResources/files/packs/` — the frozen ten-language reference build (D-1, D-22); standard library only, about 21 MB, verified locally in 3 s. Should that directory ever be absent, the job records a notice and uploads nothing | `clavis-<v>-web.html` |
-| `release` (ubuntu-24.04) | download everything, `sha256sum`, `softprops/action-gh-release` | `SHA256SUMS.txt`, the Release itself — pre-release when the version has an `-alpha/-beta/-rc` suffix, "latest" otherwise |
+| `release` (ubuntu-24.04, tag builds only) | `gh release download` of the draft's assets, a check that every job delivered (one expected name per asset, and nothing extra), `sha256sum`, `gh release edit --draft=false` | `SHA256SUMS.txt`, the Release itself — body = the `CHANGELOG.md` section for `<v>` plus the verify/install notes; pre-release when the version has an `-alpha/-beta/-rc` suffix, "latest" otherwise; no auto-generated notes |
+| `cleanup` (ubuntu-24.04, `always()`) | prints the draft's assets with their sizes, then `gh release delete` unless the run published it | — |
 
-The uber-jars are per OS: `packageUberJarForCurrentOS` bundles only the host's Skiko. Running the Release workflow with *Run workflow* and a version is a dry run: everything is built and uploaded to the workflow run, nothing is published. Jobs that fail can be re-run individually; the `release` job only runs when all five build jobs succeeded, so a partial release cannot be published by accident.
+The uber-jars are per OS: `packageUberJarForCurrentOS` bundles only the host's Skiko. Running the Release workflow with *Run workflow* and a version is a dry run: everything is built and uploaded into a temporary draft Release named `dryrun-<run id>` (never published, so no tag is ever created), the `cleanup` job prints its asset list with sizes — the log records exactly what a real release would have shipped — and deletes it; nothing is published. The `release` job only runs when all five build jobs succeeded, so a partial release cannot be published by accident. A run that fails deletes its draft too, so re-run it with *Re-run all jobs* (or push a fixed tag), not *Re-run failed jobs* — the surviving jobs would upload into a draft that no longer exists.
 
 ## 1. One-time setup
 
@@ -89,7 +90,7 @@ Create the app with package `io.github.mbaliga.clavis`. Under *App integrity →
 git tag -a vX.Y.Z -m "Clavis X.Y.Z" && git push origin vX.Y.Z
 ```
 
-Watch *Actions → Release*. Pre-release tags (`vX.Y.Z-rc.1`) are marked pre-release and are not "latest". Start Play's closed test with the first `-beta`/`-rc` tag, not the first stable one (see §6).
+Watch *Actions → Release*. `preflight` creates a draft Release for the tag, the five build jobs upload their assets into it, and `release` downloads them back, checks that every job delivered, adds `SHA256SUMS.txt` and publishes the draft with the CHANGELOG section as its notes — the Release appears only at that last step, complete. If any job fails, `cleanup` deletes the draft: nothing half-built stays behind, and the fix is *Re-run all jobs* or a new tag (§0). A tag whose release is already published is refused by `preflight`; releases are not rebuilt in place — bump PATCH and tag again. Pre-release tags (`vX.Y.Z-rc.1`) are marked pre-release and are not "latest". Start Play's closed test with the first `-beta`/`-rc` tag, not the first stable one (see §6).
 
 ## 4. Verify — on your machine, not the runner
 
@@ -139,12 +140,13 @@ Non-tag builds (`CLAVIS_VERSION` unset) carry `ClavisVersion.NAME`; CI's debug A
 
 ## 8. Workflows: policies worth knowing before editing
 
-- Actions are pinned to **major tags** of release lines that run on Node 24 (GitHub removes Node 20 from hosted runners on 2026-09-23): `checkout@v7`, `setup-java@v6`, `gradle/actions/setup-gradle@v6`, `upload-artifact@v7`, `download-artifact@v8`, `setup-android@v4`, `setup-python@v7`, `softprops/action-gh-release@v3`. Dependabot proposes bumps monthly. Full-SHA pinning is stricter and was not adopted for a single-maintainer repo; if the repo gains contributors with write access, switch and keep the version in a trailing comment.
+- Actions are pinned to **major tags** of release lines that run on Node 24 (GitHub removes Node 20 from hosted runners on 2026-09-23): `checkout@v7`, `setup-java@v6`, `gradle/actions/setup-gradle@v6`, `upload-artifact@v7` (CI only), `setup-android@v4`, `setup-python@v7`. `release.yml` moves files with the preinstalled `gh` CLI, not with actions (no `download-artifact`, no `action-gh-release`). Dependabot proposes bumps monthly. Full-SHA pinning is stricter and was not adopted for a single-maintainer repo; if the repo gains contributors with write access, switch and keep the version in a trailing comment.
+- **Storage.** Actions artifact storage is one quota for the whole account (500 MB on the free plan) and it ran full in 2026-09: CI's per-run debug APK + release APK + uber-jar (~136 MB, kept 14 days) exhausted it after nine runs, and a release run's intermediates (~630 MB: three uber-jars, `.deb`, `.dmg`, `.msi`, APK, AAB, web build) could never have fitted even an empty quota — an `upload-artifact`/`download-artifact` hand-off between jobs was a design that could not succeed here. Release assets live with the Release, outside that quota, so `release.yml` uploads every job's output straight into one draft Release and the `release` job reads it back from there; a dry run's draft is deleted at the end, a failed run's too. CI keeps only the R8 release APK + mapping (3 days; test and lint reports on failure, 3 days), with `continue-on-error` on both upload steps so a quota blip never fails a green verification job. Do not add `upload-artifact` steps without a retention budget in mind.
 - Runners are pinned images (`ubuntu-24.04`, `macos-15`, `windows-2025`), never `-latest`; image jumps are deliberate. macOS x64 is not built (no `macos-15-intel` job); add one if a user needs it.
 - The Android SDK numbers appear in three places: `gradle/libs.versions.toml`, the `setup-android` `packages:` input and the `build-tools/36.0.0` path in both workflows. Bump them together.
 - Secrets reach Gradle only through `env:` on the steps that need them; `secrets` cannot be used in `if:`, so presence is converted into a step output first. Never run the signing steps with `--info`/`--debug`.
 - `-Dorg.gradle.jvmargs` is passed on the command line per job (3 GB on Linux/Windows, 2 GB plus a 1.5 GB Kotlin daemon on the 7 GB macOS runner); command-line values beat `gradle.properties`.
-- Validate edits with `actionlint` and `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"` before pushing.
+- Validate edits with `actionlint` (with `shellcheck` on `PATH`, so the `run:` scripts are checked too) and `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml')); yaml.safe_load(open('.github/workflows/ci.yml'))"` before pushing. The `gh` commands cannot be exercised locally; a dry run (*Run workflow* with a version) exercises everything except the final publish.
 
 ## 9. Open items before the first stable tag
 

@@ -1,7 +1,14 @@
 # Release: on a tag `v<version>` builds every artifact in docs/DECISIONS.md D-16 on its own OS runner and publishes
-# one GitHub Release with SHA256SUMS.txt. `workflow_dispatch` with a version builds the same artifacts as a dry run
-# (uploaded to the workflow run, no Release). Signing is optional everywhere: without secrets the Android and macOS
-# artifacts are still built and carry "-unsigned" in their names; the Windows MSI is always unsigned for now.
+# one GitHub Release with SHA256SUMS.txt. `workflow_dispatch` with a version builds the same artifacts as a dry run:
+# they go into a temporary draft Release (`dryrun-<run id>`) whose asset list is printed and which is then deleted;
+# nothing is published. Signing is optional everywhere: without secrets the Android and macOS artifacts are still
+# built and carry "-unsigned" in their names; the Windows MSI is always unsigned for now.
+#
+# Transport: no GitHub Actions artifact storage. `preflight` creates ONE draft Release, every build job uploads its
+# outputs straight into it (`gh release upload`), the `release` job downloads them back from the draft to check,
+# checksum and publish it, and `cleanup` deletes the draft when the run did not publish. A release run's
+# intermediates (~630 MB) never fitted the account's 500 MB Actions artifact quota; Release assets are stored with
+# the Release and are not subject to it (docs/RELEASE.md §8 "Storage").
 # Action pinning policy: see the header of ci.yml (major tags of Node-24 release lines).
 name: Release
 
@@ -11,10 +18,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build, e.g. 0.2.0 or 0.2.0-rc.1 (dry run: artifacts only, no GitHub Release)'
+        description: 'Version to build, e.g. 0.2.0 or 0.2.0-rc.1 (dry run: a temporary draft Release, deleted at the end; nothing is published)'
         required: true
         type: string
 
+# The floor for any job that forgets to declare its own. Every job below overrides it with `contents: write`, the
+# least the token needs to create, upload into, publish or delete a (draft) Release.
 permissions:
   contents: read
 
@@ -26,16 +35,25 @@ defaults:
   run:
     shell: bash
 
+env:
+  # `gh` is preinstalled on every hosted runner (ubuntu, macos, windows) and reads these two: the job's token, and
+  # the repository so it never has to infer it from a checkout (the cleanup job has none).
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+
 jobs:
   # ---------------------------------------------------------------------------------------------------------
   preflight:
-    name: Version ↔ tag ↔ ClavisVersion.kt ↔ CHANGELOG
+    name: Version ↔ tag ↔ ClavisVersion.kt ↔ CHANGELOG · draft Release
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.v.outputs.version }}
       prerelease: ${{ steps.v.outputs.prerelease }}
       publish: ${{ steps.v.outputs.publish }}
+      release_tag: ${{ steps.draft.outputs.release_tag }}
     steps:
       - uses: actions/checkout@v7
 
@@ -65,14 +83,50 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Building Clavis $version (prerelease=$prerelease, publish=$publish)"
 
+      # One draft Release receives every job's assets. A tag build drafts under its own tag; a dry run drafts under
+      # `dryrun-<run id>` against the commit — a draft creates its tag only when published, and this one never is
+      # (the cleanup job deletes it). A re-run finds its draft still there and reuses it (uploads use --clobber);
+      # a tag whose release was already published is refused rather than rebuilt in place.
+      - name: Create (or reuse) the draft Release every job uploads into
+        id: draft
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          PRERELEASE: ${{ steps.v.outputs.prerelease }}
+          PUBLISH: ${{ steps.v.outputs.publish }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$PUBLISH" = true ]; then
+            tag="$GITHUB_REF_NAME"
+            create=(--title "Clavis $VERSION" --notes "Build in progress: $run_url")
+          else
+            tag="dryrun-$GITHUB_RUN_ID"
+            create=(--target "$GITHUB_SHA" --title "Clavis $VERSION (dry run — deleted at the end of the run)" --notes "Dry run: $run_url")
+          fi
+          if [ "$PRERELEASE" = true ]; then create+=(--prerelease); fi
+          if state=$(gh release view "$tag" --json isDraft --jq .isDraft 2>&1); then
+            if [ "$state" != true ]; then
+              echo "::error::'$tag' already has a published release — releases are not rebuilt in place; fix forward with a new tag (docs/RELEASE.md §3)"; exit 1
+            fi
+            echo "Reusing the existing draft release '$tag'"
+          elif [[ "$state" == *"release not found"* ]]; then
+            gh release create "$tag" --draft "${create[@]}"
+          else
+            echo "::error::gh release view '$tag' failed: $state"; exit 1
+          fi
+          echo "release_tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Assets go to the draft release '$tag'"
+
   # ---------------------------------------------------------------------------------------------------------
   android:
     name: Android APK + AAB (ubuntu-24.04)
     needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    permissions:
+      contents: write
     env:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
     steps:
       - uses: actions/checkout@v7
@@ -143,12 +197,12 @@ jobs:
           cp composeApp/build/outputs/mapping/release/mapping.txt "dist/clavis-$CLAVIS_VERSION-android-mapping.txt"
           ls -la dist
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: clavis-android
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 30
+      # Same step in every build job: straight into the draft Release, no artifact storage. An empty dist/ is an
+      # error (the old `if-no-files-found: error`); --clobber makes the one retry, and any re-run, idempotent.
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
 
   # ---------------------------------------------------------------------------------------------------------
   linux:
@@ -156,8 +210,11 @@ jobs:
     needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 40
+    permissions:
+      contents: write
     env:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
     steps:
       - uses: actions/checkout@v7
@@ -201,12 +258,10 @@ jobs:
           dpkg-deb --info "dist/clavis_${CLAVIS_VERSION}_amd64.deb" | grep -E 'Package|Version|Architecture'
           ls -la dist
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: clavis-linux-x64
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 30
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
 
   # ---------------------------------------------------------------------------------------------------------
   macos:
@@ -214,8 +269,11 @@ jobs:
     needs: preflight
     runs-on: macos-15
     timeout-minutes: 60
+    permissions:
+      contents: write
     env:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       # macos-15 runners have 7 GB: smaller daemons than gradle.properties asks for.
       GRADLE_JVMARGS: -Xmx2g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8
     steps:
@@ -323,12 +381,10 @@ jobs:
         if: always() && env.KEYCHAIN != ''
         run: security delete-keychain "$KEYCHAIN" || true
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: clavis-macos-arm64
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 30
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
 
   # ---------------------------------------------------------------------------------------------------------
   windows:
@@ -336,8 +392,11 @@ jobs:
     needs: preflight
     runs-on: windows-2025
     timeout-minutes: 40
+    permissions:
+      contents: write
     env:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
     steps:
       - uses: actions/checkout@v7
@@ -361,7 +420,7 @@ jobs:
           else
             echo "::warning::WiX not on PATH — installing wixtoolset 3.14.1 via Chocolatey"
             choco install wixtoolset --version=3.14.1 -y --no-progress
-            echo 'C:\Program Files (x86)\WiX Toolset v3.14\bin' >> "$GITHUB_PATH"
+            printf '%s\n' 'C:\Program Files (x86)\WiX Toolset v3.14\bin' >> "$GITHUB_PATH"
           fi
 
       - name: Desktop tests, MSI and uber-jar
@@ -382,12 +441,11 @@ jobs:
           cp composeApp/build/compose/jars/*.jar "dist/clavis-$CLAVIS_VERSION-windows-x64.jar"
           ls -la dist
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: clavis-windows-x64
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 30
+      # Git Bash (the workflow default shell) has gh on PATH on windows-2025.
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
 
   # ---------------------------------------------------------------------------------------------------------
   # The reference single-file web app (docs/DECISIONS.md D-1) is rebuilt from the content packs committed under
@@ -398,8 +456,13 @@ jobs:
     needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      built: ${{ steps.packs.outputs.present }}
     env:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       PACKS: composeApp/src/commonMain/composeResources/files/packs
     steps:
       - uses: actions/checkout@v7
@@ -421,7 +484,7 @@ jobs:
 
       # pack_web.py needs only the standard library (pipeline/config.py); no downloads. It writes a standalone
       # wrapper and pack_web-stats.json beside its output, so it builds into build/web and only the reference
-      # page is copied into dist — the release job uploads everything under dist/.
+      # page is copied into dist — everything under dist/ becomes a release asset.
       - name: Build clavis.html from the committed packs
         if: steps.packs.outputs.present == 'true'
         run: |
@@ -430,17 +493,15 @@ jobs:
           cp "build/web/clavis-$CLAVIS_VERSION-web.html" dist/
           ls -la build/web dist
 
-      - uses: actions/upload-artifact@v7
+      - name: Upload to the draft Release
         if: steps.packs.outputs.present == 'true'
-        with:
-          name: clavis-web
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 30
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
 
   # ---------------------------------------------------------------------------------------------------------
   release:
-    name: GitHub Release
+    name: Publish the GitHub Release
     if: needs.preflight.outputs.publish == 'true'
     needs: [preflight, android, linux, macos, windows, web]
     runs-on: ubuntu-24.04
@@ -449,22 +510,53 @@ jobs:
       contents: write
     env:
       CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      PRERELEASE: ${{ needs.preflight.outputs.prerelease }}
+      WEB_BUILT: ${{ needs.web.outputs.built }}
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: clavis-*
-          merge-multiple: true
-          path: dist
+      # `needs` already guarantees the five build jobs succeeded; this checks that what they uploaded is all there
+      # (one name per asset, so a missing one names its job) and that nothing else is, before it is checksummed
+      # and published.
+      - name: Download the draft's assets and check that every job delivered
+        run: |
+          mkdir -p dist
+          gh release download "$RELEASE_TAG" -D dist
+          rm -f dist/SHA256SUMS.txt   # left by an earlier attempt whose publish failed after uploading it; regenerated below
+          ls -la dist
+          missing=0
+          expect() { compgen -G "dist/$1" > /dev/null || { echo "::error::missing release asset $1 (job: $2)"; missing=1; }; }
+          expect "clavis-$CLAVIS_VERSION-android*.apk" android
+          expect "clavis-$CLAVIS_VERSION-android*.aab" android
+          expect "clavis-$CLAVIS_VERSION-android-mapping.txt" android
+          expect "clavis_${CLAVIS_VERSION}_amd64.deb" linux
+          expect "clavis-$CLAVIS_VERSION-linux-x64.jar" linux
+          expect "clavis-$CLAVIS_VERSION-dependencies-android.txt" linux
+          expect "clavis-$CLAVIS_VERSION-dependencies-desktop.txt" linux
+          expect "Clavis-$CLAVIS_VERSION-macos-arm64*.dmg" macos
+          expect "clavis-$CLAVIS_VERSION-macos-arm64.jar" macos
+          expect "Clavis-$CLAVIS_VERSION-windows-x64.msi" windows
+          expect "clavis-$CLAVIS_VERSION-windows-x64.jar" windows
+          expected=11
+          if [ "$WEB_BUILT" = true ]; then expect "clavis-$CLAVIS_VERSION-web.html" web; expected=12; fi
+          [ "$missing" = 0 ] || exit 1
+          actual=$(find dist -mindepth 1 -maxdepth 1 | wc -l)
+          [ "$actual" = "$expected" ] || { echo "::error::expected $expected assets in the draft '$RELEASE_TAG', found $actual — a stale or unexpected upload; inspect the draft before re-running"; exit 1; }
 
-      - name: Checksums and release body
+      - name: SHA256SUMS.txt
         run: |
           (cd dist && sha256sum -- * > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          gh release upload "$RELEASE_TAG" dist/SHA256SUMS.txt --clobber
+
+      - name: Release body
+        run: |
           # The CHANGELOG section for this version becomes the top of the body (Keep a Changelog headings).
           awk -v v="$CLAVIS_VERSION" '/^## \[/ { p = ($0 ~ ("^## \\[" v "\\]")) } p' CHANGELOG.md > release-body.md
           unsigned_android=$(ls dist/*-android-unsigned.apk 2>/dev/null || true)
           unsigned_dmg=$(ls dist/*-macos-*-unsigned.dmg 2>/dev/null || true)
+          # The backticks in the single-quoted lines are Markdown code spans, not command substitutions:
+          # shellcheck disable=SC2016
           {
             echo
             echo '### Verify your download'
@@ -484,14 +576,48 @@ jobs:
           } >> release-body.md
           cat release-body.md
 
-      - uses: softprops/action-gh-release@v3
-        with:
-          name: Clavis ${{ env.CLAVIS_VERSION }}
-          tag_name: ${{ github.ref_name }}
-          body_path: release-body.md
-          generate_release_notes: true
-          prerelease: ${{ needs.preflight.outputs.prerelease == 'true' }}
-          make_latest: ${{ needs.preflight.outputs.prerelease != 'true' }}
-          fail_on_unmatched_files: true
-          files: |
-            dist/*
+      # Publishing is flipping the draft. The curated CHANGELOG section is the whole body — no auto-generated
+      # notes, which would list every commit since the repository began. Pre-releases are never "latest".
+      - name: Publish
+        run: |
+          if [ "$PRERELEASE" = true ]; then latest=false; else latest=true; fi
+          gh release edit "$RELEASE_TAG" --draft=false --title "Clavis $CLAVIS_VERSION" --notes-file release-body.md \
+            --prerelease="$PRERELEASE" --latest="$latest"
+          gh release view "$RELEASE_TAG" --json url,isDraft,isPrerelease,assets \
+            --jq '"Published \(.url) (draft=\(.isDraft), prerelease=\(.isPrerelease), \(.assets | length) assets)"' \
+            || echo "::warning::published, but reading the release back failed — check it in the Releases tab"
+
+  # ---------------------------------------------------------------------------------------------------------
+  # Runs whatever happened above. Prints what the draft holds — a dry run's log thereby records exactly what a
+  # real release would have shipped, with sizes — then deletes the draft unless the run published it: every dry
+  # run (`dryrun-<run id>` has no tag to clean up) and every tag build that failed on the way. A published release
+  # is never touched, and nothing is when preflight failed before creating a draft.
+  cleanup:
+    name: Delete the draft unless it was published
+    if: always()
+    needs: [preflight, android, linux, macos, windows, web, release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      PUBLISH: ${{ needs.preflight.outputs.publish }}
+    steps:
+      - name: List the draft's assets, then delete it if it is still a draft
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then echo "preflight created no draft release — nothing to clean up"; exit 0; fi
+          if ! state=$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft 2>&1); then
+            if [[ "$state" == *"release not found"* ]]; then echo "no release '$RELEASE_TAG' left to clean up"; exit 0; fi
+            echo "::error::gh release view '$RELEASE_TAG' failed: $state"; exit 1
+          fi
+          echo "Assets of release '$RELEASE_TAG' (draft=$state):"
+          gh release view "$RELEASE_TAG" --json assets \
+            --jq '(.assets[] | "  \(((.size / 1048576 * 10) | round) / 10) MB\t\(.name)"), "  total: \(((.assets | map(.size) | add) // 0) / 1048576 | round) MB in \(.assets | length) assets"'
+          if [ "$state" = true ]; then
+            if [ "$PUBLISH" = true ]; then echo "::warning::The run did not publish '$RELEASE_TAG'; deleting the half-built draft — re-run with 'Re-run all jobs' or push a fixed tag"; fi
+            gh release delete "$RELEASE_TAG" --yes
+            echo "Deleted the draft release '$RELEASE_TAG'"
+          else
+            echo "'$RELEASE_TAG' is published — left untouched"
+          fi
