@@ -5,27 +5,31 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.runSkikoComposeUiTest
-import io.github.mbaliga.clavis.core.Encounter
-import io.github.mbaliga.clavis.store.ClavisStore
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 /**
- * Renders the main screens in light and dark at phone (412×915) and desktop (1280×800) sizes into
- * `<root>/build/ui-shots/<screen>-<theme>-<size>.png` for visual review (brief M).
+ * Renders every screen of [Screens] into `<root>/build/ui-shots/<screen>-<variant>-<size>.png` for
+ * visual review (brief M): light and dark at phone (412×915) and desktop (1280×800) sizes, the whole
+ * app under right-to-left layout at both sizes (`-rtl-`), and at the 2× font-size step on the phone
+ * (`-x2-mobile`). The directory is overridable with the `clavis.shots` system property.
  */
 @OptIn(ExperimentalTestApi::class)
 class ScreenshotTest {
-    private val out: File = File(System.getProperty("clavis.shots") ?: "../build/ui-shots").also { it.mkdirs() }
-    private val sizes = listOf("mobile" to Size(412f, 915f), "desktop" to Size(1280f, 800f))
-    private val themes = listOf("light" to false, "dark" to true)
+    private val out: File = TestBoot.shotsDir()
+    private val mobile = "mobile" to MOBILE
+    private val desktop = "desktop" to DESKTOP
+
+    /** The matrix: seven renders per screen. */
+    private val matrix: List<Pair<Variant, Pair<String, Size>>> = listOf(
+        Variant.LIGHT to mobile, Variant.LIGHT to desktop,
+        Variant.DARK to mobile, Variant.DARK to desktop,
+        Variant.RTL to mobile, Variant.RTL to desktop,
+        Variant.X2 to mobile,
+    )
 
     private fun ComposeUiTest.save(name: String) {
         val img = onRoot().captureToImage().toAwtImage()
@@ -34,63 +38,48 @@ class ScreenshotTest {
         assertTrue(f.length() > 1000, "screenshot $name is empty")
     }
 
-    private fun shoot(screen: String, prepare: () -> ClavisStore, act: ComposeUiTest.(ClavisStore) -> Unit = {}) {
-        for ((sizeName, size) in sizes) for ((themeName, dark) in themes) {
-            val store = prepare()
-            runSkikoComposeUiTest(size = size) {
-                setContent { ClavisApp(store, darkOverride = dark) }
-                waitForIdle()
-                act(store)
-                waitForIdle()
-                save("$screen-$themeName-$sizeName")
-            }
+    private fun shoot(case: ScreenCase) {
+        for ((variant, size) in matrix) {
+            val (sizeName, px) = size
+            renderScreen(case, variant, px) { save("${case.name}-${variant.id}-$sizeName") }
         }
     }
 
-    @Test fun learn() = shoot("learn", { TestBoot.onboarded() })
+    @Test fun learn() = shoot(Screens.learn)
 
-    @Test fun onboardingStep1() = shoot("onboarding-1", { TestBoot.store() })
+    @Test fun onboardingStep1() = shoot(Screens.onboarding1)
 
-    @Test fun settings() = shoot("settings", { TestBoot.onboarded { it.state.view = "set" } })
+    @Test fun settings() = shoot(Screens.settings)
 
-    @Test fun you() = shoot("you", { TestBoot.onboarded { it.state.view = "you" } })
+    @Test fun you() = shoot(Screens.you)
 
-    @Test fun colophon() = shoot("colophon", { TestBoot.onboarded { it.state.view = "colophon" } })
+    @Test fun colophon() = shoot(Screens.colophon)
 
     // ui-features screens
-    @Test fun cosmos() = shoot("cosmos", { TestBoot.onboarded { it.state.view = "cosmos" } })
+    @Test fun cosmos() = shoot(Screens.cosmos)
 
-    @Test fun cosmosExplore() = shoot("cosmos-explore", { TestBoot.onboarded { it.state.view = "cosmos"; it.state.cosmos.mode = "explore"; it.state.cosmos.exsets = true } })
+    @Test fun cosmosExplore() = shoot(Screens.cosmosExplore)
 
-    @Test fun paths() = shoot("paths", { TestBoot.onboarded { it.state.view = "paths" } })
+    @Test fun paths() = shoot(Screens.paths)
 
-    @Test fun pathsMap() = shoot("paths-map", { TestBoot.onboarded { it.state.view = "paths"; it.state.pathView = "map" } })
+    @Test fun pathsMap() = shoot(Screens.pathsMap)
 
-    @Test fun letters() = shoot("letters", { TestBoot.onboarded { it.state.view = "letters" } })
+    @Test fun letters() = shoot(Screens.letters)
 
-    @Test fun story() = shoot("story", { TestBoot.onboarded { it.state.view = "story"; it.state.story.lane = "es" } }) { store ->
-        waitUntil(timeoutMillis = 30_000) { store.pageImages.size > 0 }
-    }
+    @Test fun story() = shoot(Screens.story)
 
-    @Test fun languages() = shoot("languages", { TestBoot.onboarded { it.state.view = "languages" } })
+    @Test fun languages() = shoot(Screens.languages)
 
-    @Test fun media() = shoot("media", {
-        TestBoot.onboarded { it.state.view = "media" }.also { s ->
-            s.addMedia("Canción de ejemplo", io.github.mbaliga.clavis.core.Lang("es"), "lrc", listOf("La casa azul", "El perro duerme"))
-        }
-    })
+    @Test fun media() = shoot(Screens.media)
 
-    @Test fun encounterCropped() = shoot("encounter-cropped", { TestBoot.onboarded(seed = 1) { TestBoot.seedDueCloze(it) }.also { it.startSession() } }) { store ->
-        val e = store.current.enc?.enc as Encounter.Cloze
-        waitUntil(timeoutMillis = 30_000) { store.pageImages.peek(e.sc.m) != null }
-    }
+    @Test fun encounterCropped() = shoot(Screens.encounterCropped)
 
-    @Test fun encounterWholePage() = shoot("encounter-page", { TestBoot.onboarded(seed = 1) { TestBoot.seedDueCloze(it) }.also { it.startSession() } }) { store ->
-        val e = store.current.enc?.enc as Encounter.Cloze
-        waitUntil(timeoutMillis = 30_000) { store.pageImages.peek(e.sc.m) != null }
-        onNodeWithTag("toggle-page").performScrollTo().performClick()
-        waitForIdle()
-        // scroll the page into view
-        onNodeWithTag("scene-full").performScrollTo()
-    }
+    @Test fun encounterWholePage() = shoot(Screens.encounterWholePage)
+
+    // modal states and the blocked Learn
+    @Test fun baselineTest() = shoot(Screens.baselineTest)
+
+    @Test fun sessionSummary() = shoot(Screens.sessionSummary)
+
+    @Test fun learnResting() = shoot(Screens.learnResting)
 }

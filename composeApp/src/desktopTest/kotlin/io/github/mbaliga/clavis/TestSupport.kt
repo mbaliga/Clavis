@@ -94,6 +94,28 @@ object TestBoot {
         store.state.pin = "es"
         return seed
     }
+
+    /**
+     * Drives a started session to its summary through the store's intents (the keyboard path), the
+     * way [stepSession] does through the buttons: first option / understood / "I know it" / first
+     * language, then Next. Fails loudly if the session does not finish.
+     */
+    fun finishSession(store: ClavisStore, maxSteps: Int = 80) {
+        var guard = 0
+        while (store.current.session?.done != true && guard++ < maxSteps) {
+            val eu = store.current.enc ?: break
+            when (val e = eu.enc) {
+                is Encounter.Cloze -> if (eu.answered == null) store.answerCloze(eu.options.first()) else store.next()
+                is Encounter.Read -> store.finishRead(true)
+                is Encounter.Echo -> if (eu.answered == null) store.answerEcho(3) else store.next()
+                is Encounter.LangId -> if (eu.answered == null) store.answerLangId(e.opts.first()) else store.next()
+            }
+        }
+        check(store.current.session?.done == true) { "session did not finish in $guard steps" }
+    }
+
+    /** Where the screenshot matrix and the accessibility report land: `-Dclavis.shots=`, else `<root>/build/ui-shots`. */
+    fun shotsDir(): File = File(System.getProperty("clavis.shots") ?: "../build/ui-shots").also { it.mkdirs() }
 }
 
 fun SemanticsNode.textContent(): String = buildString {
