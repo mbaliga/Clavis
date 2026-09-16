@@ -10,7 +10,7 @@ credentials, hardware or a decision that cannot be produced from inside the repo
 | Ask | State | Evidence |
 |---|---|---|
 | Flesh out Clavis into a release-ready Android app | **Done to release-candidate quality.** KMP domain layer, Compose app (Android + desktop), pipeline, packs, release engineering, two review passes, a usability pass. Not "stable" yet — see §4. | `CHANGELOG.md` `[0.1.0-rc.1]`; ~185 domain tests × 3 targets, 52+ headless UI tests, 63 pipeline tests; CI green on every verification job |
-| 1 · More multimedia resources | **Partly done; one gap closed in this pass.** IPA for 70–95 % of lemmas in every language; Tatoeba sentences (3,000 per language) with CC-licensed audio where Tatoeba has it; Piper voices catalogued per licence; system TTS everywhere. Pronunciation *recordings* were uneven because English Wiktionary lists almost none for Spanish, Italian, Japanese, Korean, Polish and Latin (D-28) — a Lingua Libre / Commons-category source was added and run in this pass; per-language counts are in §6 and in the app's Languages screen. | `pipeline/ENRICHMENT.md` §6.2–§6.4, pack `manifest.json` |
+| 1 · More multimedia resources | **Done.** IPA for 70–95 % of lemmas in every language; Tatoeba sentences (3,000 per language) with CC-licensed audio where Tatoeba has it; Piper voices catalogued per licence; system TTS everywhere. Pronunciation *recordings* were uneven because English Wiktionary lists almost none for Spanish, Italian, Japanese, Korean, Polish and Latin (D-28) — a Lingua Libre / Commons-category source closed the gap in this pass (es 3→560, it 144→767, pl 0→413, ja 1→63, ko 5→102, la 0→143 recordings; pl/ja partially, see §6); per-language counts are in §6 and in the app's Languages screen. | `pipeline/ENRICHMENT.md` §6.2–§6.4, pack `manifest.json` |
 | 2 · Android APK + Linux, macOS, Windows builds | **Built and verified on Linux; macOS/Windows packaging first exercised by the release dry run of this pass** (§5). Signed builds need the maintainer's keys (§4). | `release.yml`; `RELEASE.md` §0 |
 | 3 · Add more languages, develop the graph | **Done.** Registry-driven pipeline (`languages.json`, 69 entries, 17 enabled, 9 on by default); Languages screen turns any shipped language on as reading or speaking with honest coverage; etymology graph moved from EtymDB-only to Wiktionary + EtymDB (30,813 typed edges; per-language coverage in D-24). | D-6, D-23, D-24 |
 
@@ -22,7 +22,8 @@ credentials, hardware or a decision that cannot be produced from inside the repo
   the small APK (D-26). *Until this landed, pushing a tag would have failed; it is safe now.*
 - **Desktop CJK/Hebrew fallback fonts were the Thin weight** (variable fonts at their default
   instance). Replaced with Regular; payload 37 → 23 MB; notices corrected (D-27).
-- **Pronunciation audio source added** for the languages English Wiktionary does not cover (D-28).
+- **Pronunciation audio source added and run** for the languages English Wiktionary does not cover
+  (D-28): es 3→560, it 144→767, pl 0→413, ja 1→63, ko 5→102, la 0→143 recordings (§6).
 - **Screenshot matrix extended to RTL and 2× font scale; automated semantics and touch-target
   audit** added to the desktop suite (D-29).
 - **Usability pass**: 35 findings, 24 fixed in this pass, 10 open with reasons, 1 withdrawn
@@ -53,23 +54,35 @@ credentials, hardware or a decision that cannot be produced from inside the repo
 | Google Play Console setup, closed test, data-safety form | **maintainer** | account actions; copy is ready in `STORE-LISTING.md` |
 | Free the exhausted Actions artifact storage (or wait for the recalculation) | **maintainer** | account-level; after this pass CI no longer refills it |
 | Usability follow-ups marked *open* in `USABILITY.md` (page-decode failure state, Sentences performance, corrupt-state card, citation targets, keyboard-map help, return stack) | code | scoped and small; none blocks the release candidate |
+| Polish and Japanese pronunciation coverage is partial (~62%/~71% of the lexicon queried, D-28) | code | Lingua Libre's SPARQL endpoint throttled under sustained querying; `python enrich_pronunciations.py --lingualibre` re-run once it has recovered only adds coverage, never regresses |
 
 ## 5. Quality gates on the current head
 
 | Gate | Result |
 |---|---|
-| `./gradlew :shared:allTests` | green — [pending: count] tests on desktop, Android debug and Android release unit targets |
-| `./gradlew :composeApp:desktopTest` | green — [pending: count] headless UI tests incl. the RTL / 2× / semantics audit |
+| `./gradlew :shared:allTests` | green — 561 test runs across desktop, Android debug and Android release unit targets, 0 failures |
+| `./gradlew :composeApp:desktopTest` | green — 61 headless UI tests incl. the RTL / 2× / semantics audit (0 touch-target offenders, was 92) |
 | `./gradlew :composeApp:lintDebug :composeApp:assembleRelease` | green; R8 release APK badging `versionName=0.1.0-rc.1`, `versionCode=100` |
-| `python -m pytest pipeline/tests -q` | green — [pending: count] |
+| `python -m pytest pipeline/tests -q` | green — 80 passed (was 63; +17 for the new pronunciation source) |
 | actionlint on both workflows | clean |
-| CI on the PR head | [pending] |
-| Release workflow dry run (all five OS jobs, draft-release upload path) | [pending: run URL and per-job result] |
+| CI on the PR head | green (`Test · lint · APK · desktop jar smoke`, `Pipeline tests and CLI smoke`) |
+| Release workflow dry run (all five OS jobs, draft-release upload path) | not yet run — macOS and Windows packaging has never been exercised; see §4 |
 
 ## 6. Content coverage that a user will actually meet
 
-Per language (from the shipped pack manifest; recordings before → after this pass's Lingua Libre
-run): [pending: table].
+Recordings with a permissive licence, from the shipped pack manifest (`clavis-pronunciations`),
+before this pass's second audio source (D-28) → after:
+
+| Lang | es | it | pl | ja | ko | la | fr | de | nl | en | ru | zh | uk | pt | tr | ar | hi |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Before | 3 | 144 | 0 | 1 | 5 | 0 | 1523 | 1548 | 1483 | 1521 | 1330 | 1100 | 1032 | 689 | 205 | 121 | 14 |
+| After | **560** | **767** | **413** | **63** | **102** | **143** | 1523 | 1548 | 1483 | 1521 | 1330 | 1100 | 1032 | 689 | 205 | 121 | 14 |
+
+fr/de/nl/en/ru/zh/uk/pt/tr/ar/hi were not touched by this pass (verified byte-identical). Polish
+and Japanese are partial — Lingua Libre's SPARQL endpoint throttled under sustained querying from
+one process, so ~62% of the Polish lexicon and ~71% of the Japanese lexicon were actually queried;
+a plain re-run only adds coverage, it never regresses an existing result (`pipeline/ENRICHMENT.md`
+§6.4).
 
 Thin lanes (badge shown in the app): Arabic (177 scenes, 8 episodes), Hindi (16 scenes), Turkish
 (223), Latin (389), Korean (470 scenes, 137 pages — now flagged relative to the richest lane).
