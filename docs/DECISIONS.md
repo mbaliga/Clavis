@@ -548,3 +548,35 @@ up" is a streak in disguise, D-15; the 27 minutes of baseline checks before the 
 session; whether Cosmos needs a list view for assistive technology) are for the maintainer.
 
 **Status.** Record.
+
+## D-31 · PROPOSED: iOS/iPadOS joins the targets; the web build ships on Ubuntu Touch only if D-1 is relaxed
+
+**Status: PROPOSED — awaiting the owner. Not in force.** D-1 and D-16 stand as written until the owner rules;
+nothing below has been built. The plan is `docs/PORTING.md`; the program it belongs to is
+`Personal-Tracker/PORTING_PROGRAM.md` (2026-10-06).
+
+**Decision (proposed).** Amend D-1's target list in three parts, each answerable separately.
+
+1. *iOS and iPadOS become product targets*, built from the same `:shared` and `:composeApp` code
+   (`iosArm64`, `iosSimulatorArm64`) inside a thin SwiftUI shell under `iosApp/`. No new product scope; D-3, D-8,
+   D-9, D-12, D-13 and D-18 apply unchanged. D-16's release shape gains an iOS artefact only after the owner has
+   ruled on distribution; until then iOS is built in the simulator and released nowhere.
+2. *The desktop targets stay Linux, macOS and Windows.* Linux arm64, a Flatpak and a per-architecture tarball (and,
+   if wanted, macOS Intel and Windows arm64) are distribution breadth for the same build, not new targets.
+3. *Ubuntu Touch*, Option A: D-1's "not shipped as a product" is relaxed for exactly one artefact, the unmodified
+   `clavis-<v>-web.html` from `release.yml`'s `web` job, packaged as a webapp-container click and labelled as the
+   frozen ten-language reference build. D-1's freeze stays: no feature lands in it and `template.html` is not
+   edited to label it. Option B: D-1 stays as written and the answer for Clavis is "no Ubuntu Touch port".
+
+**Why.** The program's owner-ordered targets are Ubuntu Touch, Linux, iOS/iPadOS, macOS, Windows. Linux, macOS and
+Windows already have a JVM desktop build (never tagged). iOS is the one target the existing code can add with a
+small, bounded platform layer (8 `expect`s, six service interfaces). Ubuntu Touch has no JVM path in a click and no
+Compose target, so the only shape D-1 leaves is the web build it forbids shipping.
+
+**Cost.** iOS adds a target to maintain (the actuals, `IosServices`, an Xcode shell, and a `macos-15` lane that bills
+at 10× on a private repo) and an Apple Developer Program dependency for anything beyond the simulator. Option A puts
+a frozen ten-language build under the Clavis name next to a native app with 17 languages; the labelling requirement
+is the mitigation. Every store listing enlarges the name-clearance exposure recorded in `STATUS.md` §4.
+
+**Would reopen it.** The current pin (D-2) failing to build for iOS; the owner declining the Apple Program or the
+name; a Click-engine spike showing the reference build cannot run there.
