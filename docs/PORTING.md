@@ -439,3 +439,36 @@ Owner questions in the program register that concern this repo (status as of 202
 - OQ-38 (ruled): iOS toolchain pin
 
 When the owner confirms or changes the line, this repo's original cells above stay as the engineering detail; only the verdicts and re-costs in program section 5A change.
+
+## Update 2026-10-14: the market lens, iPadOS and the owner's latest answers
+
+Status: PLAN. Nothing here is built, run on a device, signed or submitted. This update follows the section "Owner rulings and the proposed line (added 2026-10-07)" above and the program plan's section 5A.12 (Personal-Tracker `PORTING_PROGRAM.md`, [PR #10](https://github.com/mbaliga/Personal-Tracker/pull/10)), which governs where the two differ. It records the owner's market lens and answers of 2026-10-13 and 2026-10-14; the proposed line is still a proposal. Two tests were added to the program's section 5A.1: (d) a real gap, or we are better or cheaper ("better" only where it has been measured; free alone is no gap when free tools exist); (w) mature free alternatives abound and the app adds nothing.
+
+### Where Clavis sits now (program section 5A.12, a proposal)
+
+| Target       | Verdict, weeks and flags |
+| ------------ | ------------------------ |
+| Ubuntu Touch | no-port                  |
+| Linux        | exists 1w                |
+| iPhone       | follows                  |
+| iPad         | port 5w (early)          |
+| macOS        | exists 0.5w              |
+| Windows      | exists 0.5w              |
+
+The Apple column is now split: iPhone and iPad are judged apart. Where an app ports to both, the weeks are counted once on the lead cell and the other reads follows. The wave (early or later) is for the iPad, and for the iPhone where it leads.
+
+### What changed for this repo
+
+- iPad is now its own column: **port, early wave, 5 weeks**, the first repo through the Compose-on-iOS recipe; iPhone follows (the earlier section had iOS owner-call 5w).
+- Ubuntu Touch stays no-port: its only shape is the frozen web build in a click, which the Ubuntu Touch scope ruling excludes, although a search of OpenStore found no offline language course (not exhaustive).
+- **The owner chose to make this repo public** (OQ-40) so the iPad proof can use free hosted macOS runners. That is an owner action in GitHub (Settings, General, Change visibility); the assistant cannot change visibility. A pre-publication audit found no secret-shaped strings in all 37 commits, no keystore, env or credential files, only noreply author addresses, and the licence files (Apache-2.0 LICENSE, NOTICE, SECURITY.md, PRIVACY.md). The docs under docs/research hold competitor pricing and market sizing, which become public. After the flip, the lines in this plan and in the earlier section that say the repo is private (the OQ-20 and signing-route statements) are out of date and should be updated.
+
+### Owner answers that apply here
+
+- **TestFlight (PT:D-Z, approved 2026-10-14):** "Approve PROPOSED-1 as drafted". Directive I-1 now carries an exception for crash reports that Apple collects on TestFlight and the App Store. The app does not transmit those reports and adds no crash-reporting or analytics SDK of its own, and its README, store listing and about/privacy page must name the exception. This supersedes any statement in the earlier section that TestFlight is not used until the exception is approved. Any repo-local no-telemetry rule here is a restatement that PT:D-Z does not amend; recording the exception there is for the owner.
+- **Mac mini timing (OQ-31, 2026-10-14):** "Use hosted macOS runners on public repos first, buy later". This repo is private today, so hosted macOS builds are billed (the program's figure is about 10 times the rate, not independently verified). The owner chose to make it public (OQ-40, an owner action, not done); after that, simulator builds, unit tests and unsigned archives can start on free hosted macOS runners. The Mac mini stays chosen and not bought.
+- **Apple ids and signing:** Apple bundle ids use `com.asoc.<appname>` (OQ-25, in part; a NAMES.md row first, R11). Signing material is to live in GitHub environment secrets behind a required-approval gate (OQ-3, Apple half). The owner will enrol in the Apple Developer Program ("Not yet, I'll enrol"); until then every Apple build is a simulator or unsigned hosted build.
+- **Apple devices:** the owner has an iPad Pro M4, an Apple Pencil and an iPhone 12 mini; the Mac mini is not yet bought, and nothing is device-verified.
+- **Skin contract (OQ-39, 2026-10-14):** proposed conformance level for this app: Level 1, cost class A (already Compose Multiplatform commonMain with its own ClavisPalette); second in the rollout order. The owner chose Tier 1 (palette) everywhere first and every app declaring its own level; the assistant chose JSON, not XML, after the owner asked for a check; the draft spec is Personal-Tracker `porting/skin-contract/SPEC-DRAFT.md`. This is a proposal, not decided for this app.
+
+When the owner confirms or changes the line, this repo's original cells above stay as the engineering detail; only the verdicts and re-costs in program section 5A.12 change.
