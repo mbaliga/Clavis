@@ -1,0 +1,79 @@
+# Linux arm64 desktop lane (docs/PORTING.md 6.3, LX1). Manual dispatch only while the repository is private
+# (arm64 hosted minutes, OQ-20); add push / pull_request triggers when that is settled. A new file: ci.yml and
+# release.yml are untouched. Nothing here is uploaded to a Release; the two named files are kept for 3 days.
+# Unknown until a hosted run: whether compose.desktop.currentOs resolves Skiko's linux-arm64 natives and the
+# foojay arm64 JDK 17 package. Action pinning follows ci.yml (major tags).
+name: Desktop Linux arm64
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, e.g. 0.2.0 or 0.2.0-rc.1 (same shape as release.yml)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-linux-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+
+jobs:
+  linux-arm64:
+    name: Linux .deb + uber-jar (ubuntu-24.04-arm)
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    env:
+      CLAVIS_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      - name: Desktop tests, .deb and uber-jar
+        run: >
+          ./gradlew
+          :composeApp:desktopTest
+          :composeApp:packageDeb
+          :composeApp:packageUberJarForCurrentOS
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      - name: Uber-jar headless smoke test and naming
+        run: |
+          jar=$(ls composeApp/build/compose/jars/*.jar)
+          set +e
+          out=$(timeout 90 java -Djava.awt.headless=true -jar "$jar" 2>&1)
+          set -e
+          if echo "$out" | grep -q 'ClassNotFoundException\|NoClassDefFoundError'; then echo "$out" | tail -20; echo "::error::missing class in uber-jar"; exit 1; fi
+          echo "$out" | grep -q 'HeadlessException'
+          mkdir -p dist
+          cp composeApp/build/compose/binaries/main/deb/*.deb "dist/clavis_${CLAVIS_VERSION}_arm64.deb"
+          cp "$jar" "dist/clavis-$CLAVIS_VERSION-linux-arm64.jar"
+          dpkg-deb --info "dist/clavis_${CLAVIS_VERSION}_arm64.deb" | grep -E 'Package|Version|Architecture'
+          ls -la dist
+
+      - name: Upload the arm64 files
+        uses: actions/upload-artifact@v7
+        with:
+          name: clavis-linux-arm64
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 3
