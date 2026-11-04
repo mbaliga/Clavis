@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MEDIUM (about 4x2) card template: label, title, meta and one button. Bound by WidgetViews. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:clipToOutline="true"
+    android:padding="12dp"
+    android:orientation="vertical"
+    tools:targetApi="31">
+    <TextView
+        android:id="@+id/widget_label"
+        style="@style/Widget.Clavis.Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/widget_title"
+        style="@style/Widget.Clavis.Title"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical|start"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="14sp"
+        android:autoSizeMaxTextSize="20sp" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/widget_primary"
+            style="@style/Widget.Clavis.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp" />
+        <TextView
+            android:id="@+id/widget_meta"
+            style="@style/Widget.Clavis.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/widget_primary"
+            android:layout_centerVertical="true"
+            android:maxLines="2"
+            android:ellipsize="end" />
+    </RelativeLayout>
+</LinearLayout>

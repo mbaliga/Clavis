@@ -83,6 +83,8 @@ object SessionOrigin {
     const val POOL = "pool"
     const val BRANCH = "branch"
     const val ANOTHER = "another"
+    /** Started from an Android home-screen widget. */
+    const val WIDGET = "widget"
 }
 
 /**

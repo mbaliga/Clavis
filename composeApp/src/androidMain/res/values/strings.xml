@@ -1,4 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Clavis</string>
+
+    <!-- Home-screen widgets (docs/widgets.md). Names and descriptions appear in the launcher's
+         widget picker. The words the widgets draw from data live in WidgetCopy (:shared), beside
+         Copy, under the same D-18 copy rules. -->
+    <string name="widget_loading">Filling the pool…</string>
+    <string name="widget_word_due_name">Word due</string>
+    <string name="widget_word_due_description">The first word ready to return, in a line with the word gapped. Tap to recall it in Clavis.</string>
+    <string name="widget_pool_name">The pool</string>
+    <string name="widget_pool_description">Whether words are ready to return or the pool is still, per language.</string>
+    <string name="widget_record_name">Your record</string>
+    <string name="widget_record_description">Words held and bubbles readable per language, as of when you last left Clavis.</string>
+    <string name="widget_last_dip_name">Last dip</string>
+    <string name="widget_last_dip_description">The numbers from your last session.</string>
+    <string name="widget_origins_name">Word origins</string>
+    <string name="widget_origins_description">One word a day and where it comes from, from Wiktionary and EtymDB.</string>
+    <string name="widget_languages_name">Your languages</string>
+    <string name="widget_languages_description">One shortcut per language: tap one to start a session in it.</string>
+
+    <!-- Picker previews (Android 12+): sample content drawn without data. The line is from
+         Pepper&Carrot (CC BY 4.0, scene 61); the origin is the etymology pack's record for casa. -->
+    <string name="widget_preview_word_due_label">Word due · Spanish</string>
+    <string name="widget_preview_word_due_title">La ____ del Genio.</string>
+    <string name="widget_preview_word_due_meta">● 3 words ready to return</string>
+    <string name="widget_preview_recall">Recall it</string>
+    <string name="widget_preview_pool_headline">● 4 ready</string>
+    <string name="widget_preview_lang_es">Spanish</string>
+    <string name="widget_preview_lang_fr">French</string>
+    <string name="widget_preview_lang_it">Italian</string>
+    <string name="widget_preview_lang_de">German</string>
+    <string name="widget_preview_ready_3">● 3 ready</string>
+    <string name="widget_preview_ready_1">● 1 ready</string>
+    <string name="widget_preview_still">○ still</string>
+    <string name="widget_preview_record_headline">412 words held</string>
+    <string name="widget_preview_record_es">210 held · 34% readable</string>
+    <string name="widget_preview_record_fr">150 held · 21% readable</string>
+    <string name="widget_preview_record_de">52 held · 6% readable</string>
+    <string name="widget_preview_as_of">as of the last time you left Clavis</string>
+    <string name="widget_preview_last_label">Last dip</string>
+    <string name="widget_preview_last_title">4/5 understood or recalled</string>
+    <string name="widget_preview_last_meta">2 new words met · 2 languages visited</string>
+    <string name="widget_preview_another">Another</string>
+    <string name="widget_preview_origin_label">Spanish · a word you\'ve met</string>
+    <string name="widget_preview_origin_title">casa</string>
+    <string name="widget_preview_origin_meta">grew from Latin casa</string>
+    <string name="widget_preview_see_web">See its web</string>
 </resources>

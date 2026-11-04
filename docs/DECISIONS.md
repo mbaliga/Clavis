@@ -548,3 +548,31 @@ up" is a streak in disguise, D-15; the 27 minutes of baseline checks before the 
 session; whether Cosmos needs a list view for assistive technology) are for the maintainer.
 
 **Status.** Record.
+
+## D-31 · Home-screen widgets draw from a published snapshot; "Word due" opens the review instead of grading
+
+**Decision.** The Android home-screen widgets (docs/widgets.md) never read `clavis-state.json` or
+the packs. When the activity stops while a widget is placed, the app builds a small projection of
+the live engine (`WidgetSnapshots.build`) and writes it to `noBackupFilesDir/widgets/glance.json`
+(removing the last widget deletes it); the widgets draw from that file alone, and each lane carries
+its cards' due times so counts stay true as time passes without the app. The "Word due" widget is read-only: it shows the next word's line with the word
+gapped, and its tap opens a session held in that lane (`ClavisEngine.startLaneSession`), which
+serves that word first and, not being a Paths choice, leaves `state.intent` and the Paths log
+(H8's data) alone.
+
+**Why.** The UI thread is the document's only mutator and the store is owned by the activity
+together with activity-bound services (the file picker, the share sheet), so a widget that wrote the
+document would need an application-scoped store and a booted engine inside a broadcast — a
+refactor out of proportion to a widget. Grading on the home screen would also break two product
+rules: every encounter is anchored to a comic page (05-information-architecture §4.2), and the
+cloze grade depends on response time. Loading 20 MB of packs inside a broadcast's ten seconds was
+the other alternative and was rejected for the same budget.
+
+**Cost.** Words held and bubbles readable on a widget are as of the last time the app stopped (the
+widgets print that time). While a widget is placed, the snapshot duplicates a few kilobytes of
+learner state on disk, outside every backup.
+
+**Reopen** when the store moves to application scope; then "Word due" can become a `choice` widget,
+if a home-screen answer can be made honest about its missing page and timing.
+
+**Status.** Settled (implemented 2026-11-04; device behaviour not yet verified).

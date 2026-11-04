@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Home-screen widget colours: Clavis's own quiet palette (D-11), copied from ClavisTokens.Light
+  (commonMain ui/theme) because RemoteViews cannot read Compose tokens. Night values are in
+  values-night/. No colour carries meaning on a widget: every state is a shape and a word
+  (docs/widgets.md). ink2 on surface and surface2 clears WCAG AA (ClavisTokens' usability note).
+-->
+<resources>
+    <color name="widget_surface">#FBFBFA</color>
+    <color name="widget_surface2">#EEEEEB</color>
+    <color name="widget_ink">#2A2C31</color>
+    <color name="widget_ink2">#5E616A</color>
+    <color name="widget_line">#E6E6E2</color>
+    <color name="widget_accent">#4A5578</color>
+    <color name="widget_accent_ink">#3D4763</color>
+    <color name="widget_button">#2A2C31</color>
+    <color name="widget_button_ink">#F7F7F5</color>
+</resources>

@@ -30,6 +30,21 @@ credentials, hardware or a decision that cannot be produced from inside the repo
   (`USABILITY.md`, D-30). The fixed set includes one blocker (session scroll carrying over between
   encounters) and the data-safety gap (Reset/Import kept no copy; Enter confirmed the erase).
 
+### Since the release candidate: home-screen widgets (2026-11-04, unreleased)
+
+- **Six Android home-screen widgets** for any launcher — Word due, The pool, Your record, Last dip,
+  Word origins, Your languages — each resizable from 2×1 up with four layouts, drawn from a snapshot
+  the app publishes when it stops while a widget is placed (`noBackupFilesDir`, outside every
+  backup), with no permission, no network and no new dependency (docs/widgets.md, D-31). **Word due is read-only**: it shows the next
+  word's line with the word gapped and opens a session held in that lane; answering on the home
+  screen waits for an application-scoped store.
+- Machine-verified only: the CI line (`:shared:allTests :composeApp:desktopTest :composeApp:lintDebug
+  :composeApp:assembleDebug :composeApp:assembleRelease :composeApp:packageUberJarForCurrentOS`) is
+  green — 681 domain test runs (227 × 3 targets, was 187 × 3) and 71 headless desktop tests (was 61),
+  0 failures; lint 0 errors; the R8 release APK keeps every widget resource and adds no permission.
+  **Nothing about the widgets has been seen on a device** — no emulator here; the owner-verify list
+  is in docs/widgets.md.
+
 ## 3. Pre-tag checklist (RELEASE.md §2) — state
 
 | Step | State |
@@ -54,6 +69,7 @@ credentials, hardware or a decision that cannot be produced from inside the repo
 | Google Play Console setup, closed test, data-safety form | **maintainer** | account actions; copy is ready in `STORE-LISTING.md` |
 | Free the exhausted Actions artifact storage (or wait for the recalculation) | **maintainer** | account-level; after this pass CI no longer refills it |
 | Usability follow-ups marked *open* in `USABILITY.md` (page-decode failure state, Sentences performance, corrupt-state card, citation targets, keyboard-map help, return stack) | code | scoped and small; none blocks the release candidate |
+| Home-screen widgets on real launchers (picker previews, resizing through every layout, light/dark, TalkBack, taps into a running app, the due-time redraw under Doze and OEM battery managers) | **maintainer** | needs a phone; the checklist is docs/widgets.md "Owner-verify" |
 | Polish and Japanese pronunciation coverage is partial (~62%/~71% of the lexicon queried, D-28) | code | Lingua Libre's SPARQL endpoint throttled under sustained querying; `python enrich_pronunciations.py --lingualibre` re-run once it has recovered only adds coverage, never regresses |
 
 ## 5. Quality gates on the current head

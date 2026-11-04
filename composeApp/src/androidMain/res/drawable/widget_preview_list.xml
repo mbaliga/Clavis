@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Picker image for Android 8–11: the list template's shape, no data. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="88dp"
+    android:viewportWidth="250"
+    android:viewportHeight="110">
+    <path android:fillColor="@color/widget_surface" android:strokeColor="@color/widget_line" android:strokeWidth="1"
+        android:pathData="M16,0.5h218a15.5,15.5 0,0 1,15.5 15.5v78a15.5,15.5 0,0 1,-15.5 15.5h-218a15.5,15.5 0,0 1,-15.5 -15.5v-78a15.5,15.5 0,0 1,15.5 -15.5z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M14,14h60v6h-60z" />
+    <path android:fillColor="@color/widget_ink" android:pathData="M176,12h60v10h-60z" />
+    <path android:fillColor="#FFB3543B" android:pathData="M19,42m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="@color/widget_ink" android:pathData="M30,39h80v6h-80z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M196,39h40v6h-40z" />
+    <path android:fillColor="#FF7A5CC0" android:pathData="M19,64m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="@color/widget_ink" android:pathData="M30,61h70v6h-70z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M196,61h40v6h-40z" />
+    <path android:fillColor="#FF4E6B8A" android:pathData="M19,86m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="@color/widget_ink" android:pathData="M30,83h76v6h-76z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M196,83h40v6h-40z" />
+</vector>

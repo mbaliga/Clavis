@@ -13,6 +13,7 @@ spec in `template-spec.md`) with unit tests on both targets: `./gradlew :shared:
 | `.engine` | `Fsrs5` (the scheduler, template §2) · `ClavisEngine` (one class implementing `SelectionEngine`, `EncounterGrader`, `BaselineTester`, `PathsEngine`, plus You/Story/lane-overview helpers) · `LaneScore`, `YouMetrics`, `LaneOverview`, `SessionSummary` |
 | `.data` | `CorpusDecoder` (compact pack JSON → `Corpus`), `LanguageRegistryLoader` / `ListLanguageRegistry`, `PackManifests`, `DefaultContentPackLoader` (over a `suspend (path) -> ByteArray` reader), `gunzip` (expect/actual, `GZIPInputStream` on both targets), `maybeGunzip` (magic-byte detection) |
 | `.state` | `JsonStateStore` (atomic JSON document, merge-on-load, web-export import), `FileIo` (expect/actual over java.io/nio) |
+| `.widget` | Android home-screen widgets' pure side (docs/widgets.md): `WidgetSnapshots.build` (the published projection of the engine), `WidgetFaces` (what each widget shows at each size), `WidgetCopy` (their words, under D-18), `WidgetTap` (validated tap destinations) |
 
 ## Wiring (what the UI does)
 

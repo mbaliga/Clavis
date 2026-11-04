@@ -89,7 +89,7 @@ their own OS runners and publishes them ([docs/RELEASE.md](docs/RELEASE.md)).
 
 ## Documentation
 
-- [Changelog](CHANGELOG.md) · [Decisions](docs/DECISIONS.md) · [Build platform](docs/build-platform.md)
+- [Changelog](CHANGELOG.md) · [Decisions](docs/DECISIONS.md) · [Build platform](docs/build-platform.md) · [Home-screen widgets](docs/widgets.md)
 - [Concept docs](docs/00-README.md) · [Build plan](docs/10-build-plan.md) · [Pipeline](pipeline/README.md)
 - [Release and signing procedure](docs/RELEASE.md) · [Store listing](docs/STORE-LISTING.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md) · [Privacy](PRIVACY.md) · [Security policy](SECURITY.md) · [Contributing](CONTRIBUTING.md)

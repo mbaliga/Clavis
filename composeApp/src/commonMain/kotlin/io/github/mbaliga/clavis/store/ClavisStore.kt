@@ -31,6 +31,7 @@ import io.github.mbaliga.clavis.core.lineOf
 import io.github.mbaliga.clavis.core.sha256Hex
 import io.github.mbaliga.clavis.core.state.FileIo
 import io.github.mbaliga.clavis.core.state.JsonStateStore
+import io.github.mbaliga.clavis.core.widget.WidgetTap
 import io.github.mbaliga.clavis.platform.PlatformServices
 import io.github.mbaliga.clavis.platform.ioDispatcher
 import io.github.mbaliga.clavis.platform.runBlockingCompat
@@ -137,6 +138,7 @@ class ClavisStore(
             val theme = prefs.load().theme
             _ui.update { it.copy(phase = Phase.Ready, theme = theme, rev = it.rev + 1) }
             if (stateStore.lastLoadWasCorrupt) toast(Copy.STATE_UNREADABLE) // the unreadable file sits beside the fresh one
+            pendingWidgetTap?.let { pendingWidgetTap = null; openFromWidget(it) } // a widget tap that arrived while the packs loaded
         } catch (e: Throwable) {
             _ui.update { it.copy(phase = Phase.Failed(Copy.couldNotLoad(e.message ?: (e::class.simpleName ?: "unknown error")))) }
         }
@@ -362,6 +364,19 @@ class ClavisStore(
         commit { it.copy(session = s, enc = enc, sessionOrigin = origin, test = null, colophon = null) }
     }
 
+    /**
+     * A session held in [l] from its first encounter (home-screen widgets: "Recall it" and the lane
+     * shortcuts); an ordinary session when [l] is null or not an active lane.
+     */
+    fun startLaneSession(l: Lang?, origin: String = SessionOrigin.WIDGET) {
+        if (!ready) return
+        if (l == null || l !in engine.activeLanes()) { startSession(origin); return }
+        engine.rollDay(now)
+        val s = engine.startLaneSession(l, Copy.HOME_SCREEN, now)
+        s.blocked?.let { toast(it); return }
+        commit { it.copy(session = s, enc = encounterUi(s), sessionOrigin = origin, test = null, colophon = null) }
+    }
+
     fun startGameSession() {
         if (!ready) return
         engine.rollDay(now)
@@ -456,6 +471,39 @@ class ClavisStore(
     fun endSession(toView: String? = null) {
         if (toView != null && toView in VALID_VIEWS) state.view = toView
         commit { it.copy(session = null, enc = null) }
+    }
+
+    // ------------------------------------------------------------------ home-screen widgets (Android)
+
+    /** A widget tap that arrived before [boot] finished; applied once the store is ready. */
+    private var pendingWidgetTap: WidgetTap? = null
+
+    /**
+     * Lands a home-screen widget tap (docs/widgets.md). Never interrupts: during onboarding, a
+     * baseline check or a live session the app simply comes forward as it was. A finished
+     * session's summary gives way to the destination. Unknown views and words are ignored.
+     */
+    fun openFromWidget(tap: WidgetTap) {
+        if (!ready) { pendingWidgetTap = tap; return }
+        val u = current
+        if (!state.onboarded || u.test != null || (u.session != null && !u.session.done)) return
+        when (tap) {
+            WidgetTap.Open -> Unit
+            is WidgetTap.View -> if (tap.view in VALID_VIEWS) {
+                state.view = tap.view
+                commit { it.copy(session = null, enc = null, colophon = null) }
+            }
+            is WidgetTap.Session -> startLaneSession(tap.lane?.let(::Lang))
+            is WidgetTap.Word -> {
+                val l = Lang(tap.lane)
+                if (corpus.lex[l]?.containsKey(tap.lemma) == true) {
+                    state.cosmos.mode = "depth"
+                    state.cosmos.webFor = "${l.code}|${tap.lemma}" // the Field selects and focuses it (CosmosScreen)
+                }
+                state.view = "cosmos"
+                commit { it.copy(session = null, enc = null, colophon = null) }
+            }
+        }
     }
 
     // ------------------------------------------------------------------ paths (§6)

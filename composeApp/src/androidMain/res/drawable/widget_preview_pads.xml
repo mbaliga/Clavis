@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Picker image for Android 8–11: the pads template's shape, no data. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="88dp"
+    android:viewportWidth="250"
+    android:viewportHeight="110">
+    <path android:fillColor="@color/widget_surface" android:strokeColor="@color/widget_line" android:strokeWidth="1"
+        android:pathData="M16,0.5h218a15.5,15.5 0,0 1,15.5 15.5v78a15.5,15.5 0,0 1,-15.5 15.5h-218a15.5,15.5 0,0 1,-15.5 -15.5v-78a15.5,15.5 0,0 1,15.5 -15.5z" />
+    <path android:fillColor="@color/widget_surface2" android:pathData="M18,9h96a8,8 0,0 1,8 8v30a8,8 0,0 1,-8 8h-96a8,8 0,0 1,-8 -8v-30a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="@color/widget_surface2" android:pathData="M136,9h96a8,8 0,0 1,8 8v30a8,8 0,0 1,-8 8h-96a8,8 0,0 1,-8 -8v-30a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="@color/widget_surface2" android:pathData="M18,55h96a8,8 0,0 1,8 8v30a8,8 0,0 1,-8 8h-96a8,8 0,0 1,-8 -8v-30a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="@color/widget_surface2" android:pathData="M136,55h96a8,8 0,0 1,8 8v30a8,8 0,0 1,-8 8h-96a8,8 0,0 1,-8 -8v-30a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="#FFB3543B" android:pathData="M27,32m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FF7A5CC0" android:pathData="M145,32m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FF3E8D5C" android:pathData="M27,78m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FF4E6B8A" android:pathData="M145,78m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="@color/widget_ink" android:pathData="M38,24h50v6h-50z M156,24h50v6h-50z M38,70h50v6h-50z M156,70h50v6h-50z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M38,35h34v5h-34z M156,35h34v5h-34z M38,81h34v5h-34z M156,81h34v5h-34z" />
+</vector>

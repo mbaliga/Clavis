@@ -31,6 +31,8 @@ object Copy {
     const val GETTING_TO_KNOW = "getting to know you"
     const val PATH_YOU_CHOSE = "the path you chose"
     const val HELD = "held for this session"
+    /** Home-screen widgets: the lane a session was started in from a widget (`ClavisEngine.startLaneSession`). No web-build original. */
+    const val HOME_SCREEN = "chosen on your home screen"
     const val ECHO = "an echo from earlier"
     /** D-14: `chooseLane` guard when no active lane has scenes. */
     const val NOTHING_ELSE_OPEN = "nothing else is open"
