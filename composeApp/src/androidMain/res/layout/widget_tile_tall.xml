@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SMALL (about 2x2) for the stat and card widgets: label, value, caption. Bound by WidgetViews. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:clipToOutline="true"
+    android:padding="12dp"
+    android:orientation="vertical"
+    tools:targetApi="31">
+    <TextView
+        android:id="@+id/widget_label"
+        style="@style/Widget.Clavis.Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/widget_value"
+        style="@style/Widget.Clavis.Value"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical|start"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="14sp"
+        android:autoSizeMaxTextSize="24sp" />
+    <TextView
+        android:id="@+id/widget_caption"
+        style="@style/Widget.Clavis.Meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="3"
+        android:ellipsize="end" />
+</LinearLayout>

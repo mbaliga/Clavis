@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Night values of the widget palette, from ClavisTokens.Dark (see values/widget_colors.xml). -->
+<resources>
+    <color name="widget_surface">#1B1C21</color>
+    <color name="widget_surface2">#222328</color>
+    <color name="widget_ink">#DCDDE1</color>
+    <color name="widget_ink2">#9B9DA5</color>
+    <color name="widget_line">#26272D</color>
+    <color name="widget_accent">#9AA5C8</color>
+    <color name="widget_accent_ink">#B3BDDA</color>
+    <color name="widget_button">#D7D8DC</color>
+    <color name="widget_button_ink">#1B1C21</color>
+</resources>

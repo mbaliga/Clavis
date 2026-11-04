@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Picker image for Android 8–11 (no previewLayout there): the card template's shape, no data. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="88dp"
+    android:viewportWidth="250"
+    android:viewportHeight="110">
+    <path android:fillColor="@color/widget_surface" android:strokeColor="@color/widget_line" android:strokeWidth="1"
+        android:pathData="M16,0.5h218a15.5,15.5 0,0 1,15.5 15.5v78a15.5,15.5 0,0 1,-15.5 15.5h-218a15.5,15.5 0,0 1,-15.5 -15.5v-78a15.5,15.5 0,0 1,15.5 -15.5z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M14,14h70v6h-70z" />
+    <path android:fillColor="@color/widget_ink" android:pathData="M14,36h150v10h-150z" />
+    <path android:fillColor="@color/widget_ink2" android:pathData="M14,82h90v6h-90z" />
+    <path android:fillColor="@color/widget_button" android:pathData="M176,70h60a8,8 0,0 1,8 8v12a8,8 0,0 1,-8 8h-60a8,8 0,0 1,-8 -8v-12a8,8 0,0 1,8 -8z" />
+</vector>

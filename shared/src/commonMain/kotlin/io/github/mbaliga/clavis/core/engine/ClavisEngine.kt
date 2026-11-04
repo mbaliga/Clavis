@@ -403,6 +403,21 @@ class ClavisEngine(
         return s
     }
 
+    /**
+     * A session held in lane [l] from its first encounter, so it opens on that lane's first due
+     * card when one is due (a home-screen widget's "Recall it" and its lane shortcuts). Unlike a
+     * Paths branch it leaves `state.intent` and the Paths log alone: it was not a Paths choice and
+     * must not count toward H8. A lane that is not active gives an ordinary [startSession]; a lane
+     * with nothing to offer releases the hold, as any held lane does.
+     */
+    fun startLaneSession(l: Lang, why: String, now: Long): Session {
+        if (l !in activeLanes()) return startSession(now)
+        rollDay(now)
+        val s = Session(n = state.settings.sessionSize, start = now, hold = l, holdWhy = why)
+        nextEncounter(s, now)
+        return s
+    }
+
     /** Paths `game` branch (template L2155): a session whose first, already-picked encounter is replaced by langid. */
     fun startGameSession(now: Long): Session {
         state.intent = null

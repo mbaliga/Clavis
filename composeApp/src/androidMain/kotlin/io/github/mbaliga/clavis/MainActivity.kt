@@ -1,5 +1,6 @@
 package io.github.mbaliga.clavis
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,8 @@ import io.github.mbaliga.clavis.platform.PlatformServices
 import io.github.mbaliga.clavis.platform.platformReducedMotion
 import io.github.mbaliga.clavis.resources.Res
 import io.github.mbaliga.clavis.store.ClavisStore
+import io.github.mbaliga.clavis.widget.ClavisWidgets
+import io.github.mbaliga.clavis.widget.WidgetIntents
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 class MainActivity : ComponentActivity() {
@@ -45,11 +48,29 @@ class MainActivity : ComponentActivity() {
         val s = ClavisStore(services, readResource = { path -> Res.readBytes(path) })
         store = s
         setContent { ClavisApp(s) }
+        // A home-screen widget tap (docs/widgets.md); not again when the activity is recreated.
+        if (savedInstanceState == null) openFromWidget(intent)
     }
 
-    /** The process may be killed any time after this: write the learner document now. */
+    /** A widget tapped while Clavis is already running: the same activity and store take it. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        openFromWidget(intent)
+    }
+
+    private fun openFromWidget(intent: Intent?) {
+        val tap = WidgetIntents.tapOf(intent) ?: return
+        store?.openFromWidget(tap) // waits for boot when the packs are still loading
+    }
+
+    /**
+     * The process may be killed any time after this: write the learner document now, then publish
+     * what the home-screen widgets show (the user is likely on the home screen next).
+     */
     override fun onStop() {
         store?.flushSaves()
+        store?.let { ClavisWidgets.publish(applicationContext, it) }
         super.onStop()
     }
 

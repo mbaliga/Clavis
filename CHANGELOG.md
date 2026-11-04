@@ -4,6 +4,16 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 
 ## [Unreleased]
 
+### Application (`:composeApp`)
+
+- Added six Android home-screen widgets that any launcher can host — Word due, The pool, Your record, Last dip, Word origins and Your languages — each resizable from 2×1 up with four layouts, in the app's own light and dark palette, with every state a shape and a word (docs/widgets.md). Word due is read-only: it shows the next word's line with the word gapped, and **Recall it** opens a session held in that word's lane, which serves that word first. No permission, no network, no new dependency; one inexact alarm redraws when a card falls due. Device behaviour has not been verified (no emulator here).
+- When the app stops while a widget is placed, it writes the widgets' snapshot (`widgets/glance.json`) under `noBackupFilesDir`, outside cloud backup and device-to-device transfer (PRIVACY.md); removing the last widget deletes it. It is never read back into the learner document.
+- A widget tap lands through `ClavisStore.openFromWidget`: it waits for boot and never interrupts onboarding, a baseline check or a live session.
+
+### Domain (`:shared`)
+
+- Added `core.widget` (`WidgetSnapshots`, `WidgetFaces`, `WidgetCopy`, `WidgetTap`) with its JVM tests, and `ClavisEngine.startLaneSession`, a session held in one lane that leaves `state.intent` and the Paths log alone (D-31). No learner-state schema change.
+
 ## [0.1.0-rc.1] - 2026-09-16
 
 ### Domain (`:shared`)

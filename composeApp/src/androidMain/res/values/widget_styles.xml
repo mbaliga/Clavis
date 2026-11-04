@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Text styles for the home-screen widgets. Sizes are in sp so they follow the system font scale;
+  secondary text is never below 12sp and body text never below 14sp. The bundled Hind/Rozha faces
+  are Compose resources that RemoteViews cannot load, so widgets use the system sans-serif.
+-->
+<resources>
+    <!-- Alignment stays TextView's default (gravity start against each line's own direction), so
+         an Arabic line is laid out right to left even inside the English chrome. -->
+    <style name="Widget.Clavis" parent="">
+        <item name="android:textColor">@color/widget_ink</item>
+    </style>
+
+    <style name="Widget.Clavis.Label" parent="Widget.Clavis">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/widget_ink2</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="Widget.Clavis.Value" parent="Widget.Clavis">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Widget.Clavis.Headline" parent="Widget.Clavis">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Widget.Clavis.Compact" parent="Widget.Clavis">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Widget.Clavis.Title" parent="Widget.Clavis">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="Widget.Clavis.TitleLarge" parent="Widget.Clavis">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="Widget.Clavis.Body" parent="Widget.Clavis">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Widget.Clavis.Row" parent="Widget.Clavis">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/widget_ink2</item>
+    </style>
+
+    <style name="Widget.Clavis.Meta" parent="Widget.Clavis">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/widget_ink2</item>
+    </style>
+
+    <!-- 48dp tall at least (D-29 touch targets). -->
+    <style name="Widget.Clavis.Button" parent="Widget.Clavis">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/widget_button_ink</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:background">@drawable/widget_button</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">64dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="Widget.Clavis.Button.Quiet" parent="Widget.Clavis.Button">
+        <item name="android:textColor">@color/widget_accent_ink</item>
+        <item name="android:background">@drawable/widget_button_quiet</item>
+    </style>
+</resources>
