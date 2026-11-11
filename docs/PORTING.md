@@ -285,6 +285,9 @@ tracked files, so the R3 precondition holds; it becomes a step of `desktop-windo
    Termux:X11, where GL is software and every app must start without Wayland, Vulkan or Bluetooth; the Cosmos
    canvases' cost there is unmeasured). Clavis builds no native code, so the glibc concern is the JDK launcher and
    Skiko's prebuilt libraries; whether the app-image starts on SteamOS is NDV.
+   Built so far (2026-11-11, unrun on hosted arm64): `packaging/linux/test-install.sh` (offline test of `install.sh`, wired into
+   `ci.yml`) and a tarball step in `desktop-linux.yml` that packs `clavis-<v>-linux-arm64.tar.gz` and runs the same test on it.
+   The x86_64 tarball is not built yet.
 4. **LX3, Flatpak, `packaging/linux/flatpak/` + a `flatpak-builder` job in `desktop-linux.yml` (main and tags).** The
    manifest consumes the LX2 tarball from a Release (Flathub builds offline). The image already bundles JDK 17
    (D-2), so the `openjdk` extension may be unnecessary; F10's template decides. Finish-args:

@@ -29,7 +29,7 @@ env:
 
 jobs:
   linux-arm64:
-    name: Linux .deb + uber-jar (ubuntu-24.04-arm)
+    name: Linux .deb + uber-jar + tarball (ubuntu-24.04-arm)
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 45
     env:
@@ -69,6 +69,17 @@ jobs:
           cp "$jar" "dist/clavis-$CLAVIS_VERSION-linux-arm64.jar"
           dpkg-deb --info "dist/clavis_${CLAVIS_VERSION}_arm64.deb" | grep -E 'Package|Version|Architecture'
           ls -la dist
+
+      # LX2: the per-user tarball install.sh consumes. createDistributable yields the app-image directory
+      # (composeApp/build/compose/binaries/main/app/clavis). test-install.sh runs install.sh against it.
+      - name: Tarball from the app-image and install test
+        run: |
+          ./gradlew :composeApp:createDistributable --no-daemon --stacktrace "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+          img=$(find composeApp/build/compose/binaries/main/app -mindepth 1 -maxdepth 1 -type d -name clavis | head -1)
+          [ -n "$img" ] || { echo "::error::no clavis app-image"; exit 1; }
+          mkdir -p dist
+          tar -czf "dist/clavis-$CLAVIS_VERSION-linux-arm64.tar.gz" -C "$(dirname "$img")" clavis
+          bash packaging/linux/test-install.sh "dist/clavis-$CLAVIS_VERSION-linux-arm64.tar.gz"
 
       - name: Upload the arm64 files
         uses: actions/upload-artifact@v7

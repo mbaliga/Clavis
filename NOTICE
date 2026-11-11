@@ -7,8 +7,8 @@ APK/AAB, Linux .deb and uber-jar, macOS .dmg, Windows .msi) additionally contain
 
   * Third-party libraries under the Apache License 2.0: Kotlin and kotlinx (coroutines,
     serialization, datetime), JetBrains Compose Multiplatform and the org.jetbrains.androidx.*
-    multiplatform builds, AndroidX, Skiko (which bundles Skia, BSD 3-Clause), okio,
-    multiplatform-settings, JSpecify annotations and Guava listenablefuture. Their licence
+    multiplatform builds, AndroidX, Skiko (which bundles Skia, BSD 3-Clause),
+    JSpecify annotations and Guava listenablefuture. Their licence
     texts travel inside the artifacts (META-INF/); of the artifacts resolved for the reviewed
     release and desktop runtime graphs none ships a NOTICE file that requires reproduction here.
     THIRD_PARTY_NOTICES.md lists the families and the procedure that re-checks this per release.
