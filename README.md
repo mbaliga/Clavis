@@ -92,6 +92,7 @@ their own OS runners and publishes them ([docs/RELEASE.md](docs/RELEASE.md)).
 - [Changelog](CHANGELOG.md) · [Decisions](docs/DECISIONS.md) · [Build platform](docs/build-platform.md)
 - [Concept docs](docs/00-README.md) · [Build plan](docs/10-build-plan.md) · [Pipeline](pipeline/README.md)
 - [Release and signing procedure](docs/RELEASE.md) · [Store listing](docs/STORE-LISTING.md)
+- [Porting plan](docs/PORTING.md) (iOS/iPadOS, Linux packaging, Ubuntu Touch; proposed [D-31](docs/DECISIONS.md), awaiting the owner)
 - [Third-party notices](THIRD_PARTY_NOTICES.md) · [Privacy](PRIVACY.md) · [Security policy](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 ## Licensing

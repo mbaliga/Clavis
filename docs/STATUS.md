@@ -55,6 +55,7 @@ credentials, hardware or a decision that cannot be produced from inside the repo
 | Free the exhausted Actions artifact storage (or wait for the recalculation) | **maintainer** | account-level; after this pass CI no longer refills it |
 | Usability follow-ups marked *open* in `USABILITY.md` (page-decode failure state, Sentences performance, corrupt-state card, citation targets, keyboard-map help, return stack) | code | scoped and small; none blocks the release candidate |
 | Polish and Japanese pronunciation coverage is partial (~62%/~71% of the lexicon queried, D-28) | code | Lingua Libre's SPARQL endpoint throttled under sustained querying; `python enrich_pronunciations.py --lingualibre` re-run once it has recovered only adds coverage, never regresses |
+| Porting (iOS/iPadOS, Linux arm64 + Flatpak, Ubuntu Touch; proposed D-31) | **maintainer** | plan only (`PORTING.md`); D-31 awaits the owner's ruling, and the Apple Developer Program, an Ubuntu Touch device and signing material are owner-held; nothing in the plan has been built |
 
 ## 5. Quality gates on the current head
 

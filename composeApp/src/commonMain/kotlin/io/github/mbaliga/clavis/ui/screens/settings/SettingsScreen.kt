@@ -57,6 +57,21 @@ import io.github.mbaliga.clavis.ui.screens.learn.laneColour
 import io.github.mbaliga.clavis.ui.theme.ClavisTheme
 import io.github.mbaliga.clavis.ui.theme.ThemeMode
 
+/** One row of the keyboard map: the keys, then what they do. Mirrors `handleKey` in ClavisApp.kt; keep the two together. */
+data class KeyBinding(val keys: String, val does: String)
+
+val KEYBOARD_MAP: List<KeyBinding> = listOf(
+    KeyBinding("1 2 3 4 5", "go to a main view"),
+    KeyBinding("Ctrl/Cmd ,", "open Settings"),
+    KeyBinding("Esc", "back to Learn, or stop a session"),
+    KeyBinding("Space / Enter", "start a session; continue after an answer; finish a read"),
+    KeyBinding("1 2 3", "choose an answer option"),
+    KeyBinding("P", "show the full comic page"),
+    KeyBinding("E", "show the English line"),
+    KeyBinding("U / T", "mark a read understood / not yet"),
+    KeyBinding("Left / Right, N / Y", "answer in the baseline check"),
+)
+
 const val ABOUT_COPY =
     "Voices come from a downloaded voice or your device. Everything stays on this device — there is no server and nothing is sent anywhere. The evidence behind every design choice, the materials and their licences, and a glossary live in Evidence & credits."
 const val FAMILY_WARNING_TITLE = "Two speaking languages in one family"
@@ -129,6 +144,17 @@ fun SettingsScreen(store: ClavisStore, ui: UiState) {
         }
 
         YourDataCard(store)
+
+        SoftCard(Modifier.tagged("keyboard-help")) {
+            Eyebrow("Keyboard")
+            for (b in KEYBOARD_MAP) {
+                Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.Top) {
+                    Text(b.keys, style = t.chip, color = p.ink, modifier = Modifier.width(150.dp))
+                    Text(b.does, style = t.small, color = p.ink2, modifier = Modifier.weight(1f))
+                }
+            }
+            Text("Works wherever a hardware keyboard is attached.", style = t.small, color = p.ink3, modifier = Modifier.padding(top = 6.dp))
+        }
 
         SoftCard {
             Eyebrow("About")

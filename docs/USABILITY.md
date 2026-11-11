@@ -62,7 +62,7 @@ reason; **withdrawn** = looked like a problem in the screenshots and was not.
 | U15 | Minor | Sentences reused the app-boot "Filling the pool…" as its loading text, and a pack that fails to parse rendered as "No sentence pack for Korean yet." | `SentencesScreen.kt` | fixed: its own loading and failure lines. |
 | U16 | Major | A comic page that is slow to decode and one that fails to decode look identical forever: a grey box with balloon text floating on it. Story before first paint is exactly this state. | `PageImages.kt`, `SceneBox.kt` | open: `PageImages` should distinguish loading from failure and `SceneBox` say "the page could not be loaded" while the caption rows stay usable. |
 | U17 | Minor | Secondary screens' back (gear → Settings → back, or Story → gear → back) always lands on Learn, so Story loses its page. | `ClavisApp.kt` back handling | open: a one-deep return stack. |
-| U18 | Minor | The desktop keyboard map (1–5 views, Esc, Space/Enter, 1–3 options, P/E/U/T) is discoverable nowhere but a hint on the baseline check. | `ClavisApp.handleKey` | open: a "Keyboard" block in Settings → About on desktop. |
+| U18 | Minor | The desktop keyboard map (1–5 views, Esc, Space/Enter, 1–3 options, P/E/U/T) is discoverable nowhere but a hint on the baseline check. | `ClavisApp.handleKey` | fixed: a "Keyboard" card in Settings (`KEYBOARD_MAP`, `KeyboardHelpTest`). |
 | U19 | Minor | "Read" (open the comic in Story) sat directly under the "speak / read / off" mode control on every Languages card — two different things, one word. | screenshot `languages-light-mobile` | fixed: "Read the comic". |
 
 ### Legibility, targets, layout at large text
