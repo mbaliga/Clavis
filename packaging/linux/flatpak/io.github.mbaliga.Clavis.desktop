@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Clavis
+Comment=Nine languages, one lexicon: offline-first language learning from parallel comics.
+Exec=clavis
+Icon=io.github.mbaliga.Clavis
+Terminal=false
+Categories=Education;

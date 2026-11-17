@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.mbaliga.Clavis</id>
+  <name>Clavis</name>
+  <summary>Nine languages, one lexicon, from parallel comics</summary>
+  <developer id="io.github.mbaliga"><name>mbaliga</name></developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <description>
+    <p>Clavis teaches several languages at once through comic bubbles you can almost read: one to three new words at a time, never a wall of vocabulary.</p>
+    <p>It works offline. There is no account, no analytics and no sync. The only network use is a download you start yourself by tapping Play or Download on a recording.</p>
+  </description>
+  <launchable type="desktop-id">io.github.mbaliga.Clavis.desktop</launchable>
+  <url type="homepage">https://github.com/mbaliga/Clavis</url>
+  <url type="bugtracker">https://github.com/mbaliga/Clavis/issues</url>
+  <content_rating type="oars-1.1"/>
+  <provides>
+    <binary>clavis</binary>
+  </provides>
+  <releases>
+    <release version="0.2.0" date="2026-11-17"/>
+  </releases>
+</component>

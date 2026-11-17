@@ -1,0 +1,47 @@
+# Flatpak manifest for Clavis (docs/PORTING.md 6.3, LX3). Evidence class: CI-LANE-WRITTEN; see render-manifest.sh and
+# validate.sh for what was run in the authoring container (metadata lint only: no Flatpak build has run).
+#
+# APP ID: io.github.mbaliga.Clavis is a PROPOSAL, matching the Android applicationId (io.github.mbaliga.clavis) and the
+# GitHub-hosted-app form Flathub accepts. NAMES.md row first (plan rule R11) and Flathub's id verification are owner
+# actions; the id appears here, in the two metadata files' names/ids, and in the CI lane's FLATPAK_ID, nowhere else.
+#
+# The app-image (jpackage createDistributable tarball) already bundles a JDK 17 runtime, so no openjdk extension is
+# used. Release builds consume the tarball from a GitHub Release by URL + sha256 (Flathub builds offline); CI builds
+# a local variant with render-manifest.sh. @VERSION@ / @ARCH@ / @SHA256@ are filled by that script.
+app-id: io.github.mbaliga.Clavis
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: clavis
+finish-args:
+  # AWT runs through X11 (XWayland on Wayland sessions); a native Wayland path is a flagged spike, not claimed.
+  - --socket=x11
+  - --share=ipc
+  - --device=dri
+  # javax.sound playback of the recordings the learner taps.
+  - --socket=pulseaudio
+  # The single visible D-13 path (one user-tapped HTTPS download). Flatpak cannot grant network on demand, so the
+  # sandbox permission is always on; the app still makes no request until the learner taps Play/Download.
+  # PRIVACY.md says so. Nothing else is requested: no filesystem, no session bus, no device list.
+  - --share=network
+modules:
+  - name: clavis
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/opt /app/bin /app/share/applications /app/share/metainfo /app/share/icons/hicolor/256x256/apps
+      - cp -a Clavis /app/opt/clavis
+      - ln -s /app/opt/clavis/bin/Clavis /app/bin/clavis
+      - install -Dm644 io.github.mbaliga.Clavis.desktop /app/share/applications/io.github.mbaliga.Clavis.desktop
+      - install -Dm644 io.github.mbaliga.Clavis.metainfo.xml /app/share/metainfo/io.github.mbaliga.Clavis.metainfo.xml
+      - install -Dm644 icon-256.png /app/share/icons/hicolor/256x256/apps/io.github.mbaliga.Clavis.png
+    sources:
+      - type: archive
+        url: "https://github.com/mbaliga/Clavis/releases/download/v@VERSION@/clavis-@VERSION@-linux-@ARCH@.tar.gz"
+        sha256: "@SHA256@"
+        strip-components: 0
+      - type: file
+        path: io.github.mbaliga.Clavis.desktop
+      - type: file
+        path: io.github.mbaliga.Clavis.metainfo.xml
+      - type: file
+        path: ../../../composeApp/src/desktopMain/resources/icons/icon-256.png

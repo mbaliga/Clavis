@@ -46,3 +46,4 @@ keystore.properties
 *.apk
 *.aab
 ubuntu-touch/www/
+packaging/linux/flatpak/build-manifest.yml

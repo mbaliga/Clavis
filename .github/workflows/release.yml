@@ -258,6 +258,82 @@ jobs:
           dpkg-deb --info "dist/clavis_${CLAVIS_VERSION}_amd64.deb" | grep -E 'Package|Version|Architecture'
           ls -la dist
 
+      # LX2: the per-user tarball packaging/linux/install.sh consumes. createDistributable's app-image directory is
+      # `Clavis/` (packageName), measured by building it; test-install.sh installs the real tarball as a normal user.
+      - name: Tarball from the app-image and install test
+        run: |
+          ./gradlew :composeApp:createDistributable --no-daemon --stacktrace "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+          img=$(find composeApp/build/compose/binaries/main/app -mindepth 1 -maxdepth 1 -type d | head -1)
+          [ -n "$img" ] || { echo "::error::no app-image under composeApp/build/compose/binaries/main/app"; exit 1; }
+          mkdir -p dist
+          tar -czf "dist/clavis-$CLAVIS_VERSION-linux-x86_64.tar.gz" -C "$(dirname "$img")" "$(basename "$img")"
+          bash packaging/linux/test-install.sh "dist/clavis-$CLAVIS_VERSION-linux-x86_64.tar.gz"
+
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
+  linux-arm64:
+    name: Linux arm64 .deb + uber-jar + tarball (ubuntu-24.04-arm)
+    needs: preflight
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      # jpackage's DEB bundler needs fakeroot and dpkg-deb; both are preinstalled on ubuntu-24.04 (docs/build-platform.md §5).
+      - name: Desktop tests, .deb and uber-jar
+        run: >
+          ./gradlew
+          :composeApp:desktopTest
+          :composeApp:packageDeb
+          :composeApp:packageUberJarForCurrentOS
+          --no-daemon --stacktrace
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      - name: Uber-jar headless smoke test and naming
+        run: |
+          mkdir -p dist
+          jar=$(ls composeApp/build/compose/jars/*.jar)
+          set +e
+          out=$(timeout 90 java -Djava.awt.headless=true -jar "$jar" 2>&1)
+          set -e
+          if echo "$out" | grep -q 'ClassNotFoundException\|NoClassDefFoundError'; then echo "$out" | tail -20; echo "::error::missing class in uber-jar"; exit 1; fi
+          echo "$out" | grep -q 'HeadlessException'
+          cp composeApp/build/compose/binaries/main/deb/*.deb "dist/clavis_${CLAVIS_VERSION}_arm64.deb"
+          cp "$jar" "dist/clavis-$CLAVIS_VERSION-linux-arm64.jar"
+          dpkg-deb --info "dist/clavis_${CLAVIS_VERSION}_arm64.deb" | grep -E 'Package|Version|Architecture'
+          ls -la dist
+
+      # LX2: the per-user tarball packaging/linux/install.sh consumes. createDistributable's app-image directory is
+      # `Clavis/` (packageName), measured by building it; test-install.sh installs the real tarball as a normal user.
+      - name: Tarball from the app-image and install test
+        run: |
+          ./gradlew :composeApp:createDistributable --no-daemon --stacktrace "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+          img=$(find composeApp/build/compose/binaries/main/app -mindepth 1 -maxdepth 1 -type d | head -1)
+          [ -n "$img" ] || { echo "::error::no app-image under composeApp/build/compose/binaries/main/app"; exit 1; }
+          mkdir -p dist
+          tar -czf "dist/clavis-$CLAVIS_VERSION-linux-arm64.tar.gz" -C "$(dirname "$img")" "$(basename "$img")"
+          bash packaging/linux/test-install.sh "dist/clavis-$CLAVIS_VERSION-linux-arm64.tar.gz"
+
       - name: Upload to the draft Release
         run: |
           compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
@@ -566,7 +642,7 @@ jobs:
     # Runs for a dry run too (only the final "Publish" step is skipped) so a dry run exercises the same
     # download/checksum/body-composition path a real release goes through, not just the five build jobs.
     name: Assemble the Release (and publish it, on a tag)
-    needs: [preflight, android, linux, macos, ios, windows, web]
+    needs: [preflight, android, linux, linux-arm64, macos, ios, windows, web]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -596,6 +672,10 @@ jobs:
           expect "clavis-$CLAVIS_VERSION-android-mapping.txt" android
           expect "clavis_${CLAVIS_VERSION}_amd64.deb" linux
           expect "clavis-$CLAVIS_VERSION-linux-x64.jar" linux
+          expect "clavis-$CLAVIS_VERSION-linux-x86_64.tar.gz" linux
+          expect "clavis_${CLAVIS_VERSION}_arm64.deb" linux-arm64
+          expect "clavis-$CLAVIS_VERSION-linux-arm64.jar" linux-arm64
+          expect "clavis-$CLAVIS_VERSION-linux-arm64.tar.gz" linux-arm64
           expect "clavis-$CLAVIS_VERSION-dependencies-android.txt" linux
           expect "clavis-$CLAVIS_VERSION-dependencies-desktop.txt" linux
           expect "Clavis-$CLAVIS_VERSION-macos-arm64*.dmg" macos
@@ -603,8 +683,8 @@ jobs:
           expect "Clavis-$CLAVIS_VERSION-ios-unsigned.ipa" ios
           expect "Clavis-$CLAVIS_VERSION-windows-x64.msi" windows
           expect "clavis-$CLAVIS_VERSION-windows-x64.jar" windows
-          expected=12
-          if [ "$WEB_BUILT" = true ]; then expect "clavis-$CLAVIS_VERSION-web.html" web; expected=13; fi
+          expected=16
+          if [ "$WEB_BUILT" = true ]; then expect "clavis-$CLAVIS_VERSION-web.html" web; expected=17; fi
           [ "$missing" = 0 ] || exit 1
           actual=$(find dist -mindepth 1 -maxdepth 1 | wc -l)
           [ "$actual" = "$expected" ] || { echo "::error::expected $expected assets in the draft '$RELEASE_TAG', found $actual — a stale or unexpected upload; inspect the draft before re-running"; exit 1; }
@@ -632,7 +712,7 @@ jobs:
             echo '### Installing'
             echo '- **Android:** install the `.apk`; the `.aab` is for Google Play only.'
             [ -n "$unsigned_android" ] && echo '  This build is **unsigned** (no signing secrets were configured) — Android will refuse to install it over a signed build and vice versa.'
-            echo '- **Linux:** `sudo apt install ./clavis_'"$CLAVIS_VERSION"'_amd64.deb`, or `java -jar clavis-'"$CLAVIS_VERSION"'-linux-x64.jar` on any JRE 17+.'
+            echo '- **Linux:** `sudo apt install ./clavis_'"$CLAVIS_VERSION"'_amd64.deb`, or `java -jar clavis-'"$CLAVIS_VERSION"'-linux-x64.jar` on any JRE 17+. Linux arm64 has the matching `_arm64.deb`. No root: unpack the `linux-<arch>.tar.gz` and run `packaging/linux/install.sh` (installs under `~/.local`).'
             echo '- **macOS (Apple silicon):** open the `.dmg` and drag Clavis to Applications.'
             [ -n "$unsigned_dmg" ] && echo '  This DMG is **not signed or notarized**: after the first double-click choose *Done*, then System Settings → Privacy & Security → *Open Anyway* (Control-click → Open no longer bypasses Gatekeeper since macOS 15). Details in the README.'
             echo '- **iOS / iPadOS:** the `.ipa` is **unsigned** and cannot be installed as is. It is for re-signing with your own Apple team (Sideloadly, AltStore, or Xcode); there is no App Store build yet.'
@@ -672,7 +752,7 @@ jobs:
   cleanup:
     name: Clean up the draft Release
     if: always()
-    needs: [preflight, android, linux, macos, windows, web, release]
+    needs: [preflight, android, linux, linux-arm64, macos, windows, web, release]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
