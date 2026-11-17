@@ -7,6 +7,7 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 ### Platforms
 
 - Added the iOS / iPadOS port: `iosArm64` and `iosSimulatorArm64` targets in `:shared` and `:composeApp`, the iOS actuals and services, a SwiftUI shell (`iosApp/`, bundle id `com.asoc.clavis`), `ios.yml` (simulator tests, Xcode build, launch smoke) and an unsigned `.ipa` in the release. Compiled and run on no Apple target yet; see `docs/STATUS.md` section 8 and `docs/DEVICE_CHECKLIST_IOS.md`.
+- Added `ubuntu-touch/`: the frozen ten-language web build packaged as an Ubuntu Touch click (QML WebView, `webview` policy only, labelled "reference build"; not the native app), with `ubuntu-touch.yml` and `docs/DEVICE_CHECKLIST_UT.md`. The click removes the three Google Fonts links so it makes no request. Unrun on any device; see `docs/STATUS.md` section 9.
 - Fixed `lineOf` (ja/zh display, gloss and TTS text) so it no longer depends on a JVM-only regex, and now also strips a line-break gap that follows a supplementary-plane Han character.
 
 ## [0.1.0-rc.1] - 2026-09-16

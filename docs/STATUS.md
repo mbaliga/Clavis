@@ -55,7 +55,7 @@ credentials, hardware or a decision that cannot be produced from inside the repo
 | Free the exhausted Actions artifact storage (or wait for the recalculation) | **maintainer** | account-level; after this pass CI no longer refills it |
 | Usability follow-ups marked *open* in `USABILITY.md` (page-decode failure state, Sentences performance, corrupt-state card, citation targets, keyboard-map help, return stack) | code | scoped and small; none blocks the release candidate |
 | Polish and Japanese pronunciation coverage is partial (~62%/~71% of the lexicon queried, D-28) | code | Lingua Libre's SPARQL endpoint throttled under sustained querying; `python enrich_pronunciations.py --lingualibre` re-run once it has recovered only adds coverage, never regresses |
-| Porting (iOS/iPadOS, Linux arm64 + Flatpak, Ubuntu Touch; proposed D-31) | **maintainer** | plan only (`PORTING.md`); D-31 awaits the owner's ruling, and the Apple Developer Program, an Ubuntu Touch device and signing material are owner-held; nothing in the plan has been built |
+| Porting (iOS/iPadOS, Linux arm64 + Flatpak, Ubuntu Touch; proposed D-31) | **maintainer** | iOS and the Ubuntu Touch reference-build click are written (sections 8 and 9), unrun on any device; D-31 still awaits the owner's recording, and the Apple Developer Program, an Ubuntu Touch device and signing material are owner-held |
 
 ## 5. Quality gates on the current head
 
@@ -136,3 +136,34 @@ recordings show no Play control) and Q12 (iCloud backup of the learner document;
 
 Telemetry: none. The one approved exception (PT:D-BD, 2026-10-14) is Apple-side crash reporting for TestFlight/App Store
 builds; the app adds no SDK and transmits nothing, and `iosApp/README.md` names it.
+
+## 9. Ubuntu Touch reference-build click (2026-11-17)
+
+Owner request of 2026-11-17: Ubuntu Touch click builds happen on GitHub Actions (ubuntu + Clickable). **This is a
+reframe, not a port of the native app** (plan section 4: no JVM and no Compose target in a click): it packages the
+frozen ten-language web build in a QML WebView and is labelled "reference build" everywhere. It overrides the plan's
+proposed no-port line; D-31 Option A (relax D-1 for this one artefact) is treated as taken and still needs the owner to
+record it. Evidence classes as in section 8.
+
+| Piece | Evidence |
+|---|---|
+| `ubuntu-touch/tools/stage_www.py`: packs to `www/index.html`, removing only the three Google Fonts `<link>` tags (no request of its own) | BUILT-HERE: ran, 21,315,994-byte page |
+| `ubuntu-touch/tests` (8 unittest cases: strip, output equals packed page minus those lines, no fetch/beacon/socket/open in the page, layout guard rejects `networking`, Google Fonts, wrong arch) | BUILT-HERE: 8 tests pass |
+| CMake install layout, manifest, `webview`-only AppArmor profile, desktop file; `check_click_layout.py` on the `DESTDIR` install and on a `dpkg-deb` repack | BUILT-HERE: "click layout ok" both ways. A real `click build` was not run (not installed) |
+| Staged page loaded in desktop QtWebEngine 5.15.13 under Xvfb (`run_webengine_boot.sh`): welcome screen renders, no JS console warning/error, `localStorage` round-trips on `file://` | BUILT-HERE, as a stand-in only. It is not Morph.Web, not Lomiri, not a device |
+| `qml/Main.qml` (Morph.Web `WebView`) | qmllint exit 0 (Qt 5.15 qmllint does not resolve imports, so this is syntax only). Behaviour: CODE-ONLY |
+| Clickable 8.10.0 parses `clickable.yaml` and reaches the Docker step; the daemon is absent here | the build itself: CI-LANE-WRITTEN |
+| `.github/workflows/ubuntu-touch.yml` (tool tests, stage, layout, QtWebEngine boot, Clickable build, built-click check, click-review informational, draft release on `ut-v*`) | CI-LANE-WRITTEN, `actionlint` clean, actions pinned to full SHAs (checkout, upload-artifact); no secrets |
+| `docs/DEVICE_CHECKLIST_UT.md` | every row NEEDS-DEVICE-VALIDATION |
+
+Not tried: Waydroid or any other substitute (owner ruling: native ports only). Not done: a native Ubuntu Touch Clavis;
+that needs a Qt/QML port of `:shared` and is not estimated.
+
+**What the owner does next:** (1) record D-31 Option A in `DECISIONS.md` (or revoke); (2) add the NAMES.md row for the
+click id and fill `APP_ID`/`APP_MAINTAINER` in `ubuntu-touch/CMakeLists.txt` (currently `clavis-reference.mbaliga`, a
+placeholder); (3) run Actions > Ubuntu Touch once and report the first red step; (4) work through
+`DEVICE_CHECKLIST_UT.md` on a device (open: persistence of `localStorage`, speech voices, export, whether the page
+looks right without Google Fonts); (5) decide whether citation links and file export justify requesting
+`url_dispatcher` / `content_exchange`; (6) OpenStore listing after name clearance.
+
+Telemetry: none. The click requests the `webview` policy group only; the page makes no request.

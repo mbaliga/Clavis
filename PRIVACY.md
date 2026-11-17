@@ -14,6 +14,7 @@ One JSON document per profile, `clavis-state.json`, containing your learning sta
 | Linux | `$XDG_DATA_HOME/Clavis/` (default `~/.local/share/Clavis/`) | `$XDG_CACHE_HOME/Clavis/` (default `~/.cache/Clavis/`) |
 | macOS | `~/Library/Application Support/Clavis/` | `~/Library/Caches/Clavis/` |
 | Windows | `%APPDATA%\Clavis\` | `%LOCALAPPDATA%\Clavis\cache\` |
+| Ubuntu Touch (reference build click, not the native app) | the WebView's `localStorage` in the app's own profile; clearing app data erases it and the in-page export is the only copy | none |
 
 These are the directories the desktop shell resolves (`DesktopAppDirs`; the directory name is `Clavis` with a capital C on every platform, which matters on case-sensitive file systems).
 
