@@ -54,6 +54,7 @@ sha256sum -c SHA256SUMS.txt --ignore-missing
 |---|---|---|
 | Android 8.0+ | `clavis-<v>-android.apk` | Universal APK for sideloading. A file named `-unsigned.apk` was built without the maintainer's signing key: Android will not install it over a signed build, nor a signed one over it. The `.aab` is for Google Play only. |
 | Linux x64 | `clavis_<v>_amd64.deb` | `sudo apt install ./clavis_<v>_amd64.deb`, then `clavis` or the menu entry (bundles its own Java 17). |
+| Linux x86_64 / arm64, no root | `clavis-<v>-linux-<arch>.tar.gz` (`x86_64` or `arm64`) | Unpack, then `packaging/linux/install.sh clavis-<v>-linux-<arch>.tar.gz`: installs under `~/.local`, adds a menu entry; `--uninstall` removes it. A `clavis_<v>_arm64.deb` exists for arm64. Flatpak: built in CI, not yet released ([docs/DEVICE_CHECKLIST_LINUX.md](docs/DEVICE_CHECKLIST_LINUX.md)). |
 | Any OS with a JRE 17+ | `clavis-<v>-<os>-<arch>.jar` | `java -jar clavis-<v>-linux-x64.jar`. Jars are per OS/architecture (each bundles that platform's Skia), not one jar for all. |
 | macOS 11+ (Apple silicon) | `Clavis-<v>-macos-arm64.dmg` | Drag to Applications. **Unsigned builds** (`-unsigned.dmg`): macOS 15 removed the Control-click bypass — double-click once, choose *Done*, then System Settings → Privacy & Security → *Open Anyway* → *Open*. macOS remembers it. |
 | Windows 10/11 x64 | `Clavis-<v>-windows-x64.msi` | Not code-signed yet: SmartScreen shows "Windows protected your PC" → *More info* → *Run anyway*. Upgrades install over the previous version. |

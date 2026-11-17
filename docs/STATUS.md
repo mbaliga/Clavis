@@ -167,3 +167,34 @@ looks right without Google Fonts); (5) decide whether citation links and file ex
 `url_dispatcher` / `content_exchange`; (6) OpenStore listing after name clearance.
 
 Telemetry: none. The click requests the `webview` policy group only; the page makes no request.
+
+## 10. Linux desktop port (2026-11-17)
+
+Linux was already a JVM desktop target (`.deb` + uber-jar). This pass added the tarball + per-user installer on both
+architectures, a launch smoke, a Flatpak, and the CI lanes, and fixed a real defect found by building the app-image.
+Evidence classes as in section 8.
+
+| Piece | Evidence |
+|---|---|
+| `:composeApp:createDistributable` on x86_64: app-image is `Clavis/` (launcher `bin/Clavis`, `lib/Clavis.png`, bundled JDK, 160 MB, tarball 97 MB) | BUILT-HERE, 31 s |
+| **Defect found:** the earlier `install.sh`, `test-install.sh` and the `desktop-linux.yml` tarball step assumed lowercase `clavis/bin/clavis`, so they would have failed on a real app-image. `install.sh` now finds the launcher under `bin/`; the stub test uses the real shape | BUILT-HERE: `test-install.sh` stub and the real x86_64 tarball both print "OK: install.sh install, reinstall and uninstall" (as a normal user) |
+| App-image launched under Xvfb (`smoke-launch.sh`): alive after 20 s, welcome screen rendered (screenshot read). Skiko logs "Cannot create Linux GL context" and falls back to software | BUILT-HERE, as a stand-in: software render, no GPU, no Wayland, no audio, no real desktop session |
+| Launch through the `~/.local/bin/clavis` symlink | CODE-ONLY (only the direct launcher path was run; checklist 2.6) |
+| `:shared:desktopTest` + `:composeApp:desktopTest` | BUILT-HERE: 268 tests, 0 failures, 0 errors (read from the XML results; Gradle reported the tasks up to date, i.e. the same sources already ran green earlier in this run) |
+| Flatpak manifest, desktop file, AppStream metainfo; `validate.sh` (desktop-file-validate, `appstreamcli validate --no-net`, finish-args pinned to x11, ipc, dri, pulseaudio, network) and `render-manifest.sh` | BUILT-HERE: lint passes (one pedantic note), render checked on a dummy tarball. **No `flatpak-builder` build ran**: the runtime plus SDK do not fit on this container's disk (about 0.5 GB free) |
+| `desktop-linux.yml`: x86_64 + arm64 matrix (tests, `.deb`, jar, tarball + install test, Xvfb launch, screenshot), then a Flatpak job per arch; push/PR only when the repo is public, dispatch always; actions pinned to SHAs | CI-LANE-WRITTEN, `actionlint` clean |
+| `release.yml`: new `linux-arm64` job, x86_64 tarball in `linux`, asset checks (12 to 16, web 13 to 17), notes line | CI-LANE-WRITTEN, `actionlint` clean, YAML parsed |
+| `docs/DEVICE_CHECKLIST_LINUX.md`, PRIVACY.md Flatpak rows, README Downloads row | every device row NEEDS-DEVICE-VALIDATION |
+
+Not tried: AppImage or Snap (plan: not proposed); a native Wayland path (AWT goes through XWayland); bundling a TTS
+engine (espeak-ng is GPL, D-8). Unknown until a hosted run: whether `compose.desktop.currentOs` resolves Skiko's
+linux-arm64 natives, whether `flatpak-builder` accepts the tarball source, and whether the sandbox has a usable file
+dialog (no filesystem permission is granted) or any TTS.
+
+**What the owner does next:** (1) add the NAMES.md row and confirm the Flatpak id `io.github.mbaliga.Clavis` (appears in
+`packaging/linux/flatpak/`, `desktop-linux.yml` `FLATPAK_ID` and the `PRIVACY.md` rows); (2) run Actions > Desktop Linux
+and report the first red step; (3) work through `DEVICE_CHECKLIST_LINUX.md` (Deck, RedMagic, HiDPI); (4) decide the
+Flatpak file-access and network permissions; (5) Flathub submission once the repository is public; (6) tag a release to
+exercise the arm64 and tarball assets.
+
+Telemetry: none. The Flatpak requests network, an unavoidable always-on permission for the one user-tapped download.
