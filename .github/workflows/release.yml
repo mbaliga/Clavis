@@ -387,6 +387,68 @@ jobs:
           gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
 
   # ---------------------------------------------------------------------------------------------------------
+  # iOS: an UNSIGNED device .ipa (docs/PORTING.md 6.1, I5). It cannot be installed as is: it exists so the archive step
+  # is proven on every release and so the owner can re-sign it with their own team (a free personal team works for
+  # 7 days on their own devices) without a Mac-side Gradle build. App Store / TestFlight delivery is ios.yml's gated
+  # `testflight` job, never this one. EVIDENCE CLASS: CI-LANE-WRITTEN (not yet run).
+  ios:
+    name: iOS unsigned .ipa (macos-latest, arm64)
+    needs: preflight
+    runs-on: macos-latest
+    timeout-minutes: 75
+    permissions:
+      contents: write
+    env:
+      CLAVIS_VERSION: ${{ needs.preflight.outputs.version }}
+      RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
+      GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      - name: Select the newest installed Xcode 26.x
+        run: bash iosApp/scripts/select-xcode.sh
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen --version
+
+      - name: Domain tests on the iOS simulator
+        run: ./gradlew :shared:iosSimulatorArm64Test --no-daemon --max-workers=2 --stacktrace "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}" -Pkotlin.daemon.jvmargs=-Xmx2g
+
+      - name: Archive (device, unsigned) and zip the .ipa
+        run: |
+          set -o pipefail
+          eval "$(bash iosApp/scripts/ios-version.sh | sed 's/^/export /')"
+          (cd iosApp && xcodegen generate)
+          cd iosApp
+          xcodebuild archive \
+            -project Clavis.xcodeproj -scheme Clavis -configuration Release -sdk iphoneos \
+            -archivePath build/Clavis.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            MARKETING_VERSION="$marketing" CURRENT_PROJECT_VERSION="$build" \
+            GRADLE_OPTS="${GRADLE_JVMARGS}" | tail -n 30
+          rm -rf build/ipa && mkdir -p build/ipa/Payload ../dist
+          cp -R build/Clavis.xcarchive/Products/Applications/Clavis.app build/ipa/Payload/
+          (cd build/ipa && zip -qry "../../../dist/Clavis-$CLAVIS_VERSION-ios-unsigned.ipa" Payload)
+          ls -la ../dist
+
+      - name: Upload to the draft Release
+        run: |
+          compgen -G 'dist/*' > /dev/null || { echo "::error::nothing to upload under dist/"; exit 1; }
+          gh release upload "$RELEASE_TAG" dist/* --clobber || { sleep 30; gh release upload "$RELEASE_TAG" dist/* --clobber; }
+
+  # ---------------------------------------------------------------------------------------------------------
   windows:
     name: Windows .msi + uber-jar (windows-2025)
     needs: preflight
@@ -504,7 +566,7 @@ jobs:
     # Runs for a dry run too (only the final "Publish" step is skipped) so a dry run exercises the same
     # download/checksum/body-composition path a real release goes through, not just the five build jobs.
     name: Assemble the Release (and publish it, on a tag)
-    needs: [preflight, android, linux, macos, windows, web]
+    needs: [preflight, android, linux, macos, ios, windows, web]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -518,7 +580,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # `needs` already guarantees the five build jobs succeeded; this checks that what they uploaded is all there
+      # `needs` already guarantees the build jobs succeeded; this checks that what they uploaded is all there
       # (one name per asset, so a missing one names its job) and that nothing else is, before it is checksummed
       # and published.
       - name: Download the draft's assets and check that every job delivered
@@ -538,10 +600,11 @@ jobs:
           expect "clavis-$CLAVIS_VERSION-dependencies-desktop.txt" linux
           expect "Clavis-$CLAVIS_VERSION-macos-arm64*.dmg" macos
           expect "clavis-$CLAVIS_VERSION-macos-arm64.jar" macos
+          expect "Clavis-$CLAVIS_VERSION-ios-unsigned.ipa" ios
           expect "Clavis-$CLAVIS_VERSION-windows-x64.msi" windows
           expect "clavis-$CLAVIS_VERSION-windows-x64.jar" windows
-          expected=11
-          if [ "$WEB_BUILT" = true ]; then expect "clavis-$CLAVIS_VERSION-web.html" web; expected=12; fi
+          expected=12
+          if [ "$WEB_BUILT" = true ]; then expect "clavis-$CLAVIS_VERSION-web.html" web; expected=13; fi
           [ "$missing" = 0 ] || exit 1
           actual=$(find dist -mindepth 1 -maxdepth 1 | wc -l)
           [ "$actual" = "$expected" ] || { echo "::error::expected $expected assets in the draft '$RELEASE_TAG', found $actual — a stale or unexpected upload; inspect the draft before re-running"; exit 1; }
@@ -572,6 +635,7 @@ jobs:
             echo '- **Linux:** `sudo apt install ./clavis_'"$CLAVIS_VERSION"'_amd64.deb`, or `java -jar clavis-'"$CLAVIS_VERSION"'-linux-x64.jar` on any JRE 17+.'
             echo '- **macOS (Apple silicon):** open the `.dmg` and drag Clavis to Applications.'
             [ -n "$unsigned_dmg" ] && echo '  This DMG is **not signed or notarized**: after the first double-click choose *Done*, then System Settings → Privacy & Security → *Open Anyway* (Control-click → Open no longer bypasses Gatekeeper since macOS 15). Details in the README.'
+            echo '- **iOS / iPadOS:** the `.ipa` is **unsigned** and cannot be installed as is. It is for re-signing with your own Apple team (Sideloadly, AltStore, or Xcode); there is no App Store build yet.'
             echo '- **Windows:** run the `.msi`. It is not code-signed; SmartScreen shows "Windows protected your PC" → *More info* → *Run anyway*.'
             echo
             echo 'Clavis is one person'"'"'s experiment (N=1); it is not a validated pedagogy. See the README.'
