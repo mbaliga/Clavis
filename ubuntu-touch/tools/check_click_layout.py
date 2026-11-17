@@ -83,6 +83,14 @@ def main(argv=None) -> int:
     if a.click:
         with tempfile.TemporaryDirectory() as t:
             subprocess.run(['dpkg-deb', '-x', str(a.click), t], check=True)
+            # A click keeps its manifest in the control archive (as `manifest`); the data archive may not carry
+            # manifest.json at all, so fall back to the control copy before checking the layout.
+            if not (Path(t) / 'manifest.json').is_file():
+                with tempfile.TemporaryDirectory() as c:
+                    subprocess.run(['dpkg-deb', '-e', str(a.click), c], check=True)
+                    ctl = Path(c) / 'manifest'
+                    if ctl.is_file():
+                        (Path(t) / 'manifest.json').write_text(ctl.read_text())
             errs = check(Path(t))
     elif a.stage:
         errs = check(a.stage)
