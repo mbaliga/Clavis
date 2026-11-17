@@ -52,7 +52,7 @@
 # * Compose, kotlinx-coroutines, kotlinx-datetime and androidx.graphics:graphics-path ship their own
 #   consumer rules; blanket "-keep class androidx.compose.**" rules would defeat the shrinking those
 #   rules already scope correctly. Do not add them.
-# * okio and multiplatform-settings ship no rules and need none today (no reflection). If R8 ever
+# * If R8 ever
 #   writes build/outputs/mapping/release/missing_rules.txt, paste its content here verbatim.
 
 # ---- Diagnostics -----------------------------------------------------------------------------

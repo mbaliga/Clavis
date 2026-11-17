@@ -45,3 +45,7 @@ keystore.properties
 # Built app binaries never enter the repo (Releases carry them)
 *.apk
 *.aab
+ubuntu-touch/www/
+packaging/linux/flatpak/build-manifest.yml
+__pycache__/
+*.pyc

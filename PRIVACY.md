@@ -12,8 +12,12 @@ One JSON document per profile, `clavis-state.json`, containing your learning sta
 |---|---|---|
 | Android | the app's private storage (`Context.filesDir`, i.e. `/data/data/io.github.mbaliga.clavis/files/`), readable only by Clavis | the app's private cache (`Context.cacheDir`) |
 | Linux | `$XDG_DATA_HOME/Clavis/` (default `~/.local/share/Clavis/`) | `$XDG_CACHE_HOME/Clavis/` (default `~/.cache/Clavis/`) |
+| Linux (Flatpak, expected, unverified: no Flatpak build has run) | `~/.var/app/io.github.mbaliga.Clavis/data/Clavis/` (the sandbox's `XDG_DATA_HOME`) | `~/.var/app/io.github.mbaliga.Clavis/cache/Clavis/` |
 | macOS | `~/Library/Application Support/Clavis/` | `~/Library/Caches/Clavis/` |
 | Windows | `%APPDATA%\Clavis\` | `%LOCALAPPDATA%\Clavis\cache\` |
+| Ubuntu Touch (reference build click, not the native app) | the WebView's `localStorage` in the app's own profile; clearing app data erases it and the in-page export is the only copy | none |
+
+The Flatpak build (CI-built, unreleased) holds exactly these sandbox permissions: X11 and IPC and DRI (a window), PulseAudio (recording playback) and network. **Flatpak cannot grant network on demand**, so the permission is always on; the app still makes no request until you tap Play or Download, and `flatpak run --unshare=network` turns it off. No filesystem or session-bus access is requested.
 
 These are the directories the desktop shell resolves (`DesktopAppDirs`; the directory name is `Clavis` with a capital C on every platform, which matters on case-sensitive file systems).
 

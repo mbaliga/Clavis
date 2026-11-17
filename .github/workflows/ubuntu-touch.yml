@@ -1,0 +1,116 @@
+# Ubuntu Touch lane for the FROZEN ten-language reference build (docs/PORTING.md 6.2, D-31 Option A, owner request
+# 2026-11-17). This builds a click that wraps the web build in a WebView. It is NOT the native Clavis app and every
+# label says "reference build" (program rule R12).
+#
+# Evidence class of every job: CI-LANE-WRITTEN (no hosted run seen yet). The `stage`, `layout` and `webengine` steps
+# were run in the authoring container (ubuntu 24.04, Qt 5.15.13) and passed there; the Clickable step needs Docker
+# and has never run. Nothing here holds a secret: OpenStore re-signs on upload, and the click is unsigned
+# (`UNSIGNED, not for release` until the owner publishes the draft by hand). New file only; ci.yml and release.yml
+# are untouched (R3).
+name: Ubuntu Touch (reference build click)
+
+on:
+  push:
+    branches: [main]
+    tags: ['ut-v*']
+    paths:
+      - 'ubuntu-touch/**'
+      - 'pipeline/pack_web.py'
+      - 'pipeline/config.py'
+      - 'reference-prototype/**'
+      - '.github/workflows/ubuntu-touch.yml'
+  pull_request:
+    paths:
+      - 'ubuntu-touch/**'
+      - 'pipeline/pack_web.py'
+      - 'reference-prototype/**'
+      - '.github/workflows/ubuntu-touch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ubuntu-touch-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CLICKABLE_VERSION: '8.10.0'
+
+jobs:
+  click:
+    name: Stage page, check layout, QtWebEngine boot, Clickable click
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write   # used only by the final tag-gated step, which creates a DRAFT release; PR tokens stay read-only
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Tool unit tests (stdlib only; they also pack the web build)
+        run: python3 -m unittest discover -s ubuntu-touch/tests -v
+
+      - name: Stage ubuntu-touch/www/index.html from the committed packs
+        run: python3 ubuntu-touch/tools/stage_www.py
+
+      - name: Install Qt 5.15 + QtWebEngine + Xvfb (same major.minor as ubuntu-sdk-20.04)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake xvfb qmlscene qtdeclarative5-dev-tools \
+            qml-module-qtquick2 qml-module-qtquick-window2 qml-module-qtwebengine
+
+      - name: qmllint the shell (syntax only; Morph.Web does not exist off Lomiri)
+        run: qmllint ubuntu-touch/qml/Main.qml
+
+      - name: Install into a staging directory and check the click layout
+        run: |
+          set -eu
+          cmake -S ubuntu-touch -B build/ut -DCMAKE_INSTALL_PREFIX=/.
+          DESTDIR="$PWD/stage" cmake --install build/ut
+          python3 ubuntu-touch/tools/check_click_layout.py stage
+
+      - name: Boot the staged page in desktop QtWebEngine (stand-in, not Morph, not a device)
+        run: ubuntu-touch/tests/run_webengine_boot.sh stage/www/index.html
+
+      - name: Install Clickable (pinned)
+        run: python3 -m pip install --user "clickable-ut==${CLICKABLE_VERSION}" && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Build the click (Docker, pulls Clickable's ubuntu-sdk-20.04 image)
+        working-directory: ubuntu-touch
+        run: clickable build --non-interactive --skip-review --output "$GITHUB_WORKSPACE/click-out"
+
+      - name: Check the built click
+        run: |
+          set -eu
+          ls -l click-out
+          for c in click-out/*.click; do python3 ubuntu-touch/tools/check_click_layout.py --click "$c"; done
+
+      - name: click-review (informational until the owner has seen a green run)
+        working-directory: ubuntu-touch
+        continue-on-error: true
+        run: clickable review --non-interactive
+
+      - name: Upload click (tags and manual runs only; quota-limited so it never fails the job)
+        if: startsWith(github.ref, 'refs/tags/ut-v') || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        continue-on-error: true
+        with:
+          name: clavis-reference-click
+          path: click-out/*.click
+          retention-days: 14
+          if-no-files-found: error
+
+      # One job on purpose: a separate release job would need actions/download-artifact, whose full-SHA pin could
+      # not be verified from the authoring container (no GitHub API access), and this repo pins every action.
+      - name: Create a DRAFT release with the click (ut-v* tags only; the owner publishes and uploads to OpenStore by hand)
+        if: startsWith(github.ref, 'refs/tags/ut-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" click-out/*.click --draft --repo "$GITHUB_REPOSITORY" \
+            --title "Clavis reference build for Ubuntu Touch $GITHUB_REF_NAME" \
+            --notes "UNSIGNED, not for release until the owner has run docs/DEVICE_CHECKLIST_UT.md. This is the frozen ten-language web reference build in a WebView, not the native Clavis app."

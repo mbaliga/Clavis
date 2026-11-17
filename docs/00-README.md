@@ -40,6 +40,7 @@ seed to here; where it and `DECISIONS.md` disagree, `DECISIONS.md` wins.
 | **[10-build-plan.md](10-build-plan.md)** | How to get from this seed to a running prototype in *this* repo, web reference and native Android | You are starting the build from here |
 | **[STATUS.md](STATUS.md)** | What is done, what is pending and who can do it — against the original brief and the pre-tag checklist | You want to know where the release candidate stands |
 | **[USABILITY.md](USABILITY.md)** | The screenshot review and heuristic walkthrough of 0.1.0-rc.1: every finding, its evidence and status | You are about to do the on-device pass or change a screen |
+| **[PORTING.md](PORTING.md)** | The multi-platform porting plan: iOS/iPadOS, Linux arm64 and Flatpak, Ubuntu Touch (proposed D-31), macOS and Windows signing — what each target needs and what only the owner can decide. A plan; nothing in it is built | You are about to add a platform |
 | **[research/](research/)** | The seven research memos, verbatim, plus an index | You want the primary argument |
 
 ---

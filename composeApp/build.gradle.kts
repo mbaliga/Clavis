@@ -57,6 +57,15 @@ kotlin {
 
     androidTarget()
     jvm("desktop")
+    // iOS (docs/PORTING.md 6.1). The static `ComposeApp` framework is linked into the SwiftUI shell in iosApp/ by
+    // the Xcode "Build Kotlin framework" phase (`embedAndSignAppleFrameworkForXcode`). macOS hosts only; on Linux
+    // Gradle skips these targets.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
 
     sourceSets {
         val desktopMain by getting

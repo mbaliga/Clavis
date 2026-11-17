@@ -1,0 +1,57 @@
+# XcodeGen spec for the SwiftUI shell around the Compose Multiplatform UI (docs/PORTING.md 6.1, step I3).
+# `xcodegen generate` writes Clavis.xcodeproj next to this file (git-ignored); CI and the owner both run it, so the
+# project file is never hand-edited or merged. The recipe is described in iosApp/README.md.
+name: Clavis
+
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+settings:
+  base:
+    # >>> OWNER FOLLOW-UP (docs/PORTING.md rule R11): the Apple bundle id (`com.asoc.<appname>`, owner request
+    # >>> 2026-11-17) lives in THIS ONE LINE, and CI (ios.yml) reads it back from here. It needs a row in the
+    # >>> constellation's NAMES.md (outside this repo) before the first App Store Connect record is created.
+    PRODUCT_BUNDLE_IDENTIFIER: com.asoc.clavis
+    # Placeholders: CI overrides both from `:composeApp:clavisVersion` (gradle/version.gradle.kts is the single source).
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2" # iPhone + iPad
+    # Compose Multiplatform's iOS target loads its resources through the app bundle; the framework is static.
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    # Signing is never configured here. Simulator and unsigned CI builds pass CODE_SIGNING_ALLOWED=NO; a signed build
+    # passes DEVELOPMENT_TEAM and a profile on the xcodebuild command line from CI environment secrets (ios.yml).
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  Clavis:
+    type: application
+    platform: iOS
+    sources:
+      - path: Clavis
+        excludes: ["Info.plist"] # referenced by INFOPLIST_FILE, must not also be copied as a resource
+    # No `info:` block on purpose: XcodeGen rewrites the plist at `info.path` from its own properties, which would
+    # overwrite the committed Info.plist (and its ITSAppUsesNonExemptEncryption / orientation keys). INFOPLIST_FILE suffices.
+    settings:
+      base:
+        INFOPLIST_FILE: Clavis/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # The Kotlin framework (built by the pre-build script below) is found per configuration and SDK.
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - "-framework"
+          - "ComposeApp"
+        # A static Kotlin framework has no bitcode/dSYM of its own; keep Xcode from stripping Swift-visible symbols.
+        DEAD_CODE_STRIPPING: NO
+    preBuildScripts:
+      - name: Build the Kotlin ComposeApp framework
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode --no-daemon --console=plain

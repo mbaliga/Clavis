@@ -4,6 +4,13 @@ All notable user-visible, data-format and release-relevant changes to Clavis are
 
 ## [Unreleased]
 
+### Platforms
+
+- Added the iOS / iPadOS port: `iosArm64` and `iosSimulatorArm64` targets in `:shared` and `:composeApp`, the iOS actuals and services, a SwiftUI shell (`iosApp/`, bundle id `com.asoc.clavis`), `ios.yml` (simulator tests, Xcode build, launch smoke) and an unsigned `.ipa` in the release. Compiled and run on no Apple target yet; see `docs/STATUS.md` section 8 and `docs/DEVICE_CHECKLIST_IOS.md`.
+- Added `ubuntu-touch/`: the frozen ten-language web build packaged as an Ubuntu Touch click (QML WebView, `webview` policy only, labelled "reference build"; not the native app), with `ubuntu-touch.yml` and `docs/DEVICE_CHECKLIST_UT.md`. The click removes the three Google Fonts links so it makes no request. Unrun on any device; see `docs/STATUS.md` section 9.
+- Linux: the release now also ships per-user `linux-<arch>.tar.gz` tarballs (x86_64, arm64) and an arm64 `.deb` and jar; `install.sh` was fixed for the real app-image layout (`Clavis/bin/Clavis`, previously assumed lowercase); added `packaging/linux/smoke-launch.sh`, a Flatpak manifest and metadata (app id `io.github.mbaliga.Clavis` proposed), and `desktop-linux.yml` building x86_64 and arm64 with a Flatpak job. See `docs/STATUS.md` section 10 and `docs/DEVICE_CHECKLIST_LINUX.md`.
+- Fixed `lineOf` (ja/zh display, gloss and TTS text) so it no longer depends on a JVM-only regex, and now also strips a line-break gap that follows a supplementary-plane Han character.
+
 ## [0.1.0-rc.1] - 2026-09-16
 
 ### Domain (`:shared`)

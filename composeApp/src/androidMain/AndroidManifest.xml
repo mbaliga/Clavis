@@ -26,12 +26,21 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:resizeableActivity="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|smallestScreenSize"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Freeform / desktop-mode windows only; phones and fullscreen are unaffected. The floor matches the
+                 desktop build's 480 x 720 dp minimum (OD-12), the size the compact layout is verified at. -->
+            <layout
+                android:defaultWidth="1100dp"
+                android:defaultHeight="780dp"
+                android:minWidth="480dp"
+                android:minHeight="720dp" />
         </activity>
     </application>
 

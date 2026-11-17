@@ -1,0 +1,272 @@
+# iOS / iPadOS lane (docs/PORTING.md 6.1, steps I1-I4; owner directive 2026-11-17: iOS builds happen on GitHub Actions).
+# EVIDENCE CLASS: CI-LANE-WRITTEN. Nothing in this file has run yet; the Kotlin and Swift it builds have never been
+# compiled on a Mac (the authoring container is Linux). The first red run is expected to be real findings: read the log.
+#
+#  ios-shared-tests  :shared:iosSimulatorArm64Test, the 190+ common domain tests on the iOS simulator (Kotlin/Native).
+#  ios-simulator     builds the Compose framework, generates the Xcode project (XcodeGen), builds the SwiftUI shell for
+#                    the simulator UNSIGNED, boots an iPhone and an iPad simulator, launches the app on each and asserts
+#                    the process is still alive 20 s later, then keeps one screenshot of each (3 days).
+#  testflight        DISABLED TEMPLATE. Signs, exports and uploads to TestFlight. Runs only on a manual dispatch with
+#                    `testflight: true`, only when the repository variable IOS_SIGNING_ENABLED is 'true', and only after a
+#                    reviewer approves the `apple-release` environment, which is where the signing secrets live. The
+#                    repository holds no signing material and no secret is referenced outside that one job.
+#
+# Billing: hosted macOS minutes are free on a PUBLIC repository (the owner chose to make Clavis public, plan OQ-40) and
+# billed at a multiple on a private one. So push and pull_request triggers run only when the repository is public;
+# `workflow_dispatch` always runs. The trigger paths keep docs-only changes from starting a 30-minute macOS build.
+#
+# Action pinning: full commit SHAs (owner directive for the porting lanes; the older ci.yml / release.yml pin major
+# tags, see the header of ci.yml). The version each SHA was resolved from is in the trailing comment.
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'shared/**'
+      - 'composeApp/**'
+      - 'iosApp/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/ios.yml'
+  pull_request:
+    paths:
+      - 'shared/**'
+      - 'composeApp/**'
+      - 'iosApp/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+    inputs:
+      testflight:
+        description: 'Also sign, export and upload to TestFlight (needs IOS_SIGNING_ENABLED=true and approval of the apple-release environment)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # macOS runners have 7 GB: smaller daemons than gradle.properties asks for, one worker at a time (Native link is hungry).
+  GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+  GRADLE_EXTRA: --no-daemon --max-workers=2 --stacktrace --console=plain -Pkotlin.daemon.jvmargs=-Xmx2g
+
+jobs:
+  ios-shared-tests:
+    name: Domain tests on the iOS simulator (Kotlin/Native)
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          add-job-summary: on-failure
+
+      - name: Select the newest installed Xcode 26.x
+        run: bash iosApp/scripts/select-xcode.sh
+
+      - name: :shared:iosSimulatorArm64Test
+        run: ./gradlew :shared:iosSimulatorArm64Test $GRADLE_EXTRA "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+  ios-simulator:
+    name: Compose framework · Xcode build · launch on iPhone and iPad simulators
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
+    runs-on: macos-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          add-job-summary: on-failure
+
+      - name: Select the newest installed Xcode 26.x
+        run: bash iosApp/scripts/select-xcode.sh
+
+      # XcodeGen is installed from Homebrew's formula: the version is whatever the formula is at run time and is
+      # printed into the log. Pinning it to a release asset + sha256 is an owner follow-up once a first green run shows a version.
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen --version
+
+      - name: Resolve version and bundle id (single sources)
+        id: meta
+        run: |
+          bundle=$(awk -F': *' '/^[[:space:]]*PRODUCT_BUNDLE_IDENTIFIER:/ {print $2; exit}' iosApp/project.yml | tr -d '"[:space:]')
+          [ -n "$bundle" ] || { echo "::error::no PRODUCT_BUNDLE_IDENTIFIER in iosApp/project.yml"; exit 1; }
+          echo "bundle=$bundle" >> "$GITHUB_OUTPUT"
+          bash iosApp/scripts/ios-version.sh >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+      - name: Generate the Xcode project
+        working-directory: iosApp
+        run: xcodegen generate
+
+      # The pre-build script in project.yml runs `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, so this one
+      # command links the Kotlin framework and builds the Swift shell; it is the same path the owner runs on a Mac.
+      - name: xcodebuild (iphonesimulator, unsigned)
+        working-directory: iosApp
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Clavis.xcodeproj -scheme Clavis -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DerivedData \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            MARKETING_VERSION='${{ steps.meta.outputs.marketing }}' CURRENT_PROJECT_VERSION='${{ steps.meta.outputs.build }}' \
+            GRADLE_OPTS="${GRADLE_JVMARGS}" \
+            | tee xcodebuild.log | tail -n 40
+
+      - name: Launch on an iPhone and an iPad simulator and keep the process alive for 20 s
+        env:
+          BUNDLE: ${{ steps.meta.outputs.bundle }}
+        run: bash iosApp/scripts/simulator-smoke.sh iosApp/build/DerivedData/Build/Products/Debug-iphonesimulator/Clavis.app "$BUNDLE" smoke-shots
+
+      # Convenience only (the three-day screenshots are how an owner without a Mac sees the first render); the log is the
+      # evidence. A storage-quota failure must not turn a green build red (see the note in ci.yml's history).
+      - name: Simulator screenshots
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ios-simulator-screenshots
+          path: smoke-shots/*.png
+          retention-days: 3
+          if-no-files-found: ignore
+
+  testflight:
+    name: TestFlight upload (DISABLED TEMPLATE, signed)
+    needs: [ios-shared-tests, ios-simulator]
+    if: github.event_name == 'workflow_dispatch' && inputs.testflight == true && vars.IOS_SIGNING_ENABLED == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 75
+    # The approval gate. Create this environment in Settings > Environments with required reviewers and put the five
+    # secrets below on it (never on the repository): APPLE_DISTRIBUTION_CERT_P12_BASE64, APPLE_DISTRIBUTION_CERT_PASSWORD,
+    # APPLE_PROVISIONING_PROFILE_BASE64, APPLE_TEAM_ID, and the App Store Connect API key trio ASC_KEY_ID, ASC_ISSUER_ID,
+    # ASC_KEY_P8_BASE64. Until the Apple Developer Program is joined none of this exists and this job never runs.
+    environment: apple-release
+    env:
+      BUNDLE_ID_FROM_PROJECT: com.asoc.clavis # checked against project.yml in the first step, so the two cannot drift
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+        with:
+          cache-read-only: true
+          add-job-summary: on-failure
+
+      - name: Select the newest installed Xcode 26.x
+        run: bash iosApp/scripts/select-xcode.sh
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Resolve version and bundle id
+        id: meta
+        run: |
+          bundle=$(awk -F': *' '/^[[:space:]]*PRODUCT_BUNDLE_IDENTIFIER:/ {print $2; exit}' iosApp/project.yml | tr -d '"[:space:]')
+          [ "$bundle" = "$BUNDLE_ID_FROM_PROJECT" ] || { echo "::error::project.yml bundle id '$bundle' != '$BUNDLE_ID_FROM_PROJECT' in this job"; exit 1; }
+          echo "bundle=$bundle" >> "$GITHUB_OUTPUT"
+          bash iosApp/scripts/ios-version.sh >> "$GITHUB_OUTPUT"
+
+      - name: Import the distribution certificate and provisioning profile into a temporary keychain
+        env:
+          CERT_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERT_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/clavis-ios.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          echo -n "$CERT_P12_BASE64" | base64 --decode -o "$RUNNER_TEMP/dist.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/dist.p12" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN"
+          rm -f "$RUNNER_TEMP/dist.p12"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo -n "$PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
+          uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< "$(security cms -D -i "$RUNNER_TEMP/profile.mobileprovision")")
+          pname=$(/usr/libexec/PlistBuddy -c 'Print Name' /dev/stdin <<< "$(security cms -D -i "$RUNNER_TEMP/profile.mobileprovision")")
+          cp "$RUNNER_TEMP/profile.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$uuid.mobileprovision"
+          echo "PROFILE_NAME=$pname" >> "$GITHUB_ENV"
+
+      - name: Generate the project, archive (signed), export for the App Store
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUNDLE: ${{ steps.meta.outputs.bundle }}
+        run: |
+          set -o pipefail
+          (cd iosApp && xcodegen generate)
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key><dict><key>$BUNDLE</key><string>$PROFILE_NAME</string></dict>
+            <key>uploadSymbols</key><false/>
+          </dict></plist>
+          PLIST
+          cd iosApp
+          xcodebuild archive \
+            -project Clavis.xcodeproj -scheme Clavis -configuration Release -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/Clavis.xcarchive" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Distribution" PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            MARKETING_VERSION='${{ steps.meta.outputs.marketing }}' CURRENT_PROJECT_VERSION='${{ steps.meta.outputs.build }}' \
+            GRADLE_OPTS="${GRADLE_JVMARGS}" | tail -n 30
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Clavis.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export"
+
+      # TestFlight and the App Store collect crash reports on Apple's side; the app transmits nothing and links no SDK
+      # for it. That is the one telemetry exception the owner approved (PT:D-BD, 2026-10-14) and README names it.
+      - name: Upload to App Store Connect (TestFlight)
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo -n "$ASC_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          xcrun altool --upload-app --type ios --file "$RUNNER_TEMP"/export/*.ipa --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+
+      - name: Remove the temporary keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/clavis-ios.keychain-db" || true

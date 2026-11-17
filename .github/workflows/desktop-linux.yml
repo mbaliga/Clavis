@@ -1,0 +1,186 @@
+# Linux desktop lane (docs/PORTING.md 6.3, LX1-LX3). EVIDENCE CLASS: CI-LANE-WRITTEN. Nothing in this file has run on a
+# hosted runner. The same commands HAVE been run on an x86_64 Linux container (STATUS.md section 10): createDistributable,
+# the tarball, test-install.sh against it, and smoke-launch.sh under Xvfb. The arm64 job and the Flatpak build are unrun.
+#
+#  linux           matrix: x86_64 (ubuntu-24.04) and arm64 (ubuntu-24.04-arm). Desktop tests, .deb, uber-jar, headless
+#                  jar smoke, app-image tarball + per-user install test, then the app-image launched under Xvfb
+#                  (alive after 20 s + a screenshot). Kept 3 days as an artifact. Nothing is uploaded to a Release here:
+#                  release.yml does that on a tag.
+#  flatpak         builds io.github.mbaliga.Clavis from the tarball above with flatpak-builder (x86_64 and arm64), runs
+#                  the metadata lint first, uploads the .flatpak bundle for 3 days. Flathub submission is an owner step.
+#
+# Triggers: push/PR run only when the repository is public (arm64 and 7-GB-class hosted minutes are free on public
+# repos, plan OQ-20); workflow_dispatch always runs. Action pinning: full commit SHAs, as in ios.yml.
+name: Desktop Linux
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'shared/**'
+      - 'composeApp/**'
+      - 'packaging/linux/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/desktop-linux.yml'
+  pull_request:
+    paths:
+      - 'shared/**'
+      - 'composeApp/**'
+      - 'packaging/linux/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/desktop-linux.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, e.g. 0.2.0 or 0.2.0-rc.1 (empty: the ClavisVersion.kt value)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-linux-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+  FLATPAK_ID: io.github.mbaliga.Clavis
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.arch }} · tests · .deb · jar · tarball · app-image launch
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x86_64, deb: amd64, jarname: x64, runner: ubuntu-24.04 }
+          - { arch: arm64, deb: arm64, jarname: arm64, runner: ubuntu-24.04-arm }
+    env:
+      CLAVIS_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          add-job-summary: on-failure
+
+      # jpackage's DEB bundler needs fakeroot and dpkg-deb, preinstalled on ubuntu-24.04 (docs/build-platform.md 5).
+      - name: Desktop tests, .deb, uber-jar and app-image
+        run: >
+          ./gradlew
+          :shared:desktopTest
+          :composeApp:desktopTest
+          :composeApp:packageDeb
+          :composeApp:packageUberJarForCurrentOS
+          :composeApp:createDistributable
+          --no-daemon --stacktrace --console=plain
+          "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}"
+
+      - name: Uber-jar headless smoke test and naming
+        run: |
+          v="${CLAVIS_VERSION:-$(sed -n 's/.*const val NAME = "\([^"]*\)".*/\1/p' shared/src/commonMain/kotlin/io/github/mbaliga/clavis/core/ClavisVersion.kt)}"
+          echo "CLAVIS_VERSION=$v" >> "$GITHUB_ENV"
+          jar=$(ls composeApp/build/compose/jars/*.jar)
+          set +e
+          out=$(timeout 90 java -Djava.awt.headless=true -jar "$jar" 2>&1)
+          set -e
+          if echo "$out" | grep -q 'ClassNotFoundException\|NoClassDefFoundError'; then echo "$out" | tail -20; echo "::error::missing class in uber-jar"; exit 1; fi
+          echo "$out" | grep -q 'HeadlessException'
+          mkdir -p dist
+          cp composeApp/build/compose/binaries/main/deb/*.deb "dist/clavis_${v}_${{ matrix.deb }}.deb"
+          cp "$jar" "dist/clavis-$v-linux-${{ matrix.jarname }}.jar"
+          dpkg-deb --info "dist/clavis_${v}_${{ matrix.deb }}.deb" | grep -E 'Package|Version|Architecture'
+
+      # The app-image directory is `Clavis/` (packageName), launcher bin/Clavis (measured on x86_64).
+      - name: Tarball from the app-image and install test
+        run: |
+          img=$(find composeApp/build/compose/binaries/main/app -mindepth 1 -maxdepth 1 -type d | head -1)
+          [ -n "$img" ] || { echo "::error::no app-image under composeApp/build/compose/binaries/main/app"; exit 1; }
+          tar -czf "dist/clavis-$CLAVIS_VERSION-linux-${{ matrix.arch }}.tar.gz" -C "$(dirname "$img")" "$(basename "$img")"
+          bash packaging/linux/test-install.sh "dist/clavis-$CLAVIS_VERSION-linux-${{ matrix.arch }}.tar.gz"
+          ls -la dist
+
+      # Proves the app-image starts and stays up on this architecture with software rendering. Not a GPU, Wayland,
+      # audio or TTS check: those are docs/DEVICE_CHECKLIST_LINUX.md.
+      - name: Launch the app-image under Xvfb
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb imagemagick libgl1 libxtst6 libxi6 libxrender1 libfreetype6 libasound2t64
+          bash packaging/linux/smoke-launch.sh "$(find composeApp/build/compose/binaries/main/app -mindepth 1 -maxdepth 1 -type d | head -1)" 20 "dist/clavis-launch-${{ matrix.arch }}.png"
+
+      - name: Upload the files
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: clavis-linux-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 3
+
+  flatpak:
+    name: Flatpak ${{ matrix.arch }} (lint · flatpak-builder)
+    needs: linux
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x86_64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: clavis-linux-${{ matrix.arch }}
+          path: dist
+
+      - name: Install flatpak tooling and the metadata linters
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder appstream desktop-file-utils python3-yaml
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y --noninteractive flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+
+      - name: Lint metadata and manifest
+        run: bash packaging/linux/flatpak/validate.sh
+
+      - name: Build the Flatpak from the tarball
+        run: |
+          tarball=$(ls dist/clavis-*-linux-${{ matrix.arch }}.tar.gz)
+          version=$(basename "$tarball" | sed -E 's/^clavis-(.*)-linux-.*/\1/')
+          flatpak_arch=$([ "${{ matrix.arch }}" = arm64 ] && echo aarch64 || echo x86_64)
+          # Rendered inside the flatpak directory so the manifest's relative icon path resolves; never committed.
+          bash packaging/linux/flatpak/render-manifest.sh "$tarball" "$version" packaging/linux/flatpak/build-manifest.yml
+          flatpak-builder --user --force-clean --arch="$flatpak_arch" --repo=repo --install-deps-from=flathub \
+            build-dir packaging/linux/flatpak/build-manifest.yml
+          flatpak build-bundle --arch="$flatpak_arch" repo "$FLATPAK_ID-$flatpak_arch.flatpak" "$FLATPAK_ID"
+          ls -la ./*.flatpak
+
+      - name: Upload the bundle
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: clavis-flatpak-${{ matrix.arch }}
+          path: ${{ env.FLATPAK_ID }}-*.flatpak
+          if-no-files-found: error
+          retention-days: 3

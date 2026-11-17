@@ -197,8 +197,64 @@ object Mask {
 /**
  * Strips the translators' line-break spaces between two CJK characters (template-spec §10).
  * Applied to display, gloss and TTS input alike, only for ja/zh.
+ *
+ * Written as a scan, not a regex: Kotlin/Native's regex engine has no `\p{IsHan}`-style script classes, and
+ * a top-level `Regex` that throws at class-init crashes the first call on iOS (found by running the common tests
+ * on Native). The classes are the Han, Hiragana and Katakana scripts (an explicit range table, so the Common-script marks U+30FC, U+30FB and U+309B/C are excluded exactly as the regex excluded them) plus the CJK punctuation (U+3000-303F) and
+ * full-width forms (U+FF00-FFEF); the whitespace is the regex `\s` set (ASCII space, tab, LF, VT, FF, CR).
  */
-private val CJK_GAP = Regex("(?<=[\\p{IsHan}\\p{IsHiragana}\\p{IsKatakana}\\u3000-\\u303F\\uFF00-\\uFFEF])\\s+(?=[\\p{IsHan}\\p{IsHiragana}\\p{IsKatakana}\\u3000-\\u303F\\uFF00-\\uFFEF])")
+/** Inclusive start/end pairs of the Han, Hiragana and Katakana scripts (JDK 17 / Unicode 13 `UnicodeScript`, which is what the original regex used). */
+private val CJK_SCRIPT_RANGES = intArrayOf(
+    0x2E80, 0x2E99, 0x2E9B, 0x2EF3, 0x2F00, 0x2FD5, 0x3005, 0x3005,
+    0x3007, 0x3007, 0x3021, 0x3029, 0x3038, 0x303B, 0x3041, 0x3096,
+    0x309D, 0x309F, 0x30A1, 0x30FA, 0x30FD, 0x30FF, 0x31F0, 0x31FF,
+    0x32D0, 0x32FE, 0x3300, 0x3357, 0x3400, 0x4DBF, 0x4E00, 0x9FFF,
+    0xF900, 0xFA6D, 0xFA70, 0xFAD9, 0xFF66, 0xFF6F, 0xFF71, 0xFF9D,
+    0x16FE2, 0x16FE3, 0x16FF0, 0x16FF1, 0x1AFF0, 0x1AFF3, 0x1AFF5, 0x1AFFB,
+    0x1AFFD, 0x1AFFE, 0x1B000, 0x1B122, 0x1B132, 0x1B132, 0x1B150, 0x1B152,
+    0x1B155, 0x1B155, 0x1B164, 0x1B167, 0x1F200, 0x1F200, 0x20000, 0x2A6DF,
+    0x2A700, 0x2B739, 0x2B740, 0x2B81D, 0x2B820, 0x2CEA1, 0x2CEB0, 0x2EBE0,
+    0x2F800, 0x2FA1D, 0x30000, 0x3134A, 0x31350, 0x323AF,
+)
+
+internal fun isCjkCodePoint(cp: Int): Boolean {
+    if (cp in 0x3000..0x303F || cp in 0xFF00..0xFFEF) return true
+    var i = 0
+    while (i < CJK_SCRIPT_RANGES.size) {
+        if (cp >= CJK_SCRIPT_RANGES[i] && cp <= CJK_SCRIPT_RANGES[i + 1]) return true
+        i += 2
+    }
+    return false
+}
+
+private fun isGapSpace(c: Char): Boolean = c == ' ' || c == '\t' || c == '\n' || c == '\u000B' || c == '\u000C' || c == '\r'
+
+private fun codePointBefore(s: String, end: Int): Int {
+    val lo = s[end - 1]
+    if (lo.isLowSurrogate() && end >= 2 && s[end - 2].isHighSurrogate()) return 0x10000 + ((s[end - 2].code - 0xD800) shl 10) + (lo.code - 0xDC00)
+    return lo.code
+}
+
+private fun codePointAt(s: String, i: Int): Int {
+    val hi = s[i]
+    if (hi.isHighSurrogate() && i + 1 < s.length && s[i + 1].isLowSurrogate()) return 0x10000 + ((hi.code - 0xD800) shl 10) + (s[i + 1].code - 0xDC00)
+    return hi.code
+}
+
+internal fun stripCjkGaps(s: String): String {
+    if (s.none(::isGapSpace)) return s
+    val sb = StringBuilder(s.length)
+    var i = 0
+    while (i < s.length) {
+        if (!isGapSpace(s[i])) { sb.append(s[i]); i++; continue }
+        var j = i
+        while (j < s.length && isGapSpace(s[j])) j++
+        val gap = i > 0 && j < s.length && isCjkCodePoint(codePointBefore(s, i)) && isCjkCodePoint(codePointAt(s, j))
+        if (!gap) sb.append(s, i, j)
+        i = j
+    }
+    return sb.toString()
+}
 
 fun lineOf(l: Lang, s: String): String =
-    if (l.code == "ja" || l.code == "zh") s.replace(CJK_GAP, "") else s
+    if (l.code == "ja" || l.code == "zh") stripCjkGaps(s) else s

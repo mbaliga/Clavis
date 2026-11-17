@@ -55,6 +55,7 @@ credentials, hardware or a decision that cannot be produced from inside the repo
 | Free the exhausted Actions artifact storage (or wait for the recalculation) | **maintainer** | account-level; after this pass CI no longer refills it |
 | Usability follow-ups marked *open* in `USABILITY.md` (page-decode failure state, Sentences performance, corrupt-state card, citation targets, keyboard-map help, return stack) | code | scoped and small; none blocks the release candidate |
 | Polish and Japanese pronunciation coverage is partial (~62%/~71% of the lexicon queried, D-28) | code | Lingua Libre's SPARQL endpoint throttled under sustained querying; `python enrich_pronunciations.py --lingualibre` re-run once it has recovered only adds coverage, never regresses |
+| Porting (iOS/iPadOS, Linux arm64 + Flatpak, Ubuntu Touch; proposed D-31) | **maintainer** | iOS and the Ubuntu Touch reference-build click are written (sections 8 and 9), unrun on any device; D-31 still awaits the owner's recording, and the Apple Developer Program, an Ubuntu Touch device and signing material are owner-held |
 
 ## 5. Quality gates on the current head
 
@@ -96,3 +97,104 @@ Thin lanes (badge shown in the app): Arabic (177 scenes, 8 episodes), Hindi (16 
   surface platform-specific issues — the workflow deletes its draft on failure, so a failed release
   never publishes half a set.
 - The name.
+
+## 8. iOS / iPadOS port (2026-11-17)
+
+Owner request of 2026-11-17: macOS, iOS, Windows and Ubuntu Touch are built on GitHub Actions; Apple bundle ids are
+`com.asoc.<appname>`. This section is the iOS half for Clavis. Evidence classes: **BUILT-HERE** (run in the Linux
+authoring container and seen to pass), **CI-LANE-WRITTEN** (workflow exists, never run), **CODE-ONLY** (written, never
+compiled for an Apple target), **NEEDS-DEVICE-VALIDATION**. Nothing here has run on a Mac, an iOS simulator or a device.
+
+| Piece | Evidence |
+|---|---|
+| `:shared` iOS targets + `iosMain` (`UIDevice` name, `FileIo` over POSIX, `sha256Hex`/`gunzip` over pure Kotlin) | targets register and the JVM gate is unchanged: BUILT-HERE. `Platform.ios.kt` (UIKit): CODE-ONLY |
+| Pure cores `Sha256`, `PureGzip` (RFC 1951/1952 + CRC-32), `DownloadPolicy`, `ImportPolicy` | BUILT-HERE: known-answer tests on every target; JVM cross-checks against `MessageDigest` (random lengths 0..300 + 4 larger) and `GZIPInputStream` on all 36 shipped packs (21,165,107 bytes inflated) |
+| Common domain tests on Kotlin/Native | BUILT-HERE on `linuxX64` as a stand-in (a scratch project compiling the same `commonMain`, `commonTest` and the iOS `FileIo`/`Gzip` source): 201 tests, 0 failures after the two fixes below (that run preceded the last edit to `isCjkCodePoint`, which swapped block ranges for the script range table; that edit is covered by the JVM differential tests, not re-run on Native because the Native toolchain was removed to free disk). This is the closest thing to `:shared:iosSimulatorArm64Test` that Linux can run; it does not exercise Apple frameworks |
+| Two iOS blockers found that way and fixed in common code | `@JvmInline` without `import kotlin.jvm.JvmInline` (Model.kt); `lineOf`'s `\p{IsHan}` regex threw at class init on Native, now an explicit scan with a JVM differential test against the old regex (`CjkGapDifferentialTest`). One deliberate behaviour change: a gap after a supplementary-plane Han character is now stripped (the old lookbehind missed it) |
+| `composeApp/src/iosMain` (speaker, audio, downloader, picker, share, dirs, `MainViewController`) | CODE-ONLY. Compile risks are listed in `iosApp/README.md` |
+| `iosApp/` SwiftUI shell, XcodeGen `project.yml`, `Info.plist`, `PrivacyInfo.xcprivacy` | plist/YAML parse and Swift syntax (`swiftc -parse`, Linux Swift 6.0.3): BUILT-HERE. Compile and link: CI-LANE-WRITTEN |
+| `.github/workflows/ios.yml` (simulator tests, Xcode build, iPhone + iPad launch smoke, gated TestFlight template) and `release.yml` `ios` job (unsigned `.ipa`) | CI-LANE-WRITTEN, `actionlint` clean, actions pinned to full SHAs |
+| `docs/DEVICE_CHECKLIST_IOS.md` | the owner pass; every row NEEDS-DEVICE-VALIDATION |
+
+**Toolchain (OQ-38) was tried here and not adopted.** Kotlin 2.1.20 / Compose Multiplatform 1.8.2 stay (D-2 unchanged). The
+owner ruled (OQ-38, 2026-10-07) that iOS moves to Kotlin 2.2.21 + CMP 1.9.3 on an explicitly selected Xcode 26.x. I set
+those versions (plus lifecycle 2.9.4, navigation 2.9.1) and ran the desktop gate: it compiles, but **57 of 62 `:composeApp:desktopTest`
+tests fail** with `NoClassDefFoundError: kotlinx/datetime/Clock$System` (`SystemClock`, Helpers.kt:73), because kotlinx-datetime
+0.6.2 predates Kotlin 2.2's `kotlin.time.Clock`. The fix is a datetime 0.7.x bump with a `Clock` import migration through the
+store and tests; Android was not checked (no SDK here). That is a repo-wide migration, so it is left as a separate step
+rather than folded into the port. Consequence to expect: the first `ios.yml` run uses Kotlin 2.1.20 with Xcode 26.x,
+which that Kotlin line may not support; if the red step is a Kotlin/Native-vs-Xcode error, the datetime migration plus the
+version bump above is the fix, and `gradle/libs.versions.toml` is the only file whose versions change.
+
+**What the owner does next (in order):** (1) make the repository public (hosted macOS minutes are then free and `ios.yml`
+runs on push/PR; until then it runs only by hand); (2) run Actions > iOS once and fix or report the first red step;
+(3) add the NAMES.md row for `com.asoc.clavis` (plan rule R11, outside this repo) and settle the "Clavis Sinica" name
+question; (4) enrol in the Apple Developer Program, create the `apple-release` environment, the `IOS_SIGNING_ENABLED`
+variable and the secrets listed in `ios.yml`; (5) supply 1024x1024 icon art (the shipped one is a placeholder); (6) work
+through `DEVICE_CHECKLIST_IOS.md` on the iPad Pro M4, then the iPhone 12 mini; (7) decide plan Q11 (Ogg on iOS, 3.2% of
+recordings show no Play control) and Q12 (iCloud backup of the learner document; today it is excluded, one constant).
+
+Telemetry: none. The one approved exception (PT:D-BD, 2026-10-14) is Apple-side crash reporting for TestFlight/App Store
+builds; the app adds no SDK and transmits nothing, and `iosApp/README.md` names it.
+
+## 9. Ubuntu Touch reference-build click (2026-11-17)
+
+Owner request of 2026-11-17: Ubuntu Touch click builds happen on GitHub Actions (ubuntu + Clickable). **This is a
+reframe, not a port of the native app** (plan section 4: no JVM and no Compose target in a click): it packages the
+frozen ten-language web build in a QML WebView and is labelled "reference build" everywhere. It overrides the plan's
+proposed no-port line; D-31 Option A (relax D-1 for this one artefact) is treated as taken and still needs the owner to
+record it. Evidence classes as in section 8.
+
+| Piece | Evidence |
+|---|---|
+| `ubuntu-touch/tools/stage_www.py`: packs to `www/index.html`, removing only the three Google Fonts `<link>` tags (no request of its own) | BUILT-HERE: ran, 21,315,994-byte page |
+| `ubuntu-touch/tests` (8 unittest cases: strip, output equals packed page minus those lines, no fetch/beacon/socket/open in the page, layout guard rejects `networking`, Google Fonts, wrong arch) | BUILT-HERE: 8 tests pass |
+| CMake install layout, manifest, `webview`-only AppArmor profile, desktop file; `check_click_layout.py` on the `DESTDIR` install and on a `dpkg-deb` repack | BUILT-HERE: "click layout ok" both ways. A real `click build` was not run (not installed) |
+| Staged page loaded in desktop QtWebEngine 5.15.13 under Xvfb (`run_webengine_boot.sh`): welcome screen renders, no JS console warning/error, `localStorage` round-trips on `file://` | BUILT-HERE, as a stand-in only. It is not Morph.Web, not Lomiri, not a device |
+| `qml/Main.qml` (Morph.Web `WebView`) | qmllint exit 0 (Qt 5.15 qmllint does not resolve imports, so this is syntax only). Behaviour: CODE-ONLY |
+| Clickable 8.10.0 parses `clickable.yaml` and reaches the Docker step; the daemon is absent here | the build itself: CI-LANE-WRITTEN |
+| `.github/workflows/ubuntu-touch.yml` (tool tests, stage, layout, QtWebEngine boot, Clickable build, built-click check, click-review informational, draft release on `ut-v*`) | CI-LANE-WRITTEN, `actionlint` clean, actions pinned to full SHAs (checkout, upload-artifact); no secrets |
+| `docs/DEVICE_CHECKLIST_UT.md` | every row NEEDS-DEVICE-VALIDATION |
+
+Not tried: Waydroid or any other substitute (owner ruling: native ports only). Not done: a native Ubuntu Touch Clavis;
+that needs a Qt/QML port of `:shared` and is not estimated.
+
+**What the owner does next:** (1) record D-31 Option A in `DECISIONS.md` (or revoke); (2) add the NAMES.md row for the
+click id and fill `APP_ID`/`APP_MAINTAINER` in `ubuntu-touch/CMakeLists.txt` (currently `clavis-reference.mbaliga`, a
+placeholder); (3) run Actions > Ubuntu Touch once and report the first red step; (4) work through
+`DEVICE_CHECKLIST_UT.md` on a device (open: persistence of `localStorage`, speech voices, export, whether the page
+looks right without Google Fonts); (5) decide whether citation links and file export justify requesting
+`url_dispatcher` / `content_exchange`; (6) OpenStore listing after name clearance.
+
+Telemetry: none. The click requests the `webview` policy group only; the page makes no request.
+
+## 10. Linux desktop port (2026-11-17)
+
+Linux was already a JVM desktop target (`.deb` + uber-jar). This pass added the tarball + per-user installer on both
+architectures, a launch smoke, a Flatpak, and the CI lanes, and fixed a real defect found by building the app-image.
+Evidence classes as in section 8.
+
+| Piece | Evidence |
+|---|---|
+| `:composeApp:createDistributable` on x86_64: app-image is `Clavis/` (launcher `bin/Clavis`, `lib/Clavis.png`, bundled JDK, 160 MB, tarball 97 MB) | BUILT-HERE, 31 s |
+| **Defect found:** the earlier `install.sh`, `test-install.sh` and the `desktop-linux.yml` tarball step assumed lowercase `clavis/bin/clavis`, so they would have failed on a real app-image. `install.sh` now finds the launcher under `bin/`; the stub test uses the real shape | BUILT-HERE: `test-install.sh` stub and the real x86_64 tarball both print "OK: install.sh install, reinstall and uninstall" (as a normal user) |
+| App-image launched under Xvfb (`smoke-launch.sh`): alive after 20 s, welcome screen rendered (screenshot read). Skiko logs "Cannot create Linux GL context" and falls back to software | BUILT-HERE, as a stand-in: software render, no GPU, no Wayland, no audio, no real desktop session |
+| Launch through the `~/.local/bin/clavis` symlink | CODE-ONLY (only the direct launcher path was run; checklist 2.6) |
+| `:shared:desktopTest` + `:composeApp:desktopTest` | BUILT-HERE: 268 tests, 0 failures, 0 errors (read from the XML results; Gradle reported the tasks up to date, i.e. the same sources already ran green earlier in this run) |
+| Flatpak manifest, desktop file, AppStream metainfo; `validate.sh` (desktop-file-validate, `appstreamcli validate --no-net`, finish-args pinned to x11, ipc, dri, pulseaudio, network) and `render-manifest.sh` | BUILT-HERE: lint passes (one pedantic note), render checked on a dummy tarball. **No `flatpak-builder` build ran**: the runtime plus SDK do not fit on this container's disk (about 0.5 GB free) |
+| `desktop-linux.yml`: x86_64 + arm64 matrix (tests, `.deb`, jar, tarball + install test, Xvfb launch, screenshot), then a Flatpak job per arch; push/PR only when the repo is public, dispatch always; actions pinned to SHAs | CI-LANE-WRITTEN, `actionlint` clean |
+| `release.yml`: new `linux-arm64` job, x86_64 tarball in `linux`, asset checks (12 to 16, web 13 to 17), notes line | CI-LANE-WRITTEN, `actionlint` clean, YAML parsed |
+| `docs/DEVICE_CHECKLIST_LINUX.md`, PRIVACY.md Flatpak rows, README Downloads row | every device row NEEDS-DEVICE-VALIDATION |
+
+Not tried: AppImage or Snap (plan: not proposed); a native Wayland path (AWT goes through XWayland); bundling a TTS
+engine (espeak-ng is GPL, D-8). Unknown until a hosted run: whether `compose.desktop.currentOs` resolves Skiko's
+linux-arm64 natives, whether `flatpak-builder` accepts the tarball source, and whether the sandbox has a usable file
+dialog (no filesystem permission is granted) or any TTS.
+
+**What the owner does next:** (1) add the NAMES.md row and confirm the Flatpak id `io.github.mbaliga.Clavis` (appears in
+`packaging/linux/flatpak/`, `desktop-linux.yml` `FLATPAK_ID` and the `PRIVACY.md` rows); (2) run Actions > Desktop Linux
+and report the first red step; (3) work through `DEVICE_CHECKLIST_LINUX.md` (Deck, RedMagic, HiDPI); (4) decide the
+Flatpak file-access and network permissions; (5) Flathub submission once the repository is public; (6) tag a release to
+exercise the arm64 and tarball assets.
+
+Telemetry: none. The Flatpak requests network, an unavoidable always-on permission for the one user-tapped download.

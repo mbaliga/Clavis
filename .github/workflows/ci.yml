@@ -55,6 +55,9 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           add-job-summary: on-failure
 
+      - name: Linux per-user installer test (no Gradle)
+        run: bash packaging/linux/test-install.sh
+
       - name: Build and test
         run: >
           ./gradlew

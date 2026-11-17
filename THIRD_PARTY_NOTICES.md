@@ -12,8 +12,6 @@ Both resolved runtime graphs contain the following open-source families distribu
 - JetBrains Compose Multiplatform (runtime, foundation, material3, ui, components-resources, ui-tooling-preview, material-icons-core) and its `org.jetbrains.androidx.*` multiplatform builds of Lifecycle, Navigation and SavedState
 - On desktop: JetBrains Skiko, the Skia binding (Apache-2.0), which bundles Skia (BSD 3-Clause) and Skia's own third-party components
 - On Android: AndroidX Activity, Annotation, Arch Core, Autofill, Collection, Compose (animation, foundation, material, material3, runtime, ui), Concurrent, Core, CustomView, Emoji2, Graphics (`graphics-path` — the only native library in the APK), Interpolator, Lifecycle, Navigation, ProfileInstaller, SavedState, Startup, Tracing and VersionedParcelable
-- Square okio
-- multiplatform-settings (Russell Wolf)
 - JSpecify annotations and JetBrains annotations
 - Guava `listenablefuture` (the empty conflict-avoidance artifact)
 
