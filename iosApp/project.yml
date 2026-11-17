@@ -32,8 +32,9 @@ targets:
     platform: iOS
     sources:
       - path: Clavis
-    info:
-      path: Clavis/Info.plist
+        excludes: ["Info.plist"] # referenced by INFOPLIST_FILE, must not also be copied as a resource
+    # No `info:` block on purpose: XcodeGen rewrites the plist at `info.path` from its own properties, which would
+    # overwrite the committed Info.plist (and its ITSAppUsesNonExemptEncryption / orientation keys). INFOPLIST_FILE suffices.
     settings:
       base:
         INFOPLIST_FILE: Clavis/Info.plist

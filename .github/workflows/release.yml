@@ -287,14 +287,14 @@ jobs:
       RELEASE_TAG: ${{ needs.preflight.outputs.release_tag }}
       GRADLE_JVMARGS: -Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
         with:
           cache-read-only: true
           add-job-summary: on-failure
@@ -353,15 +353,15 @@ jobs:
       # macos-15 runners have 7 GB: smaller daemons than gradle.properties asks for.
       GRADLE_JVMARGS: -Xmx2g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # macos-15 defaults to JDK 21; jpackage must run on the documented 17.
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
         with:
           cache-read-only: true
           add-job-summary: on-failure
