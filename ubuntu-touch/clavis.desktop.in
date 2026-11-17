@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Clavis (reference build)
+Comment=Frozen ten-language reference build of Clavis, offline
+Exec=qmlscene $@ qml/Main.qml
+Icon=assets/icon.png
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true
+X-Lomiri-Touch=true

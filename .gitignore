@@ -45,3 +45,4 @@ keystore.properties
 # Built app binaries never enter the repo (Releases carry them)
 *.apk
 *.aab
+ubuntu-touch/www/

@@ -1,0 +1,6 @@
+clickable_minimum_required: 8.0.0
+# Pure QML around a WebView; no compiled code, so one click serves every architecture ("architecture": "all").
+builder: pure-qml-cmake
+kill: qmlscene
+framework: ubuntu-sdk-20.04
+# www/index.html is staged by tools/stage_www.py (CI runs it before clickable; locally see README.md).

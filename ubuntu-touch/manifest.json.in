@@ -1,0 +1,15 @@
+{
+    "name": "@APP_ID@",
+    "description": "Clavis, frozen ten-language reference build (the web app, not the native Android/iOS/desktop app)",
+    "architecture": "all",
+    "title": "Clavis (reference build)",
+    "hooks": {
+        "clavis": {
+            "apparmor": "clavis.apparmor",
+            "desktop": "clavis.desktop"
+        }
+    },
+    "version": "@APP_VERSION@",
+    "maintainer": "@APP_MAINTAINER@",
+    "framework": "@CLICK_FRAMEWORK@"
+}
