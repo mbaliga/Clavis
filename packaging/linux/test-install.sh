@@ -18,13 +18,14 @@ if [ $# -ge 1 ]; then
   [ -f "$1" ] || fail "no such tarball: $1"
   tarball="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 else
-  img="$tmp/build/clavis"
+  # Same shape jpackage produces (measured: Clavis/bin/Clavis, Clavis/lib/Clavis.png).
+  img="$tmp/build/Clavis"
   mkdir -p "$img/bin" "$img/lib"
-  printf '#!/bin/sh\necho clavis-stub\n' > "$img/bin/clavis"
-  chmod +x "$img/bin/clavis"
-  printf 'png' > "$img/lib/clavis.png"
+  printf '#!/bin/sh\necho clavis-stub\n' > "$img/bin/Clavis"
+  chmod +x "$img/bin/Clavis"
+  printf 'png' > "$img/lib/Clavis.png"
   tarball="$tmp/clavis-test-linux-test.tar.gz"
-  tar -czf "$tarball" -C "$tmp/build" clavis
+  tar -czf "$tarball" -C "$tmp/build" Clavis
 fi
 
 prefix="$tmp/prefix"
@@ -41,15 +42,15 @@ fi
 PREFIX="$prefix" bash "$here/install.sh" "$tarball" > "$tmp/install.log"
 
 app="$prefix/opt/clavis"
-need "$app/bin/clavis"
-[ -x "$app/bin/clavis" ] || fail "bin/clavis not executable"
+need "$app/bin/Clavis"
+[ -x "$app/bin/Clavis" ] || fail "bin/Clavis not executable"
 need "$prefix/bin/clavis"
-[ "$(readlink "$prefix/bin/clavis")" = "$app/bin/clavis" ] || fail "launcher link target wrong"
+[ "$(readlink "$prefix/bin/clavis")" = "$app/bin/Clavis" ] || fail "launcher link target wrong"
 desk="$prefix/share/applications/clavis.desktop"
 need "$desk"
-grep -qx "Exec=$app/bin/clavis" "$desk" || fail ".desktop Exec line wrong"
-if [ -f "$app/lib/clavis.png" ]; then
-  grep -qx "Icon=$app/lib/clavis.png" "$desk" || fail ".desktop Icon line wrong"
+grep -qx "Exec=$app/bin/Clavis" "$desk" || fail ".desktop Exec line wrong"
+if [ -f "$app/lib/Clavis.png" ]; then
+  grep -qx "Icon=$app/lib/Clavis.png" "$desk" || fail ".desktop Icon line wrong"
 else
   grep -qx "Icon=clavis" "$desk" || fail ".desktop fallback Icon line wrong"
 fi
@@ -57,7 +58,7 @@ grep -qx "Type=Application" "$desk" || fail ".desktop Type missing"
 
 # Re-install is idempotent.
 PREFIX="$prefix" bash "$here/install.sh" "$tarball" > /dev/null
-need "$app/bin/clavis"
+need "$app/bin/Clavis"
 
 PREFIX="$prefix" bash "$here/install.sh" --uninstall > /dev/null
 [ ! -e "$app" ] || fail "app dir not removed"
