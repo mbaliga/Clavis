@@ -11,6 +11,10 @@ kotlin {
 
     androidTarget()
     jvm("desktop")
+    // iOS (docs/PORTING.md 6.1): device + Apple-silicon simulator, no Intel simulator. These targets are only
+    // buildable on a macOS host; on Linux Gradle registers them and skips them, so the JVM gate is unchanged.
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         commonMain.dependencies {
