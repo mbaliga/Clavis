@@ -47,3 +47,5 @@ keystore.properties
 *.aab
 ubuntu-touch/www/
 packaging/linux/flatpak/build-manifest.yml
+__pycache__/
+*.pyc
