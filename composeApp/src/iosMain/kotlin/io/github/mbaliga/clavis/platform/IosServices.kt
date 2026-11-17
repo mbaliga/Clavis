@@ -21,6 +21,7 @@ import platform.AVFoundation.AVSpeechSynthesisVoice
 import platform.AVFoundation.AVSpeechSynthesizer
 import platform.AVFoundation.AVSpeechUtterance
 import platform.AVFoundation.AVSpeechUtteranceDefaultSpeechRate
+import platform.AVFoundation.stop
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSFileSize
 import platform.Foundation.NSNumber
@@ -32,9 +33,11 @@ import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSData
 import platform.Foundation.dataWithContentsOfFile
+import platform.Foundation.setValue
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIDocumentPickerDelegateProtocol
 import platform.UIKit.UIDocumentPickerViewController
+import platform.UIKit.popoverPresentationController
 import platform.UniformTypeIdentifiers.UTType
 import platform.darwin.NSObject
 
