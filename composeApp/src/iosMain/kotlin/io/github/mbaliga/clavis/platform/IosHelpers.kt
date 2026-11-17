@@ -23,10 +23,11 @@ internal fun NSData.toByteArray(): ByteArray {
     return out
 }
 
-/** The view controller a sheet or picker should be presented from: the front-most one of the active window scene. */
+/** The view controller a sheet or picker should be presented from: the front-most one of the foreground window scene. */
 internal fun topViewController(): UIViewController? {
     val scenes = UIApplication.sharedApplication.connectedScenes.filterIsInstance<UIWindowScene>()
-    val scene = scenes.firstOrNull { it.activationState == platform.UIKit.UISceneActivationStateForegroundActive } ?: scenes.firstOrNull()
+    // the scene that has a key window is the foreground one; avoids depending on how UISceneActivationState is imported
+    val scene = scenes.firstOrNull { it.keyWindow != null } ?: scenes.firstOrNull()
     var vc = scene?.keyWindow?.rootViewController ?: return null
     while (true) vc = vc.presentedViewController ?: return vc
 }
