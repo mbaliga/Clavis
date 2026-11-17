@@ -2,6 +2,7 @@ package io.github.mbaliga.clavis.core
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 /*
  * Shared domain contracts for Clavis. Every module (domain engines, pipeline-generated packs,

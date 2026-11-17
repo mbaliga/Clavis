@@ -77,6 +77,17 @@ class HelpersTest {
         assertEquals("Hola mundo", lineOf(Fx.ES, "Hola mundo"))
     }
 
+    @Test fun lineOfCjkGapEdgeCases() {
+        assertEquals("猫は眠る", lineOf(Fx.JA, "猫\n\t は \r\n眠る")) // any run of \s between two CJK characters
+        assertEquals(" 猫", lineOf(Fx.JA, " 猫")) // a leading gap has no CJK character before it
+        assertEquals("猫 ", lineOf(Fx.JA, "猫 ")) // nor a trailing one
+        assertEquals("猫。 猫".replace("。 ", "。"), lineOf(Fx.ZH, "猫。 猫")) // CJK punctuation counts as CJK
+        assertEquals("ＡＢ猫", lineOf(Fx.ZH, "ＡＢ 猫")) // full-width forms count
+        assertEquals("𠀀猫", lineOf(Fx.ZH, "𠀀 猫")) // a supplementary-plane Han character before the gap
+        assertEquals("a 猫", lineOf(Fx.ZH, "a 猫")) // ASCII before: untouched
+        assertEquals("猫\u00a0猫", lineOf(Fx.JA, "猫\u00a0猫")) // NBSP is not in the regex \s set: untouched, as before
+    }
+
     @Test fun maskContractNullEmptyOrGapped() {
         val sc = Fx.mini().scene(1) // "El gato come"
         assertNull(Mask.forCloze(sc, Fx.ES, "gato", revealed = true))
