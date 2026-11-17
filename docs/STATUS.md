@@ -97,3 +97,42 @@ Thin lanes (badge shown in the app): Arabic (177 scenes, 8 episodes), Hindi (16 
   surface platform-specific issues — the workflow deletes its draft on failure, so a failed release
   never publishes half a set.
 - The name.
+
+## 8. iOS / iPadOS port (2026-11-17)
+
+Owner request of 2026-11-17: macOS, iOS, Windows and Ubuntu Touch are built on GitHub Actions; Apple bundle ids are
+`com.asoc.<appname>`. This section is the iOS half for Clavis. Evidence classes: **BUILT-HERE** (run in the Linux
+authoring container and seen to pass), **CI-LANE-WRITTEN** (workflow exists, never run), **CODE-ONLY** (written, never
+compiled for an Apple target), **NEEDS-DEVICE-VALIDATION**. Nothing here has run on a Mac, an iOS simulator or a device.
+
+| Piece | Evidence |
+|---|---|
+| `:shared` iOS targets + `iosMain` (`UIDevice` name, `FileIo` over POSIX, `sha256Hex`/`gunzip` over pure Kotlin) | targets register and the JVM gate is unchanged: BUILT-HERE. `Platform.ios.kt` (UIKit): CODE-ONLY |
+| Pure cores `Sha256`, `PureGzip` (RFC 1951/1952 + CRC-32), `DownloadPolicy`, `ImportPolicy` | BUILT-HERE: known-answer tests on every target; JVM cross-checks against `MessageDigest` (random lengths 0..300 + 4 larger) and `GZIPInputStream` on all 36 shipped packs (21,165,107 bytes inflated) |
+| Common domain tests on Kotlin/Native | BUILT-HERE on `linuxX64` as a stand-in (a scratch project compiling the same `commonMain`, `commonTest` and the iOS `FileIo`/`Gzip` source): 201 tests, 0 failures after the two fixes below. This is the closest thing to `:shared:iosSimulatorArm64Test` that Linux can run; it does not exercise Apple frameworks |
+| Two iOS blockers found that way and fixed in common code | `@JvmInline` without `import kotlin.jvm.JvmInline` (Model.kt); `lineOf`'s `\p{IsHan}` regex threw at class init on Native, now an explicit scan with a JVM differential test against the old regex (`CjkGapDifferentialTest`). One deliberate behaviour change: a gap after a supplementary-plane Han character is now stripped (the old lookbehind missed it) |
+| `composeApp/src/iosMain` (speaker, audio, downloader, picker, share, dirs, `MainViewController`) | CODE-ONLY. Compile risks are listed in `iosApp/README.md` |
+| `iosApp/` SwiftUI shell, XcodeGen `project.yml`, `Info.plist`, `PrivacyInfo.xcprivacy` | plist/YAML parse and Swift syntax (`swiftc -parse`, Linux Swift 6.0.3): BUILT-HERE. Compile and link: CI-LANE-WRITTEN |
+| `.github/workflows/ios.yml` (simulator tests, Xcode build, iPhone + iPad launch smoke, gated TestFlight template) and `release.yml` `ios` job (unsigned `.ipa`) | CI-LANE-WRITTEN, `actionlint` clean, actions pinned to full SHAs |
+| `docs/DEVICE_CHECKLIST_IOS.md` | the owner pass; every row NEEDS-DEVICE-VALIDATION |
+
+**Toolchain (OQ-38) was tried here and not adopted.** Kotlin 2.1.20 / Compose Multiplatform 1.8.2 stay (D-2 unchanged). The
+owner ruled (OQ-38, 2026-10-07) that iOS moves to Kotlin 2.2.21 + CMP 1.9.3 on an explicitly selected Xcode 26.x. I set
+those versions (plus lifecycle 2.9.4, navigation 2.9.1) and ran the desktop gate: it compiles, but **57 of 62 `:composeApp:desktopTest`
+tests fail** with `NoClassDefFoundError: kotlinx/datetime/Clock$System` (`SystemClock`, Helpers.kt:73), because kotlinx-datetime
+0.6.2 predates Kotlin 2.2's `kotlin.time.Clock`. The fix is a datetime 0.7.x bump with a `Clock` import migration through the
+store and tests; Android was not checked (no SDK here). That is a repo-wide migration, so it is left as a separate step
+rather than folded into the port. Consequence to expect: the first `ios.yml` run uses Kotlin 2.1.20 with Xcode 26.x,
+which that Kotlin line may not support; if the red step is a Kotlin/Native-vs-Xcode error, the datetime migration plus the
+version bump above is the fix, and `gradle/libs.versions.toml` is the only file whose versions change.
+
+**What the owner does next (in order):** (1) make the repository public (hosted macOS minutes are then free and `ios.yml`
+runs on push/PR; until then it runs only by hand); (2) run Actions > iOS once and fix or report the first red step;
+(3) add the NAMES.md row for `com.asoc.clavis` (plan rule R11, outside this repo) and settle the "Clavis Sinica" name
+question; (4) enrol in the Apple Developer Program, create the `apple-release` environment, the `IOS_SIGNING_ENABLED`
+variable and the secrets listed in `ios.yml`; (5) supply 1024x1024 icon art (the shipped one is a placeholder); (6) work
+through `DEVICE_CHECKLIST_IOS.md` on the iPad Pro M4, then the iPhone 12 mini; (7) decide plan Q11 (Ogg on iOS, 3.2% of
+recordings show no Play control) and Q12 (iCloud backup of the learner document; today it is excluded, one constant).
+
+Telemetry: none. The one approved exception (PT:D-BD, 2026-10-14) is Apple-side crash reporting for TestFlight/App Store
+builds; the app adds no SDK and transmits nothing, and `iosApp/README.md` names it.

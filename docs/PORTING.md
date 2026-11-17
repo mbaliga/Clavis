@@ -126,7 +126,7 @@ Platform-bound APIs that matter:
 |---|---|---|---|---|---|
 | Ubuntu Touch | reframe | Repackage the unmodified frozen ten-language `clavis-<v>-web.html` (~21 MB, vanilla JS, `localStorage`, canvas 2D, Web Speech, no network) as a webapp-container (Morph) click labelled as the reference build. No JVM/AWT path exists in a click and CMP has no Native Linux target. If D-31 is declined the answer is "no Ubuntu Touch port" | Proposed D-31 (D-1 forbids shipping it); Morph's engine, Web Speech and storage behaviour unverified; no UT device on record (OQ-1); name clearance (OQ-4) | 3, after D-31; excludes device time | PLAN |
 | Linux desktop | done | Builds exist (never tagged): `.deb` amd64 + linux-x64 uber-jar from `release.yml`. Remaining: arm64 `.deb` + jar on `ubuntu-24.04-arm`, a per-arch tarball with `install.sh`, a Flatpak consuming the app-image. JDK 17 stays (D-2) | Never tagged; arm64 minutes on a private repo (OQ-20); Flathub needs a public source and an app-id (OQ-25, OQ-4); TTS under the sandbox unknown; Deck and RedMagic device-only | 1 (estimate; excludes Flathub review and device passes) | PLAN |
-| iOS / iPadOS | straight | Add `iosArm64` + `iosSimulatorArm64` to both modules; 8 `actual`s; `IosServices`; SwiftUI shell `iosApp/`; a pinned-`macos-15` simulator lane. Clavis pilots the constellation's CMP-iOS recipe | Whether Kotlin 2.1.20 / CMP 1.8.2 suffices is unverified; Apple Developer Program and delivery route (OQ-2, OQ-3); name clearance (OQ-4); 3.2% of recordings are Ogg and would show no Play control; no Mac or iOS device here | 5 (range 4–6): code 2–3, CI/release wiring 1, owner device iteration 1–2; excludes a toolchain bump | PLAN |
+| iOS / iPadOS | straight | Add `iosArm64` + `iosSimulatorArm64` to both modules; 8 `actual`s; `IosServices`; SwiftUI shell `iosApp/`; a pinned-`macos-15` simulator lane. Clavis pilots the constellation's CMP-iOS recipe | Whether Kotlin 2.1.20 / CMP 1.8.2 suffices is unverified; Apple Developer Program and delivery route (OQ-2, OQ-3); name clearance (OQ-4); 3.2% of recordings are Ogg and would show no Play control; no Mac or iOS device here | 5 (range 4–6): code 2–3, CI/release wiring 1, owner device iteration 1–2; excludes a toolchain bump | IMPLEMENTED 2026-11-17, CODE-ONLY / CI-LANE-WRITTEN: see STATUS.md section 8 (common tests pass on Kotlin/Native linuxX64 as a stand-in; nothing compiled for an Apple target) |
 | macOS | done | Build exists (never tagged): arm64 `.dmg` + uber-jar via `jpackage` on `macos-15`; notarisation wiring exists and runs when secrets exist. Remaining: first signed, notarised build; entitlement verification; Intel optional | Developer ID secrets (OQ-3); no Mac on record, so device gates are NOV (OQ-5); first real tag may surface issues | 0.5; excludes Intel and the Mac App Store | PLAN |
 | Windows | done | Build exists (never tagged): x64 `.msi` (WiX 3, fixed `upgradeUuid`) + uber-jar on `windows-2025`, never signed. Remaining: a signing route, first real tag; arm64 app-image and winget optional | Signing route (OQ-3); a private repo blocks winget and SignPath Foundation (OQ-20); the Dell's fate (OQ-5) | 0.5; excludes arm64, MSIX, winget | PLAN |
 
@@ -475,3 +475,27 @@ The Apple column is now split: iPhone and iPad are judged apart. Where an app po
 - **Skin contract (OQ-39, 2026-10-14):** proposed conformance level for this app: Level 1, cost class A (already Compose Multiplatform commonMain with its own ClavisPalette); second in the rollout order. The owner chose Tier 1 (palette) everywhere first and every app declaring its own level; the assistant chose JSON, not XML, after the owner asked for a check; the draft spec is Personal-Tracker `porting/skin-contract/SPEC-DRAFT.md`. This is a proposal, not decided for this app.
 
 When the owner confirms or changes the line, this repo's original cells above stay as the engineering detail; only the verdicts and re-costs in program section 5A.12 change.
+
+## Update 2026-11-17: iOS implemented as far as a Linux container allows
+
+The owner's request of 2026-11-17 overrides the "proposed line" for iOS: the port is built, and iOS builds run on
+GitHub Actions. Steps I1 to I4 exist (I5's unsigned `.ipa` as a `release.yml` job; the signed TestFlight route is a
+disabled, environment-gated template in `ios.yml`); I6 is `docs/DEVICE_CHECKLIST_IOS.md`. Differences from the plan above,
+each with its reason:
+
+- **SHA256 and gunzip are plain Kotlin in `commonMain`, not CommonCrypto and `platform.zlib`.** Reason: a pure core is
+  verifiable on the JVM here (known answers plus cross-checks against `MessageDigest` and `GZIPInputStream` over all 36
+  shipped packs); a cinterop call could only be checked on a Mac.
+- **The D-13 download guards and the D-7 import refusals are factored into `DownloadPolicy` and `ImportPolicy` in
+  `:shared`** with tests, as the plan allowed ("only if that stays a no-behaviour-change refactor"): the JVM
+  downloaders are untouched and are not rewritten to use them.
+- **Toolchain:** Kotlin 2.1.20 / CMP 1.8.2 kept; the OQ-38 move was tried and breaks 57 desktop UI tests until kotlinx-datetime is migrated (STATUS.md section 8).
+- **Runner:** `macos-latest` with an explicitly selected newest Xcode 26.x (the owner directive and OQ-38), not the pinned
+  `macos-15` of step I4. Actions are pinned to full SHAs.
+- **Triggers:** push/PR run only when the repository is public (`github.event.repository.private == false`), so the
+  lane costs nothing on a public repo and nothing is billed on a private one; `workflow_dispatch` always runs.
+- **Bundle id** `com.asoc.clavis` in one marked line of `iosApp/project.yml`; the NAMES.md row (R11) is an owner follow-up.
+- **Found by running the common tests on Kotlin/Native** (not foreseen by the plan): a missing `kotlin.jvm.JvmInline` import
+  and a JVM-only regex in `lineOf`; both fixed (STATUS.md section 8).
+- **Q11, Q12 (Ogg, backup)** are implemented as the plan's defaults (no Ogg Play control; data directory excluded from
+  backup, one constant) pending the owner.
